@@ -1,0 +1,194 @@
+{
+  "title": "OBB: Setter Floor Dashboard",
+  "dateRange": "14 Jul 2026 to 21 Jul 2026",
+  "period": "7d",
+  "sample": false,
+  "source": "SID",
+  "generatedAt": "2026-07-21T14:26:57+00:00",
+  "freshnessMin": 1,
+  "floor": {
+    "leadsToday": 0,
+    "leadsInRange": 0,
+    "unworkedNow": 0,
+    "unworkedPastSla": 0,
+    "speedToLeadMedianMin": null,
+    "dayOneCoverage": null,
+    "formCompliance": null,
+    "attemptsLogged": null,
+    "dialsLogged": null,
+    "attemptIntegrity": null,
+    "queue": {
+      "p1": 0,
+      "p2": 40,
+      "p3": 0,
+      "p4": 0
+    },
+    "connectsInRange": 0,
+    "onFloorNow": null
+  },
+  "clients": [],
+  "setters": [
+    {
+      "name": "Sophia",
+      "sidUserId": null,
+      "role": null,
+      "assigned": null,
+      "attempts": null,
+      "dials": null,
+      "connects": null,
+      "connectRate": null,
+      "booked": null,
+      "bookRate": null,
+      "shows": null,
+      "showRate": null,
+      "speedToLeadMedianMin": null,
+      "formsSubmitted": null,
+      "formCompliance": null,
+      "dayOneCoverage": null,
+      "isNew": false,
+      "belowSla": false,
+      "claimAttributed": false,
+      "byDay": null
+    },
+    {
+      "name": "Michelle",
+      "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
+      "role": null,
+      "assigned": null,
+      "attempts": null,
+      "dials": null,
+      "connects": 0,
+      "connectRate": null,
+      "booked": null,
+      "bookRate": null,
+      "shows": null,
+      "showRate": null,
+      "speedToLeadMedianMin": null,
+      "formsSubmitted": null,
+      "formCompliance": null,
+      "dayOneCoverage": null,
+      "isNew": false,
+      "belowSla": false,
+      "claimAttributed": true,
+      "byDay": null
+    },
+    {
+      "name": "Sarah",
+      "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
+      "role": null,
+      "assigned": null,
+      "attempts": null,
+      "dials": null,
+      "connects": 0,
+      "connectRate": null,
+      "booked": null,
+      "bookRate": null,
+      "shows": null,
+      "showRate": null,
+      "speedToLeadMedianMin": null,
+      "formsSubmitted": null,
+      "formCompliance": null,
+      "dayOneCoverage": null,
+      "isNew": false,
+      "belowSla": false,
+      "claimAttributed": true,
+      "byDay": null
+    },
+    {
+      "name": "Heart",
+      "sidUserId": null,
+      "role": null,
+      "assigned": null,
+      "attempts": null,
+      "dials": null,
+      "connects": null,
+      "connectRate": null,
+      "booked": null,
+      "bookRate": null,
+      "shows": null,
+      "showRate": null,
+      "speedToLeadMedianMin": null,
+      "formsSubmitted": null,
+      "formCompliance": null,
+      "dayOneCoverage": null,
+      "isNew": false,
+      "belowSla": false,
+      "claimAttributed": false,
+      "byDay": null
+    }
+  ],
+  "timeseries": {
+    "days": [
+      "2026-07-14",
+      "2026-07-15",
+      "2026-07-16",
+      "2026-07-17",
+      "2026-07-18",
+      "2026-07-19",
+      "2026-07-20",
+      "2026-07-21"
+    ],
+    "leads": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "worked": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "booked": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "speedToLeadMedianMin": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "insights": [],
+  "dataQuality": [
+    {
+      "code": "ATTEMPT_INTEGRITY",
+      "severity": "alert",
+      "message": "266 contacts are stuck carrying the sid-dial-1 toggle tag, which means dial pairs are not completing and attempt counts are not incrementing correctly. Check WF-2 before trusting attempt numbers.",
+      "affects": [
+        "setters.attempts",
+        "floor.attemptsLogged"
+      ]
+    },
+    {
+      "code": "SETTER_ATTRIBUTION",
+      "severity": "warn",
+      "message": "Sophia and Heart submit the Intro Call Form but are not in the SID Assigned To dropdown and have no matching GHL user, so only their form activity is attributed (attempts, connects and held show a dash). Add them to Assigned To in SID for full attribution. Also, SID does not record which setter dialed before a lead is claimed, so per-setter Attempts count claimed leads only.",
+      "affects": [
+        "setters.attempts",
+        "setters.connects",
+        "setters.shows"
+      ]
+    }
+  ]
+}
