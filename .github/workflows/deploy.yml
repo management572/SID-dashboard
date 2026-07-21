@@ -1,0 +1,86 @@
+# Deploy the board to Cloudflare Pages (Workers/Pages platform, via Wrangler).
+#
+# No custom domain: the board is served at the project's *.pages.dev URL. It redeploys automatically
+# after every successful data refresh, and can be run on demand.
+#
+# ONE-TIME SETUP (two repo secrets, same place as SID_TOKEN):
+#   Settings -> Secrets and variables -> Actions -> New repository secret
+#     CLOUDFLARE_API_TOKEN   a Cloudflare API token with the "Cloudflare Pages: Edit" permission
+#                            (My Profile -> API Tokens -> Create Token -> Edit Cloudflare Workers or a
+#                             custom token with Account > Cloudflare Pages > Edit)
+#     CLOUDFLARE_ACCOUNT_ID  your Cloudflare account id (Cloudflare dashboard URL, or the account
+#                            home page right sidebar)
+#
+# SECURITY: this publishes a URL. Per docs/compliance.md the board must sit behind Cloudflare Access
+# (Zero Trust) with an email allowlist before the URL is shared. Until Access is attached the
+# pages.dev URL is reachable by anyone who has it. The board carries only aggregate data and no PHI,
+# but attach Access before handing the link out. Steps are in AUTOMATION.md.
+#
+# Only the files the board actually needs are deployed (index.html, brand + dashboard config, the
+# aggregate data file, assets). config/ghl-config.json and the pipeline are NOT deployed.
+
+name: Deploy board
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["SID pipeline"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-board
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # Run on manual dispatch, or only after a SID pipeline run that actually succeeded.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Require the Cloudflare secrets
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CF_TOKEN" ] || [ -z "$CF_ACCOUNT" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID must be set under Settings > Secrets and variables > Actions. See the header of .github/workflows/deploy.yml."
+            exit 1
+          fi
+          echo "Cloudflare secrets present (values hidden)."
+
+      - name: Assemble the deploy directory
+        run: |
+          set -e
+          rm -rf dist && mkdir -p dist/config dist/data dist/assets
+          cp index.html dist/index.html
+          cp config/brand.json dist/config/brand.json
+          cp config/dashboard-config.json dist/config/dashboard-config.json
+          # Ship the aggregate data file (no PHI). Fall back to the sample if a live pull has not run.
+          if [ -f data/dashboard-data.json ]; then
+            cp data/dashboard-data.json dist/data/dashboard-data.json
+          fi
+          cp data/dashboard-data.sample.json dist/data/dashboard-data.sample.json
+          # Assets (logo) if present.
+          if [ -d assets ]; then cp -r assets/. dist/assets/ 2>/dev/null || true; fi
+          echo "Deploying these files:" && find dist -type f
+
+      - name: Create Pages project (idempotent)
+        uses: cloudflare/wrangler-action@v3
+        continue-on-error: true
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create obb-sid-dashboard --production-branch=main
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=obb-sid-dashboard --branch=main --commit-dirty=true

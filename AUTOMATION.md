@@ -75,3 +75,40 @@ authorizing changes to your live GoHighLevel, because those are irreversible and
 The token was shared in chat, so it now sits in this conversation's history. Once the automation is
 running off the GitHub secret, rotate the token in GoHighLevel and update the secret. That way the
 only copy of the live token is the one in GitHub's secret store.
+
+---
+
+## Deploy to Cloudflare Pages
+
+The board is published to Cloudflare Pages (the Workers/Pages platform) via the **Deploy board**
+workflow (`.github/workflows/deploy.yml`). No custom domain: it serves at the project's
+`https://obb-sid-dashboard.pages.dev` URL. It redeploys automatically after every successful data
+refresh, and can be run on demand from the Actions tab.
+
+### The two secrets to add (same place as SID_TOKEN)
+
+Settings -> Secrets and variables -> Actions -> New repository secret:
+
+1. `CLOUDFLARE_API_TOKEN` - a Cloudflare API token with **Cloudflare Pages: Edit**.
+   Cloudflare dashboard -> My Profile -> API Tokens -> Create Token -> use the "Edit Cloudflare
+   Workers" template, or a custom token with Account > Cloudflare Pages > Edit.
+2. `CLOUDFLARE_ACCOUNT_ID` - your account id (Cloudflare dashboard home, right sidebar, or from the
+   dashboard URL).
+
+Once both are set, the deploy runs itself; nothing else is needed to publish.
+
+### Gate it before sharing the link (required)
+
+Per `docs/compliance.md`, the board must sit behind **Cloudflare Access** with an email allowlist. A
+`pages.dev` URL with no Access is a public URL. The board carries only aggregate data and no PHI, so
+the exposure is bounded, but attach Access before handing the link out:
+
+1. Cloudflare dashboard -> **Zero Trust** -> **Access** -> **Applications** -> **Add an application**
+   -> **Self-hosted**.
+2. Application domain: `obb-sid-dashboard.pages.dev`.
+3. Add a policy: **Allow**, include **Emails ending in** `@onlinebizbuilders.com` (plus any named
+   external addresses).
+4. Save. Then open the URL in a signed-out browser: the correct result is a **login prompt, not the
+   board**.
+
+Until that policy is attached, treat the URL as unlisted-public and do not circulate it.
