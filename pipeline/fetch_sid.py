@@ -72,7 +72,9 @@ def api_get(cfg, token, path, params):
     base = cfg.get("apiBase", "https://services.leadconnectorhq.com").rstrip("/")
     url = base + path
     if params:
-        url += "?" + urllib.parse.urlencode(params, doseq=True)
+        # Coerce every value to str: GHL pagination cursors (startAfter) come back as ints, and
+        # urlencode/quote raises "'int' object has no attribute 'decode'" on a non-str value.
+        url += "?" + urllib.parse.urlencode({k: str(v) for k, v in params.items() if v is not None})
     headers = {
         "Authorization": "Bearer " + token,
         "Version": cfg.get("apiVersion", "2021-07-28"),
