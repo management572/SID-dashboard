@@ -1,0 +1,109 @@
+{
+  "title": "OBB: Setter Floor Dashboard",
+  "subtitle": "SID fulfillment engine",
+  "tabs": ["floor", "setters", "clients"],
+  "defaultTab": "floor",
+  "_tabsNote": "v1 is the fulfillment engine only. The front-end acquisition tabs (overview, ad spend, ROAS) are a separate board in v2. Do not merge them.",
+
+  "defaultPeriod": "7d",
+  "periods": ["Today", "7d", "30d", "MTD", "QTD", "All"],
+  "_periodNote": "A setter floor is a daily-rhythm system, so the default window is short. Longer windows are for trend, not for management.",
+
+  "divisions": [
+    { "key": "TODO_client_slug", "label": "TODO Client Agency Name" }
+  ],
+  "showAllClientsRollup": true,
+
+  "funnelStages": [
+    { "key": "leads", "label": "Lead In" },
+    { "key": "worked", "label": "Worked" },
+    { "key": "contacted", "label": "Contacted" },
+    { "key": "booked", "label": "Booked" },
+    { "key": "shows", "label": "Held" },
+    { "key": "wons", "label": "Signed" }
+  ],
+
+  "goals": {
+    "speedToLeadTargetMin": 5,
+    "speedToLeadSlaMin": 30,
+    "_speedNote": "Green under 5 min, yellow 5-15, orange 15-30, red over 30. The monitor agent alerts at the SLA.",
+    "speedToLeadBandsMin": [5, 15, 30],
+
+    "attemptsPerLeadTarget": 7,
+    "dayOneCoverageTarget": 0.90,
+    "_dayOneNote": "Percent of new leads that receive attempt 1 inside 24 hours. This is the single best predictor of book rate on this floor.",
+
+    "formSubmissionComplianceTarget": 0.95,
+    "_formNote": "Percent of worked leads with an Intro Call Form on file. Below this the per-rep numbers cannot be trusted, so the board flags it before it flags anything else.",
+
+    "connectRateTarget": 0.25,
+    "bookRateTarget": 0.15,
+    "showRateTarget": 0.70,
+    "dialsPerSetterPerDay": 150,
+
+    "rampDays": 30,
+    "_rampNote": "Setters inside rampDays of their start date get a NEW badge and are excluded from the below-SLA warning."
+  },
+
+  "floorTiles": [
+    { "key": "leadsToday", "label": "Leads In (today)" },
+    { "key": "unworkedNow", "label": "Unworked Right Now", "invert": true, "hero": true },
+    { "key": "speedToLeadMedianMin", "label": "Speed to Lead (median min)", "invert": true, "bands": "speedToLeadBandsMin" },
+    { "key": "dayOneCoverage", "label": "Day-One Coverage", "format": "pct", "target": "dayOneCoverageTarget" },
+    { "key": "formCompliance", "label": "Form Compliance", "format": "pct", "target": "formSubmissionComplianceTarget" },
+    { "key": "p1QueueDepth", "label": "P1 Queue", "invert": true }
+  ],
+  "_floorTilesNote": "invert = lower is better, so the goal bands reverse. hero = rendered larger. These six answer 'is the floor healthy right now'.",
+
+  "setterColumns": [
+    { "key": "name", "label": "Setter" },
+    { "key": "assigned", "label": "Assigned" },
+    { "key": "attempts", "label": "Attempts" },
+    { "key": "dials", "label": "Dials" },
+    { "key": "connects", "label": "Connects" },
+    { "key": "connectRate", "label": "Connect %", "format": "pct", "target": "connectRateTarget" },
+    { "key": "booked", "label": "Booked" },
+    { "key": "bookRate", "label": "Book %", "format": "pct", "target": "bookRateTarget" },
+    { "key": "shows", "label": "Held" },
+    { "key": "showRate", "label": "Held %", "format": "pct", "target": "showRateTarget" },
+    { "key": "speedToLeadMedianMin", "label": "Speed to Lead", "format": "min", "invert": true },
+    { "key": "formCompliance", "label": "Form %", "format": "pct", "target": "formSubmissionComplianceTarget" }
+  ],
+  "_setterNote": "This table IS the Priority-#1 deliverable. Sortable on every column, default sort by bookRate descending. Attempts and dials are separate columns on purpose: the gap between them is how you see the attempt definition working correctly.",
+
+  "clientColumns": [
+    { "key": "label", "label": "Client Agency" },
+    { "key": "market", "label": "Market" },
+    { "key": "leads", "label": "Leads In" },
+    { "key": "worked", "label": "Worked" },
+    { "key": "workedPct", "label": "Worked %", "format": "pct" },
+    { "key": "booked", "label": "Booked" },
+    { "key": "bookRate", "label": "Book %", "format": "pct", "target": "bookRateTarget" },
+    { "key": "shows", "label": "Held" },
+    { "key": "wons", "label": "Signed" },
+    { "key": "costPerBooked", "label": "Cost / Booked", "optional": true }
+  ],
+
+  "priorityLanes": [
+    { "key": "p1", "label": "P1: engaged, last 24h", "tone": "alert" },
+    { "key": "p2", "label": "P2: engaged 7d, or fresh + unworked", "tone": "warn" },
+    { "key": "p3", "label": "P3: no engagement, in 48H sweep", "tone": "neutral" },
+    { "key": "p4", "label": "P4: long-term nurture", "tone": "faint" }
+  ],
+
+  "insights": {
+    "enabled": true,
+    "_note": "A ranked priority list generated from the biggest gaps against goals, written as plain instructions to the floor lead, not as statistics. Example: 'Michelle has 14 P1 leads unworked past 30 minutes.' Ranked by leads at risk, not by percentage gap."
+  },
+
+  "privacy": {
+    "showContactNames": false,
+    "nameFormat": "first-last-initial",
+    "_note": "The board is aggregate by default. Drill-downs show first name and last initial plus a SID deep link, never a full record. No diagnoses, addresses, dates of birth, or free-text notes ever reach this file. See docs/compliance.md."
+  },
+
+  "footer": {
+    "dataSourceLine": "Source: SID (GoHighLevel). Counts are cumulative by event date, not current pipeline stage.",
+    "disclaimer": "Internal operating report. Access restricted. Do not export or forward."
+  }
+}

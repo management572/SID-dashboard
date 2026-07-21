@@ -1,0 +1,86 @@
+{
+  "crm": "SID",
+  "platform": "GHL",
+  "locationId": "6nyOgOLPgBOHWJRtt3jQ",
+  "tokenEnv": "SID_TOKEN",
+  "apiBase": "https://services.leadconnectorhq.com",
+  "apiVersion": "2021-07-28",
+  "hipaaMode": true,
+
+  "_divisions": "One home-care client agency per division. tagPrefix is that client's short slug and every one of their tags starts with it. Add a row per client; the board renders a client toggle plus an All Clients roll-up.",
+  "divisions": [
+    { "key": "TODO_client_slug", "label": "TODO Client Agency Name", "tagPrefix": "TODO_client_slug", "active": true }
+  ],
+
+  "_tagTaxonomy": "Pattern: '{prefix} {stage}'. Lower case, single spaces, no punctuation. Create these in SID verbatim. A contact carries exactly one stage tag per client at a time; the deepest stage wins when classifying.",
+  "stageTags": {
+    "lead": "{prefix} lead",
+    "worked": "{prefix} worked",
+    "contacted": "{prefix} contacted",
+    "booked": "{prefix} booked",
+    "show": "{prefix} show",
+    "won": "{prefix} won",
+    "nurture": "{prefix} nurture",
+    "dq": "{prefix} dq"
+  },
+
+  "_priorityTags": "Set by the priority workflow on every engagement event. Exactly one at a time. Drives the queue order and the obb-lead-alerts push.",
+  "priorityTags": {
+    "p1": "{prefix} p1",
+    "p2": "{prefix} p2",
+    "p3": "{prefix} p3",
+    "p4": "{prefix} p4"
+  },
+
+  "_eventDateFields": "One DATE custom field per stage, stamped by workflow the instant the event fires. The board counts contacts whose date field falls inside the window (cumulative), never by current pipeline stage. Paste the field IDs here after prompts/02 creates them.",
+  "eventDateFieldIds": {
+    "leadDate": "TODO_FIELD_ID",
+    "firstAttemptDate": "TODO_FIELD_ID",
+    "firstConnectDate": "TODO_FIELD_ID",
+    "bookedDate": "TODO_FIELD_ID",
+    "showDate": "TODO_FIELD_ID",
+    "wonDate": "TODO_FIELD_ID"
+  },
+
+  "_attemptFields": "The attempt engine. attemptCount increments ONCE per completed bundle (double dial + VM + email + SMS), never once per dial. lastAttemptDate is stamped by the same workflow step.",
+  "attemptFieldIds": {
+    "attemptCount": "TODO_FIELD_ID",
+    "lastAttemptDate": "TODO_FIELD_ID",
+    "dayOneAttemptCount": "TODO_FIELD_ID",
+    "assignedSetter": "TODO_FIELD_ID"
+  },
+
+  "_introCallForm": "The single write path for the setter floor. Every worked lead gets one submission. The setter dropdown on this form is the attribution key and the auto-assign trigger. Form-submission compliance is a board metric.",
+  "introCallForm": {
+    "formId": "TODO_FORM_ID",
+    "setterFieldId": "TODO_FIELD_ID",
+    "outcomeFieldId": "TODO_FIELD_ID",
+    "outcomes": ["booked", "callback", "no answer", "not interested", "dq", "wrong number"],
+    "_note": "Outcome values must match this list exactly. The board buckets by them."
+  },
+
+  "pipeline": {
+    "id": "TODO_PIPELINE_ID",
+    "wonStageId": "TODO_WON_STAGE_ID",
+    "_note": "Stages are for reference and funnel ordering. Won is read from opportunity status = won."
+  },
+
+  "users": {
+    "_note": "Map SID user IDs to setter display names so the Setters tab labels correctly. Names must match intake.yaml > floor.setters.",
+    "TODO_SID_USER_ID": "Michelle"
+  },
+
+  "alerts": {
+    "slackChannel": "obb-lead-alerts",
+    "webhookEnv": "SLACK_WEBHOOK_URL",
+    "_note": "Existing OBB channel convention. P1 leads and SLA breaches push here. Never include PHI or free-text notes in an alert: contact first name, last initial, client, and the SID deep link only."
+  },
+
+  "ads": {
+    "enabled": false,
+    "_note": "Facebook Lead Forms feed SID directly for fulfillment. Per-client ad spend and ROAS are v2, and belong on the front-end engine board, not this one."
+  },
+
+  "scheduler": "ghl-native",
+  "payments": "none"
+}

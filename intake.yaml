@@ -1,0 +1,89 @@
+# OBB Setter Floor Dashboard: intake. Single source of truth. Fill every TODO.
+# Everything on the board derives from this file plus the three config/*.json files.
+
+client:
+  company: "Online Business Builders"
+  short: "OBB"
+  vertical: "B2B operations for home-care agencies: outbound SDR calling, lead qualification, appointment booking"
+  crm: "SID"                          # SID is OBB's GoHighLevel instance
+  crm_platform: "GHL"
+  crm_location_id: "6nyOgOLPgBOHWJRtt3jQ"
+  api_token_env: "SID_TOKEN"          # env var only, never in the repo
+  hipaa_mode: true                    # SID is on the HIPAA-upgraded GHL plan. See docs/compliance.md
+
+engine:
+  scope: "fulfillment"                # v1 = what OBB DELIVERS (setter floor). Front-end is v2.
+  _note: >
+    OBB runs two engines. (1) Front-End / Growth = OBB acquiring its own clients.
+    (2) Fulfillment / Product-Service = per-client Facebook lead forms plus the SID setter floor
+    booking appointments. This board is engine 2. Do not mix the two on one view.
+
+# Each home-care agency OBB serves is a division: one tag prefix, one funnel, one roster row.
+clients:
+  - key: "TODO_client_slug"           # short tag prefix; ALL that client's tags start with this
+    label: "TODO Client Agency Name"
+    market: "TODO city / metro"       # drives the multi-client-per-location dialer problem
+    active: true
+  # duplicate this block per home-care client
+
+floor:
+  timezone: "America/New_York"        # TODO confirm
+  hours: "09:00-18:00"                # dialing window, local. Drives the monitor agent and SLA clock
+  days: ["Mon", "Tue", "Wed", "Thu", "Fri"]
+  setters:                            # TODO confirm the roster; names must match SID user names
+    - name: "Michelle"
+      role: "Lead SDR"
+      start_date: "TODO"
+    - name: "TODO Setter"
+      role: "SDR"
+      start_date: "TODO"
+  training_owner: "Johnny"            # SDR Sales Training, owns ramp and quality
+  ops_owner: "Jeremy"                 # Director of Ops, owns automation library
+  cs_owner: "Eva"                     # Head CSM, owns client escalation
+
+# THE attempt definition. This is the fix for the double-dial bug. One bundle equals ONE attempt.
+attempt:
+  definition: "double dial + voicemail + email + SMS"
+  counts_as: 1
+  _bug_being_fixed: >
+    The current automation increments the counter on each dial, so a double dial reads as 2 attempts
+    and every per-rep number downstream is inflated. The workflow must stamp the attempt counter once
+    per completed bundle, not once per dial.
+  day_one_sprint_attempts: 7          # 7 attempts inside the first 24 hours
+  day_one_window_hours: 24
+  sweep_window_hours: 48              # 48H sweep after the day-one sprint
+  max_attempts_before_nurture: 12     # then route to long-term nurture
+
+priority_engine:                      # P1-P4 = engagement x recency, drives the queue order
+  p1: "engaged in last 24h (opened, clicked, replied, or inbound), call first"
+  p2: "engaged in last 7d, or fresh lead under 24h old and unworked"
+  p3: "no engagement, inside the 48H sweep window"
+  p4: "no engagement, past sweep: long-term nurture"
+  alert_channel: "obb-lead-alerts"    # Slack, existing convention. P1 pushes here
+
+goals:                                # drive the goal-band tiles and the monitor agent thresholds
+  speed_to_lead_target_min: 5         # median minutes from lead form submit to first dial
+  speed_to_lead_sla_min: 30           # breach threshold: monitor agent alerts past this
+  attempts_per_lead_target: 7
+  day_one_coverage_target: 0.90       # % of new leads that get attempt 1 inside 24h
+  form_submission_compliance_target: 0.95  # % of worked leads with an Intro Call Form on file
+  connect_rate_target: 0.25           # connects / dials
+  book_rate_target: 0.15              # booked / connects
+  show_rate_target: 0.70              # held / booked
+  dials_per_setter_per_day: 150
+
+sources:                              # which pull scripts to wire (set false to skip)
+  crm_funnel: true                    # SID opportunities, tags, event-date fields -> fetch_sid.py
+  intro_call_form: true               # the setter write path -> the QC and attribution spine
+  dialer: "TODO"                      # aloeware | wave | none. Local presence is an open blocker
+  ad_spend: false                     # v2, front-end engine only
+  webinar: false
+  scheduler: "ghl-native"
+  payments: "none"
+
+deploy:
+  host: "cloudflare-pages"
+  access: "cloudflare-access"         # REQUIRED. Allowlist only, never a public URL
+  repo: "obb-setter-dashboard"
+  repo_visibility: "private"          # REQUIRED
+  refresh: "every 30 min during floor hours, full rebuild nightly"

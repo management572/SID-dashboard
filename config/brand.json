@@ -1,0 +1,68 @@
+{
+  "_brandStatus": "LIVE",
+  "name": "Online Business Builders",
+  "wordmark": "OBB",
+  "boardTitle": "Setter Floor Dashboard",
+  "preparedBy": "Offer Accelerator",
+  "site": "onlinebizbuilders.com",
+  "logoPath": "assets/logo.svg",
+
+  "tokens": {
+    "ink": "#4A5469",
+    "ink2": "#545F76",
+    "ink3": "#5A6580",
+    "inkDeep": "#3E4759",
+
+    "bone": "#FFFFFF",
+    "boneDim": "rgba(255,255,255,0.72)",
+    "boneFaint": "rgba(255,255,255,0.48)",
+    "hair": "rgba(255,255,255,0.15)",
+    "hair2": "rgba(255,255,255,0.26)",
+
+    "accent": "#2974ED",
+    "accentText": "#A8CCFF",
+    "accentDeep": "#1B58C0",
+    "accent2": "#E9C46A",
+
+    "good": "#2F9E5F",
+    "goodText": "#93E3B2",
+    "warn": "#D9A441",
+    "warnText": "#F2D28A",
+    "alert": "#C8513E",
+    "alertText": "#FFB3A6"
+  },
+
+  "_paletteSource": "Background #4A5469 and accent #2974ED supplied by the client. Everything else is derived from those two and contrast-checked against them.",
+
+  "_tokenGuide": {
+    "ink": "page background, the supplied slate #4A5469",
+    "ink2": "card and panel background, one step lighter so cards read as raised",
+    "ink3": "raised surface: table header rows, active chips, hover states",
+    "inkDeep": "recessed wells: code blocks, the data-quality strip backing, inset charts",
+    "bone": "primary text, pure white. 7.6:1 on ink, 6.4:1 on ink2",
+    "accent": "#2974ED is a FILL color on this background, not a text color. Buttons, bars, active chip fills, chart lines, focus rings. White text on it clears 4.4:1",
+    "accentText": "use this tint whenever accent-colored TEXT sits directly on ink or ink2. #2974ED on #4A5469 is only 1.74:1 and is unreadable as text",
+    "accentDeep": "pressed and hover states for accent fills",
+    "accent2": "second data series in charts. Amber, chosen because a second blue is indistinguishable from the accent on a slate background",
+    "good / warn / alert": "solid status colors, for filled chips and bars with white text",
+    "goodText / warnText / alertText": "lighter tints, for status-colored TEXT on ink or ink2"
+  },
+
+  "_contrastRule": "Status is carried by a FILLED CHIP (solid status color, white text), not by colored text on the slate. The slate background sits mid-tone, so saturated status colors do not clear 4.5:1 as text against it. When text must carry the status (a table cell colored against its goal band), use the *Text tints, never the solid color. Measured on the supplied background: bone 7.6:1, accentText 4.6:1, goodText 5.0:1, warnText 5.2:1, alertText 4.4:1.",
+
+  "fonts": {
+    "head": "Newsreader",
+    "body": "Inter",
+    "mono": "IBM Plex Mono",
+    "googleImport": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+  },
+
+  "_fontNote": "Newsreader for headings is the Offer Accelerator client-deliverable standard. If OBB has a brand typeface, swap head and body here, self-host under assets/fonts/, and drop googleImport.",
+
+  "_rules": [
+    "Rebranding is a token swap in this file only. Never hard-code a color in index.html.",
+    "Never use accent #2974ED as text on ink or ink2. Use accentText.",
+    "Status colors are semantic. Do not reuse the accent for a status, and do not reuse a status color for a brand element.",
+    "No em dashes or en dashes in any board copy. Use commas, colons, or parentheses."
+  ]
+}
