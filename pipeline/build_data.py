@@ -77,13 +77,24 @@ def parse_ms(value):
         return None
 
 
+# fieldKey -> GHL field id, built from data/raw/custom_fields.json. The GET /contacts/ list returns
+# custom fields keyed by ID only, but config uses fieldKeys, so we resolve one to the other.
+FIELD_KEY_TO_ID = {}
+
+
 def field_value(contact, field_ref):
-    """Read a contact custom field by id OR fieldKey. Config stores GHL fieldKeys."""
+    """Read a contact custom field by fieldKey (config) or id. The contacts list keys custom fields
+    by id, so resolve the config fieldKey to its id before matching."""
     if not field_ref or str(field_ref).startswith("TODO"):
         return None
+    refs = {field_ref, FIELD_KEY_TO_ID.get(field_ref)} - {None}
     for f in contact.get("customFields", []) or contact.get("customField", []) or []:
-        if f.get("id") == field_ref or f.get("fieldId") == field_ref or f.get("fieldKey") == field_ref or f.get("key") == field_ref:
-            return f.get("value") if "value" in f else f.get("fieldValue")
+        if (f.get("id") in refs or f.get("fieldId") in refs
+                or f.get("fieldKey") in refs or f.get("key") in refs):
+            for k in ("value", "fieldValue", "fieldValueString"):
+                if f.get(k) is not None:
+                    return f.get(k)
+            return None
     return None
 
 
@@ -145,6 +156,11 @@ def build_from_raw(ghl, dash):
         die("No data/raw/_meta.json. Run pipeline/fetch_sid.py first.")
     contacts = load_json(os.path.join(RAW_DIR, "contacts.json"), []) or []
     submissions = load_json(os.path.join(RAW_DIR, "form_submissions.json"), []) or []
+    cfields = load_json(os.path.join(RAW_DIR, "custom_fields.json"), []) or []
+
+    # Resolve config fieldKeys to the GHL field ids the contacts list uses.
+    global FIELD_KEY_TO_ID
+    FIELD_KEY_TO_ID = {f.get("fieldKey"): f.get("id") for f in cfields if f.get("fieldKey") and f.get("id")}
 
     since = parse_ms(meta.get("since")) or (now_utc() - dt.timedelta(days=7))
     until = parse_ms(meta.get("until")) or now_utc()
@@ -364,7 +380,7 @@ def build_setters(facts, submissions, ghl, goals, since, until):
         connects = sum(1 for f in mine if f["connect"]) if claimed else None
         attempts = (sum(f["attempts"] or 0 for f in mine) or None) if claimed else None
         claim_booked = sum(1 for f in mine if f["booked"]) if claimed else 0
-        shows = (sum(1 for f in mine if f["held"]) or None) if claimed else None
+        claim_shows = sum(1 for f in mine if f["held"]) if claimed else 0
         stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in mine if f["leadDate"] and f["firstAttempt"]]
         speed = median_or_none(stl) if claimed else None
         forms = forms_by.get(key)
@@ -379,8 +395,8 @@ def build_setters(facts, submissions, ghl, goals, since, until):
             "connectRate": None,                       # needs dials or pre-claim lead attribution
             "booked": (booked or None),
             "bookRate": ratio(booked, connects) if (claimed and connects) else None,
-            "shows": shows,
-            "showRate": ratio(shows, claim_booked) if (claimed and claim_booked) else None,
+            "shows": (claim_shows or None) if claimed else None,
+            "showRate": ratio(claim_shows, claim_booked) if (claimed and claim_booked) else None,
             "speedToLeadMedianMin": speed,
             "formsSubmitted": forms,
             "formCompliance": (min(1.0, ratio(forms or 0, connects)) if (claimed and connects) else None),
