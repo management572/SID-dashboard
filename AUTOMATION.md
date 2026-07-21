@@ -81,9 +81,12 @@ only copy of the live token is the one in GitHub's secret store.
 ## Deploy to Cloudflare Pages
 
 The board is published to Cloudflare Pages (the Workers/Pages platform) via the **Deploy board**
-workflow (`.github/workflows/deploy.yml`). No custom domain: it serves at the project's
-`https://obb-sid-dashboard.pages.dev` URL. It redeploys automatically after every successful data
-refresh, and can be run on demand from the Actions tab.
+workflow (`.github/workflows/deploy.yml`). It serves at the custom domain
+`https://db.homecarehero.tech` (and at the project's `https://obb-sid-dashboard.pages.dev` URL). The
+deploy attaches the custom domain to the Pages project via the Cloudflare API on every run
+(idempotent), so Cloudflare auto-creates the `db` CNAME because the homecarehero.tech zone is on the
+same account. It redeploys automatically after every successful data refresh, and can be run on
+demand from the Actions tab.
 
 ### The two secrets to add (same place as SID_TOKEN)
 
@@ -105,7 +108,7 @@ the exposure is bounded, but attach Access before handing the link out:
 
 1. Cloudflare dashboard -> **Zero Trust** -> **Access** -> **Applications** -> **Add an application**
    -> **Self-hosted**.
-2. Application domain: `obb-sid-dashboard.pages.dev`.
+2. Application domain: `db.homecarehero.tech` (add `obb-sid-dashboard.pages.dev` as a second app domain too, so the pages.dev URL is gated as well).
 3. Add a policy: **Allow**, include **Emails ending in** `@onlinebizbuilders.com` (plus any named
    external addresses).
 4. Save. Then open the URL in a signed-out browser: the correct result is a **login prompt, not the

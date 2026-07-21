@@ -116,3 +116,18 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=obb-sid-dashboard --branch=main --commit-dirty=true
+
+      - name: Attach custom domain db.homecarehero.tech (idempotent)
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set +e
+          DOMAIN="db.homecarehero.tech"
+          PROJECT="obb-sid-dashboard"
+          API="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/pages/projects/$PROJECT/domains"
+          echo "Attaching $DOMAIN to Pages project $PROJECT (safe to re-run)."
+          curl -sS -X POST "$API" -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" --data "{\"name\":\"$DOMAIN\"}" | jq -r '"add success: \(.success)   errors: \(.errors)   status: \(.result.status // "n/a")"'
+          echo "--- current status ---"
+          curl -sS "$API/$DOMAIN" -H "Authorization: Bearer $CF_TOKEN" | jq -r '"domain: \(.result.name)   status: \(.result.status)"'
+          echo "When status shows active, https://$DOMAIN serves the board. Cloudflare auto-creates the CNAME because the zone is on this account."
