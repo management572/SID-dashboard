@@ -175,12 +175,13 @@ def main():
     os.makedirs(RAW_DIR, exist_ok=True)
     print("fetch_sid: location=%s window=%s..%s" % (location_id, since.date(), until.date()))
 
-    # 1) custom fields: id -> {name, fieldKey, dataType}
-    fields = paginate(cfg, token, "/locations/%s/customFields" % location_id, {}, "customFields")
+    # 1) custom fields: id -> {name, fieldKey, dataType}. This endpoint returns the full list in one
+    #    response and rejects a `limit` query param (422), so call it directly, not via paginate().
+    fields = api_get(cfg, token, "/locations/%s/customFields" % location_id, {}).get("customFields", []) or []
     dump("custom_fields", fields)
 
-    # 2) users (setters)
-    users = paginate(cfg, token, "/users/", {"locationId": location_id}, "users")
+    # 2) users (setters). Same: full list in one response, no `limit` param.
+    users = api_get(cfg, token, "/users/", {"locationId": location_id}).get("users", []) or []
     dump("users", users)
 
     # 3) contacts, with their tags and custom field values
