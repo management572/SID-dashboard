@@ -829,7 +829,7 @@ function renderClients() {
 }
 function clientCell(r, c, isRollup) {
   if (c.key === "label") return (isRollup ? "All Clients" : esc(r.label));
-  if (c.key === "market") return isRollup ? '<span class="faint">rollup</span>' : esc(r.market || dash());
+  if (c.key === "market") return isRollup ? '<span class="faint">rollup</span>' : (r.market ? esc(r.market) : dash());
   const tgt = resolveTarget(c.target);
   const band = isNil(tgt) ? null : bandTarget(r[c.key], tgt, c.invert);
   const cls = band ? " class='cell" + band + "'" : "";
