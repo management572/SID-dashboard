@@ -7,78 +7,171 @@
   "apiVersion": "2021-07-28",
   "hipaaMode": true,
 
-  "_divisions": "One home-care client agency per division. tagPrefix is that client's short slug and every one of their tags starts with it. Add a row per client; the board renders a client toggle plus an All Clients roll-up.",
+  "_model": "SID runs the tag-based Belt Engine, NOT pipeline stages, for lead state. The dashboard funnel is counted from custom DATE fields and two SINGLE_OPTIONS outcome fields, never from pipeline stage. Client association is a custom FIELD (partner_acronym), not a stage tag. See SID_System_Documentation.md.",
+
+  "_clientField": "Contacts are classified to a client agency by this custom field value (the partner acronym), not by a per-client stage tag. This is the key difference from the generic kit.",
+  "clientField": "contact.partner_acronym",
+
+  "_divisions": "One row per client agency, keyed by partner acronym (uppercase key, lowercase acronym in field values and {acronym}booked tags). 38 acronyms were extracted from GHL tags. ACTIVE vs CHURNED and full agency names are PENDING confirmation from Robert/Eva; only HHC and LPC names are known. Provisionally all active so classification works; prune once the roster is confirmed.",
   "divisions": [
-    { "key": "TODO_client_slug", "label": "TODO Client Agency Name", "tagPrefix": "TODO_client_slug", "active": true }
+    { "key": "ABC", "label": "ABC", "acronym": "abc", "market": null, "active": true },
+    { "key": "ACL", "label": "ACL", "acronym": "acl", "market": null, "active": true },
+    { "key": "ACS", "label": "ACS", "acronym": "acs", "market": null, "active": true },
+    { "key": "AHC", "label": "AHC", "acronym": "ahc", "market": null, "active": true },
+    { "key": "ALB", "label": "ALB", "acronym": "alb", "market": null, "active": true },
+    { "key": "ALM", "label": "ALM", "acronym": "alm", "market": null, "active": true },
+    { "key": "ALP", "label": "ALP", "acronym": "alp", "market": null, "active": true },
+    { "key": "APA", "label": "APA", "acronym": "apa", "market": null, "active": true },
+    { "key": "AVA", "label": "AVA", "acronym": "ava", "market": null, "active": true },
+    { "key": "BCF", "label": "BCF", "acronym": "bcf", "market": null, "active": true },
+    { "key": "CBH", "label": "CBH", "acronym": "cbh", "market": null, "active": true },
+    { "key": "ENC", "label": "ENC", "acronym": "enc", "market": null, "active": true },
+    { "key": "EVC", "label": "EVC", "acronym": "evc", "market": null, "active": true },
+    { "key": "EVG", "label": "EVG", "acronym": "evg", "market": null, "active": true },
+    { "key": "GXY", "label": "GXY", "acronym": "gxy", "market": null, "active": true },
+    { "key": "HCO", "label": "HCO", "acronym": "hco", "market": null, "active": true },
+    { "key": "HHA", "label": "HHA", "acronym": "hha", "market": null, "active": true },
+    { "key": "HHC", "label": "Hallmark Home Care Houston", "acronym": "hhc", "market": "Houston, TX", "active": true },
+    { "key": "HPH", "label": "HPH", "acronym": "hph", "market": null, "active": true },
+    { "key": "HPI", "label": "HPI", "acronym": "hpi", "market": null, "active": true },
+    { "key": "HSE", "label": "HSE", "acronym": "hse", "market": null, "active": true },
+    { "key": "JHC", "label": "JHC", "acronym": "jhc", "market": null, "active": true },
+    { "key": "JOY", "label": "JOY", "acronym": "joy", "market": null, "active": true },
+    { "key": "KTY", "label": "KTY", "acronym": "kty", "market": null, "active": true },
+    { "key": "LPC", "label": "Lenorah's Personal Care", "acronym": "lpc", "market": null, "active": true },
+    { "key": "OYL", "label": "OYL", "acronym": "oyl", "market": null, "active": true },
+    { "key": "OYV", "label": "OYV", "acronym": "oyv", "market": null, "active": true },
+    { "key": "PCA", "label": "PCA", "acronym": "pca", "market": null, "active": true },
+    { "key": "PCH", "label": "PCH", "acronym": "pch", "market": null, "active": true },
+    { "key": "PHC", "label": "PHC", "acronym": "phc", "market": null, "active": true },
+    { "key": "RAH", "label": "RAH", "acronym": "rah", "market": null, "active": true },
+    { "key": "RHC", "label": "RHC", "acronym": "rhc", "market": null, "active": true },
+    { "key": "RHW", "label": "RHW", "acronym": "rhw", "market": null, "active": true },
+    { "key": "ROC", "label": "ROC", "acronym": "roc", "market": null, "active": true },
+    { "key": "SHA", "label": "SHA", "acronym": "sha", "market": null, "active": true },
+    { "key": "SHI", "label": "SHI", "acronym": "shi", "market": null, "active": true },
+    { "key": "SHS", "label": "SHS", "acronym": "shs", "market": null, "active": true },
+    { "key": "THC", "label": "THC", "acronym": "thc", "market": null, "active": true }
   ],
 
-  "_tagTaxonomy": "Pattern: '{prefix} {stage}'. Lower case, single spaces, no punctuation. Create these in SID verbatim. A contact carries exactly one stage tag per client at a time; the deepest stage wins when classifying.",
-  "stageTags": {
-    "lead": "{prefix} lead",
-    "worked": "{prefix} worked",
-    "contacted": "{prefix} contacted",
-    "booked": "{prefix} booked",
-    "show": "{prefix} show",
-    "won": "{prefix} won",
-    "nurture": "{prefix} nurture",
-    "dq": "{prefix} dq"
-  },
-
-  "_priorityTags": "Set by the priority workflow on every engagement event. Exactly one at a time. Drives the queue order and the obb-lead-alerts push.",
-  "priorityTags": {
-    "p1": "{prefix} p1",
-    "p2": "{prefix} p2",
-    "p3": "{prefix} p3",
-    "p4": "{prefix} p4"
-  },
-
-  "_eventDateFields": "One DATE custom field per stage, stamped by workflow the instant the event fires. The board counts contacts whose date field falls inside the window (cumulative), never by current pipeline stage. Paste the field IDs here after prompts/02 creates them.",
+  "_eventDateFields": "The funnel is counted by these DATE custom fields inside the window, cumulative. Values are GHL fieldKeys; the pull resolves them. showDate and wonDate have NO date field in SID: Held is read from the Client Call Outcome field, and Won lives downstream in client sub-accounts (out of scope for this board).",
   "eventDateFieldIds": {
-    "leadDate": "TODO_FIELD_ID",
-    "firstAttemptDate": "TODO_FIELD_ID",
-    "firstConnectDate": "TODO_FIELD_ID",
-    "bookedDate": "TODO_FIELD_ID",
-    "showDate": "TODO_FIELD_ID",
-    "wonDate": "TODO_FIELD_ID"
+    "leadDate": "contact.sid_entered_24h_at",
+    "firstAttemptDate": "contact.sid_first_dial_at",
+    "firstConnectDate": "contact.sid_assigned_at",
+    "bookedDate": "contact.sid_schedule_call_date",
+    "showDate": null,
+    "wonDate": null
   },
 
-  "_attemptFields": "The attempt engine. attemptCount increments ONCE per completed bundle (double dial + VM + email + SMS), never once per dial. lastAttemptDate is stamped by the same workflow step.",
+  "_outcomeFields": "SID tracks booked/held/DQ through SINGLE_OPTIONS outcome fields, not stages. Booked = Intro Call Outcome is Booked (or bookedDate set). Held = Client Call Outcome is Complete. Won is not tracked in SID.",
+  "outcomeFields": {
+    "introCallOutcome": { "fieldKey": "contact.sid_intro_call_outcome", "booked": "Booked", "options": ["Booked", "Not Booked", "DQ", "Callback", "Not Interested"] },
+    "clientCallOutcome": { "fieldKey": "contact.sid_client_call_outcome", "held": "Complete", "options": ["Complete", "No Show", "DQ"] }
+  },
+
+  "_attemptFields": "attemptCount is the true bundle count (one double-dial pair = +1), incremented by WF-2 via the sid-dial-1 toggle. dayOneAttemptCount has no field: it is computed as first attempt within 24h of leadDate. dials are NOT available (GHL native dialer, no Wavv API), so the dials column renders null and the integrity check watches for stuck sid-dial-1 tags instead.",
   "attemptFieldIds": {
-    "attemptCount": "TODO_FIELD_ID",
-    "lastAttemptDate": "TODO_FIELD_ID",
-    "dayOneAttemptCount": "TODO_FIELD_ID",
-    "assignedSetter": "TODO_FIELD_ID"
+    "attemptCount": "contact.sid_attempt_count",
+    "lastAttemptDate": "contact.sid_last_attempt_at",
+    "dayOneAttemptCount": null,
+    "assignedSetter": "contact.sid_assigned_to"
   },
 
-  "_introCallForm": "The single write path for the setter floor. Every worked lead gets one submission. The setter dropdown on this form is the attribution key and the auto-assign trigger. Form-submission compliance is a board metric.",
+  "_attemptIntegrity": "The full bundle (double dial + VM + email + SMS = one attempt) is only PARTIALLY built: just the double-dial toggle is wired. There is no dials feed, so dials-per-attempt cannot be computed. The integrity check instead flags contacts stuck with a sid-dial-1 tag (a dial pair that never completed), which is the real failure mode.",
+  "attemptToggleTag": "sid-dial-1",
+  "connectedCall": {
+    "_note": "A connect = an outbound call over 15 seconds, which auto-claims the lead (stamps sid_assigned_to and sid_assigned_at server-side). firstConnectDate maps to sid_assigned_at.",
+    "minDurationSec": 15,
+    "assignedAtField": "contact.sid_assigned_at"
+  },
+
+  "_introCallForm": "The single write path for the floor. Attribution key is the Submitted By dropdown. NOTE a real mismatch: the form's Submitted By options (Michelle, Sarah, Heart, May, Sophia) do not match the GHL user roster or the Assigned To options. Heart and Sophia are not GHL users; Kyla, Mary and Johnny are users but not on the form. This must be reconciled or per-setter numbers will split across names.",
   "introCallForm": {
-    "formId": "TODO_FORM_ID",
-    "setterFieldId": "TODO_FIELD_ID",
-    "outcomeFieldId": "TODO_FIELD_ID",
-    "outcomes": ["booked", "callback", "no answer", "not interested", "dq", "wrong number"],
+    "formId": "kERTITqTC1N423UZeEx1",
+    "formName": "SID Setter Intro Call form",
+    "setterFieldId": "contact.sid_intro_form_submitted_by",
+    "setterOptions": ["Michelle", "Sarah", "Heart", "May", "Sophia"],
+    "outcomeFieldId": "contact.sid_intro_call_outcome",
+    "outcomes": ["Booked", "Not Booked", "DQ", "Callback", "Not Interested"],
     "_note": "Outcome values must match this list exactly. The board buckets by them."
   },
 
-  "pipeline": {
-    "id": "TODO_PIPELINE_ID",
-    "wonStageId": "TODO_WON_STAGE_ID",
-    "_note": "Stages are for reference and funnel ordering. Won is read from opportunity status = won."
+  "_tierTags": "The Belt Engine priority tiers. A contact carries one active tier tag at a time; a connected call removes all tier tags (the lead is claimed). These drive the queue lanes, mapped to the board's four lanes below.",
+  "tierTags": {
+    "p1": "sys p1",
+    "new24h": "sys 24h",
+    "day2_48h": "sys 48h",
+    "p2": "sys p2",
+    "p3": "sys p3",
+    "p4": "sys p4",
+    "p5_archive": "sys p5",
+    "dnc": "sys dnc"
   },
 
-  "users": {
-    "_note": "Map SID user IDs to setter display names so the Setters tab labels correctly. Names must match intake.yaml > floor.setters.",
-    "TODO_SID_USER_ID": "Michelle"
+  "_queueLaneMap": "PROPOSED mapping of the 8 belt tiers onto the board's four priority lanes. Please confirm. P5 archive and DNC are excluded from the queue on purpose.",
+  "queueLaneMap": {
+    "p1": ["sys p1"],
+    "p2": ["sys 24h", "sys 48h"],
+    "p3": ["sys p2", "sys p3"],
+    "p4": ["sys p4"]
   },
+
+  "_operationalTags": "Non-tier tags used by the workflows.",
+  "operationalTags": {
+    "newLead": "new lead",
+    "dialToggle": "sid-dial-1",
+    "slaMiss": "sid-sla-miss",
+    "booked": "sid-booked",
+    "reAttempt": ["sys 24 - 1", "sys 24 - 2", "sys 24 - 3"]
+  },
+
+  "pipeline": {
+    "id": "2q6WDM0CXCnurp7wqZXG",
+    "name": "SDR Incoming",
+    "wonStageId": null,
+    "_note": "LEGACY and not used for lead state. The Belt Engine uses tags plus date fields. Kept only for reference. Two duplicate pipelines (Michelle DSDR k9ZjeXcN1wk9vkfK2Fqu, SDR Asana Clone 4sWUMqsJU8FRQQHxYZ34) are pending consolidation. Won is not tracked in SID, so the board's Signed column is downstream/out of scope."
+  },
+
+  "_users": "SID user IDs to display names. Attribution on the Setters tab is by the form Submitted By value, which uses FIRST names and does not line up with this roster (see introCallForm note). Johnny is a user but not on either dropdown.",
+  "users": {
+    "QCFNWQLCH2ihwmiNVpxi": "Michelle Supina",
+    "Oij3BYvEG3BdjGNesu20": "Kyla Olgado",
+    "bYLYdQbnXPT1Y1y2NtlE": "Mary Lim",
+    "XjKo7CE6eErjG4e72olK": "May Paula",
+    "ZyhQdAjohLeWSM9i0d3T": "Sarah Sanchez",
+    "nmtzyMmWsxLSFNU9a19y": "Johnny Logan"
+  },
+  "assignedToOptions": ["Michelle Supina", "Kyla Olgado", "Mary Lim", "May Paula", "Sarah Sanchez"],
 
   "alerts": {
     "slackChannel": "obb-lead-alerts",
     "webhookEnv": "SLACK_WEBHOOK_URL",
-    "_note": "Existing OBB channel convention. P1 leads and SLA breaches push here. Never include PHI or free-text notes in an alert: contact first name, last initial, client, and the SID deep link only."
+    "_note": "Confirmed channel. P1 leads and SLA breaches push here. Never include PHI or free-text notes: contact first name, last initial, client acronym, and the SID deep link only."
+  },
+
+  "dialer": {
+    "primary": "GHL native dialer",
+    "legacy": "Wavv power dialer (tags wavv-smartlist, powerdial on 1400+ contacts)",
+    "dialCountApi": false,
+    "_note": "No dial-count API is wired, so the Dials column stays null. WF-2 fires on GHL Call Details (Completed + Outgoing); Wavv calls only count if Wavv syncs events back to GHL."
+  },
+
+  "webhook": {
+    "url": "https://bold-guineapig-448.convex.site/webhook/tier-transition",
+    "_note": "Stateless Convex/Vercel service. Handles tier_transition and call_answered events, writes calculated fields back to GHL, and logs to the redundancy spreadsheet. Reference only; the board does not call it."
+  },
+
+  "hours": {
+    "timezone": "America/New_York",
+    "floorOpenLocal": "10:00",
+    "floorCloseLocal": "22:00",
+    "_note": "SDR floor is 7 days a week, 10:00 to 22:00 EST. The speed-to-lead SLA clock pauses outside these hours. The belt engine itself runs 24/7."
   },
 
   "ads": {
     "enabled": false,
-    "_note": "Facebook Lead Forms feed SID directly for fulfillment. Per-client ad spend and ROAS are v2, and belong on the front-end engine board, not this one."
+    "_note": "Facebook Lead Forms feed SID via ~40 per-client intake workflows. Per-client ad spend and ROAS are v2 and belong on the front-end engine board, not this one."
   },
 
   "scheduler": "ghl-native",

@@ -18,25 +18,46 @@ engine:
     (2) Fulfillment / Product-Service = per-client Facebook lead forms plus the SID setter floor
     booking appointments. This board is engine 2. Do not mix the two on one view.
 
-# Each home-care agency OBB serves is a division: one tag prefix, one funnel, one roster row.
+# Each home-care agency OBB serves is a division. In SID the client is stored in the
+# contact.partner_acronym custom FIELD (not a per-client tag prefix). The full roster of 38
+# acronyms lives in config/ghl-config.json > divisions. Active vs churned and full agency names
+# are PENDING confirmation from Robert/Eva; only HHC and LPC names are known so far.
 clients:
-  - key: "TODO_client_slug"           # short tag prefix; ALL that client's tags start with this
-    label: "TODO Client Agency Name"
-    market: "TODO city / metro"       # drives the multi-client-per-location dialer problem
-    active: true
-  # duplicate this block per home-care client
+  source: "config/ghl-config.json > divisions"
+  classify_by: "contact.partner_acronym"
+  known:
+    - { key: "HHC", label: "Hallmark Home Care Houston", market: "Houston, TX" }
+    - { key: "LPC", label: "Lenorah's Personal Care", market: "TODO" }
+  acronym_count: 38
+  active_roster: "TODO confirm with Robert / Eva"
 
 floor:
-  timezone: "America/New_York"        # TODO confirm
-  hours: "09:00-18:00"                # dialing window, local. Drives the monitor agent and SLA clock
-  days: ["Mon", "Tue", "Wed", "Thu", "Fri"]
-  setters:                            # TODO confirm the roster; names must match SID user names
-    - name: "Michelle"
-      role: "Lead SDR"
+  timezone: "America/New_York"        # confirmed EST (per SID system docs)
+  hours: "10:00-22:00"                # SDR floor, local. Drives the monitor agent and SLA clock
+  days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]   # 7 days/week
+  setters:                            # GHL user roster (per SID system docs). See ghl-config.json > users
+    - name: "Michelle Supina"
+      role: "SDR (senior)"
       start_date: "TODO"
-    - name: "TODO Setter"
+    - name: "Kyla Olgado"
       role: "SDR"
       start_date: "TODO"
+    - name: "Mary Lim"
+      role: "SDR"
+      start_date: "TODO"
+    - name: "May Paula"
+      role: "SDR"
+      start_date: "TODO"
+    - name: "Sarah Sanchez"
+      role: "SDR"
+      start_date: "TODO"
+    - name: "Johnny Logan"
+      role: "SDR"
+      start_date: "TODO"
+  _setterNote: >
+    Attribution key is the Intro Call Form "Submitted By" dropdown, whose options
+    (Michelle, Sarah, Heart, May, Sophia) do NOT match this roster. Heart and Sophia are
+    not GHL users; Kyla, Mary and Johnny are not on the form. Reconcile before trusting per-rep splits.
   training_owner: "Johnny"            # SDR Sales Training, owns ramp and quality
   ops_owner: "Jeremy"                 # Director of Ops, owns automation library
   cs_owner: "Eva"                     # Head CSM, owns client escalation

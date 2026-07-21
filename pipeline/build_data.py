@@ -41,7 +41,7 @@ SAMPLE_PATH = os.path.join(ROOT, "data", "dashboard-data.sample.json")
 ATTEMPT_INTEGRITY_FLOOR = 1.6            # dials/attempts below this means the double-dial bug is back
 STAGE_ORDER = ["lead", "worked", "contacted", "booked", "show", "won"]
 TERMINAL_TAGS = ["dq", "nurture"]        # rank lowest, never override a real stage
-FLOOR_HOURS = (8, 20)                    # local floor open/close, used for the SLA clock (rule 6)
+FLOOR_HOURS = (10, 22)                   # local floor open/close (EST 10:00-22:00), for the SLA clock (rule 6)
 
 
 # ------------------------------------------------------------------ helpers
@@ -85,12 +85,13 @@ def parse_ms(value):
         return None
 
 
-def field_value(contact, field_id):
-    """Read a contact custom field by id from the LeadConnector customFields array."""
-    if not field_id or str(field_id).startswith("TODO"):
+def field_value(contact, field_ref):
+    """Read a contact custom field by id OR fieldKey from the LeadConnector customFields array.
+    Config now stores GHL fieldKeys (e.g. contact.sid_attempt_count), so match either form."""
+    if not field_ref or str(field_ref).startswith("TODO"):
         return None
     for f in contact.get("customFields", []) or contact.get("customField", []) or []:
-        if f.get("id") == field_id or f.get("fieldId") == field_id:
+        if f.get("id") == field_ref or f.get("fieldId") == field_ref or f.get("fieldKey") == field_ref or f.get("key") == field_ref:
             return f.get("value") if "value" in f else f.get("fieldValue")
     return None
 
