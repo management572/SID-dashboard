@@ -35,29 +35,28 @@ floor:
   timezone: "America/New_York"        # confirmed EST (per SID system docs)
   hours: "10:00-22:00"                # SDR floor, local. Drives the monitor agent and SLA clock
   days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]   # 7 days/week
-  setters:                            # GHL user roster (per SID system docs). See ghl-config.json > users
-    - name: "Michelle Supina"
-      role: "SDR (senior)"
-      start_date: "TODO"
-    - name: "Kyla Olgado"
+  setters:                            # CURRENT SDR floor (confirmed). See ghl-config.json > activeSetters
+    - name: "Sophia"
       role: "SDR"
       start_date: "TODO"
-    - name: "Mary Lim"
+      ghl_user: null                  # form-only: not a GHL user, not in Assigned To
+    - name: "Michelle"
       role: "SDR"
       start_date: "TODO"
-    - name: "May Paula"
+      ghl_user: "Michelle Supina"     # fully attributed (claim + form)
+    - name: "Sarah"
       role: "SDR"
       start_date: "TODO"
-    - name: "Sarah Sanchez"
+      ghl_user: "Sarah Sanchez"       # fully attributed (claim + form)
+    - name: "Heart"
       role: "SDR"
       start_date: "TODO"
-    - name: "Johnny Logan"
-      role: "SDR"
-      start_date: "TODO"
+      ghl_user: null                  # form-only: not a GHL user, not in Assigned To
   _setterNote: >
-    Attribution key is the Intro Call Form "Submitted By" dropdown, whose options
-    (Michelle, Sarah, Heart, May, Sophia) do NOT match this roster. Heart and Sophia are
-    not GHL users; Kyla, Mary and Johnny are not on the form. Reconcile before trusting per-rep splits.
+    Attribution key is the Intro Call Form "Submitted By" dropdown. Michelle and Sarah also map to
+    GHL users (Michelle Supina, Sarah Sanchez) and are fully attributed on the claim side. Heart and
+    Sophia have no GHL user and are not in the Assigned To dropdown, so only their form activity
+    attributes until they are added to Assigned To in SID. May, Kyla, Mary and Johnny are not current SDRs.
   training_owner: "Johnny"            # SDR Sales Training, owns ramp and quality
   ops_owner: "Jeremy"                 # Director of Ops, owns automation library
   cs_owner: "Eva"                     # Head CSM, owns client escalation

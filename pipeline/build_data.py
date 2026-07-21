@@ -176,6 +176,13 @@ def build_from_raw(ghl, dash):
     floor = build_floor(facts, since, until, goals, lane_map)
     setters = build_setters(facts, submissions, ghl, goals, since, until)
 
+    # Floor form compliance = total forms submitted / total connected calls in the window.
+    # Capped at 1.0: form-only setters (Heart, Sophia) submit forms without a claim-side connect,
+    # so the raw ratio can exceed 1 in thin windows; a compliance rate is bounded by definition.
+    forms_total = sum((s.get("formsSubmitted") or 0) for s in setters)
+    fc = ratio(forms_total, floor.get("connectsInRange"))
+    floor["formCompliance"] = min(1.0, fc) if fc is not None else None
+
     # ---- data-quality flags for the documented gaps ----
     stuck = sum(1 for c in contacts if ghl.get("attemptToggleTag", "sid-dial-1").lower() in [t.lower() for t in c.get("tags", [])])
     if stuck > max(10, 0.02 * (floor.get("leadsInRange") or 0)):
@@ -195,14 +202,17 @@ def build_from_raw(ghl, dash):
                        % round(floor["formCompliance"] * 100),
             "affects": ["setters"],
         })
-    flags.append({
-        "code": "SETTER_ATTRIBUTION", "severity": "warn",
-        "message": "Attempts are logged on contacts but SID does not record which setter dialed before a "
-                   "lead is claimed, so per-setter Attempts count only claimed leads. Also the Intro Call "
-                   "Form Submitted By names (Michelle, Sarah, Heart, May, Sophia) do not match the GHL user "
-                   "roster, so form-based and claim-based numbers may split across names until reconciled.",
-        "affects": ["setters.attempts", "setters.formCompliance"],
-    })
+    form_only = [s["name"] for s in setters if not s.get("claimAttributed")]
+    if form_only:
+        flags.append({
+            "code": "SETTER_ATTRIBUTION", "severity": "warn",
+            "message": ("%s submit the Intro Call Form but are not in the SID Assigned To dropdown and have "
+                        "no matching GHL user, so only their form activity is attributed (attempts, connects "
+                        "and held show a dash). Add them to Assigned To in SID for full attribution. Also, SID "
+                        "does not record which setter dialed before a lead is claimed, so per-setter Attempts "
+                        "count claimed leads only." % (" and ".join(form_only))),
+            "affects": ["setters.attempts", "setters.connects", "setters.shows"],
+        })
 
     return {
         "title": dash.get("title", "Setter Floor Dashboard"),
@@ -323,56 +333,65 @@ def tier_lane_from_tags(tags, lane_map):
 
 
 def build_setters(facts, submissions, ghl, goals, since, until):
-    users = ghl.get("users", {})
     icf = ghl.get("introCallForm", {})
     setter_field = icf.get("setterFieldId")
+    outcome_field = icf.get("outcomeFieldId")
+    booked_val = (ghl.get("outcomeFields", {}).get("introCallOutcome", {}) or {}).get("booked", "Booked")
 
-    # Union of setter first-names seen on claims (assigned_to) and on forms (Submitted By).
-    display = {}   # first-name -> best display label
-    for full in users.values():
-        display.setdefault(first_name(full), full)
-    for opt in icf.get("setterOptions", []):
-        display.setdefault(first_name(opt), opt)
-
-    forms_by = {}
+    # Count form submissions (and booked-from-form) per setter first-name (Submitted By).
+    forms_by, forms_booked_by = {}, {}
     for s in submissions:
         nm = first_name(submission_field(s, setter_field))
-        if nm:
-            forms_by[nm] = forms_by.get(nm, 0) + 1
-            display.setdefault(nm, submission_field(s, setter_field))
+        if not nm:
+            continue
+        forms_by[nm] = forms_by.get(nm, 0) + 1
+        if submission_field(s, outcome_field) == booked_val:
+            forms_booked_by[nm] = forms_booked_by.get(nm, 0) + 1
+
+    # The roster is the confirmed active SDR floor. If none configured, fall back to whoever appears.
+    roster = ghl.get("activeSetters")
+    if not roster:
+        seen = {first_name(f["assignedTo"]) for f in facts if f["assignedTo"]} | set(forms_by)
+        roster = [{"name": n.title(), "formName": n.title(), "assignedToName": None} for n in seen if n]
 
     setters = []
-    for key, label in display.items():
-        mine = [f for f in facts if first_name(f["assignedTo"]) == key]
-        connects = sum(1 for f in mine if in_window(f["connect"], since, until) or f["connect"])
-        booked = sum(1 for f in mine if f["booked"])
-        shows = sum(1 for f in mine if f["held"])
-        attempts = sum(f["attempts"] or 0 for f in mine)
+    for r in roster:
+        key = first_name(r.get("formName") or r.get("name"))
+        claim_key = first_name(r.get("assignedToName")) if r.get("assignedToName") else None
+        # Claim-side metrics only exist when the setter maps to an Assigned To value.
+        mine = [f for f in facts if claim_key and first_name(f["assignedTo"]) == claim_key]
+        claimed = bool(claim_key)
+        connects = sum(1 for f in mine if f["connect"]) if claimed else None
+        attempts = (sum(f["attempts"] or 0 for f in mine) or None) if claimed else None
+        claim_booked = sum(1 for f in mine if f["booked"]) if claimed else 0
+        shows = (sum(1 for f in mine if f["held"]) or None) if claimed else None
         stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in mine if f["leadDate"] and f["firstAttempt"]]
-        speed = median_or_none(stl)
+        speed = median_or_none(stl) if claimed else None
         forms = forms_by.get(key)
+        # Booked: claim-based when the setter is claim-attributed, else form-based (Outcome = Booked).
+        booked = claim_booked if claimed else forms_booked_by.get(key)
         setters.append({
-            "name": label, "sidUserId": uid_for(label, users), "role": None,
-            "assigned": (len(mine) or None),
-            "attempts": (attempts or None),
+            "name": r.get("name"), "sidUserId": r.get("ghlUserId"), "role": None,
+            "assigned": (len(mine) or None) if claimed else None,
+            "attempts": attempts,
             "dials": None,
-            "connects": (connects or None),
+            "connects": connects,
             "connectRate": None,                       # needs dials or pre-claim lead attribution
             "booked": (booked or None),
-            "bookRate": ratio(booked, connects),
-            "shows": (shows or None),
-            "showRate": ratio(shows, booked),
+            "bookRate": ratio(booked, connects) if (claimed and connects) else None,
+            "shows": shows,
+            "showRate": ratio(shows, claim_booked) if (claimed and claim_booked) else None,
             "speedToLeadMedianMin": speed,
             "formsSubmitted": forms,
-            "formCompliance": ratio(forms or 0, connects) if connects else None,
+            "formCompliance": (min(1.0, ratio(forms or 0, connects)) if (claimed and connects) else None),
             "dayOneCoverage": None,
             "isNew": False,                            # start_date unknown, cannot compute ramp
             "belowSla": bool(speed is not None and speed > goals.get("speedToLeadSlaMin", 30)),
+            "claimAttributed": claimed,                # false = form-only (Heart, Sophia)
             "byDay": None,
         })
-    # Drop names with no signal at all so the tab is not padded with empty rows.
-    setters = [s for s in setters if any(s[k] for k in ("assigned", "connects", "booked", "formsSubmitted"))]
-    return sorted(setters, key=lambda s: -((s.get("bookRate") or 0)))
+    # Keep the full active roster visible even at zero (ramp and quiet reps stay on the board).
+    return sorted(setters, key=lambda s: (-(s.get("bookRate") or 0), -(s.get("formsSubmitted") or 0)))
 
 
 def build_timeseries(facts, since, until):
@@ -454,14 +473,6 @@ def freshness_min(meta):
     return None if not pulled else max(0, round((now_utc() - pulled).total_seconds() / 60))
 
 
-def attach_form_compliance(data):
-    """Floor form compliance = total forms submitted / total connected calls in the window."""
-    forms = sum((s.get("formsSubmitted") or 0) for s in data.get("setters", []))
-    connects = data.get("floor", {}).get("connectsInRange")
-    data["floor"]["formCompliance"] = ratio(forms, connects) if connects else None
-    return data
-
-
 def die(msg):
     sys.stderr.write("build_data: " + msg + "\n")
     sys.exit(1)
@@ -480,9 +491,6 @@ def main():
     else:
         ghl, dash = cfg_load()
         data = build_from_raw(ghl, dash)
-        data = attach_form_compliance(data)
-        # recompute the form-compliance insight now that the floor value exists
-        data["insights"] = build_insights(data["floor"], data["clients"], data["setters"], dash.get("goals", {}))
 
     with open(OUT_PATH, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2)
