@@ -1,0 +1,857 @@
+<!--
+  OBB Setter Floor Dashboard
+  One self-contained page. No framework, no bundler, no build step.
+  It fetches config/brand.json, config/dashboard-config.json and data/dashboard-data.json
+  (falling back to data/dashboard-data.sample.json) and renders. Every color, label, goal and
+  threshold comes from config or data. A rebrand is a token swap in config/brand.json; a new
+  client is a row in the data file. Nothing visual is hard-coded here.
+
+  Serve over http (see RUNBOOK.md). Opening via file:// blocks fetch() in most browsers.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>OBB Setter Floor Dashboard</title>
+
+<style>
+  /* Brand tokens are injected at runtime from config/brand.json into :root as --tokens.
+     Static layout below only ever references var(--token), never a literal color. */
+  :root {
+    --ink:#4A5469; --ink2:#545F76; --ink3:#5A6580; --inkDeep:#3E4759;
+    --bone:#FFFFFF; --boneDim:rgba(255,255,255,0.72); --boneFaint:rgba(255,255,255,0.48);
+    --hair:rgba(255,255,255,0.15); --hair2:rgba(255,255,255,0.26);
+    --accent:#2974ED; --accentText:#A8CCFF; --accentDeep:#1B58C0; --accent2:#E9C46A;
+    --good:#2F9E5F; --goodText:#93E3B2; --warn:#D9A441; --warnText:#F2D28A;
+    --alert:#C8513E; --alertText:#FFB3A6;
+    --head:'Newsreader',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+    --r:10px; --gap:18px;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; }
+  body {
+    background:var(--ink); color:var(--bone);
+    font-family:var(--body); font-size:14px; line-height:1.45;
+    -webkit-font-smoothing:antialiased; padding:0 0 60px;
+  }
+  a { color:var(--accentText); }
+  h1,h2,h3 { font-family:var(--head); font-weight:500; margin:0; }
+  .wrap { max-width:1480px; margin:0 auto; padding:0 24px; min-width:1280px; }
+  .muted { color:var(--boneDim); }
+  .faint { color:var(--boneFaint); }
+  .mono { font-family:var(--mono); }
+  .dash { color:var(--boneFaint); cursor:help; }
+
+  /* Masthead */
+  header.mast {
+    display:flex; align-items:center; gap:20px;
+    padding:20px 0 16px; border-bottom:1px solid var(--hair); margin-bottom:18px;
+  }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand img { height:34px; width:auto; display:block; }
+  .wordmark { font-family:var(--head); font-size:26px; letter-spacing:.5px; }
+  .board-title { font-family:var(--head); font-size:19px; color:var(--boneDim); border-left:1px solid var(--hair2); padding-left:20px; }
+  .mast-right { margin-left:auto; display:flex; align-items:center; gap:12px; font-size:12px; }
+  .stamp { color:var(--boneDim); text-align:right; line-height:1.3; }
+
+  .chip {
+    display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px;
+    font-size:11px; font-weight:600; letter-spacing:.3px; white-space:nowrap;
+  }
+  .chip.good { background:var(--good); color:#fff; }
+  .chip.warn { background:var(--warn); color:#fff; }
+  .chip.alert { background:var(--alert); color:#fff; }
+  .chip.neutral { background:var(--ink3); color:var(--bone); }
+  .chip.sample { background:var(--alert); color:#fff; font-weight:700; letter-spacing:1px; box-shadow:0 0 0 3px rgba(200,81,62,.25); }
+
+  /* Controls */
+  .controls { display:flex; align-items:center; gap:18px; flex-wrap:wrap; margin-bottom:16px; }
+  .segset { display:inline-flex; background:var(--inkDeep); border-radius:999px; padding:3px; gap:2px; }
+  .segset button {
+    border:0; background:transparent; color:var(--boneDim); font-family:var(--body);
+    font-size:12px; font-weight:600; padding:6px 13px; border-radius:999px; cursor:pointer;
+  }
+  .segset button.on { background:var(--accent); color:#fff; }
+  .segset button:not(.on):hover { color:var(--bone); }
+  .ctl-label { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--boneFaint); margin-right:2px; }
+
+  /* Data-quality strip: above everything, alert tone */
+  .dq-strip { margin-bottom:18px; display:flex; flex-direction:column; gap:8px; }
+  .dq {
+    display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:var(--r);
+    background:var(--inkDeep); border-left:4px solid var(--alert);
+  }
+  .dq.warn { border-left-color:var(--warn); }
+  .dq .dq-body { flex:1; }
+  .dq .dq-code { font-family:var(--mono); font-size:11px; color:var(--boneDim); letter-spacing:.5px; }
+  .dq .dq-msg { margin-top:2px; }
+  .dq .affects { margin-top:6px; font-size:11px; color:var(--boneFaint); }
+
+  /* Tabs */
+  nav.tabs { display:flex; gap:4px; border-bottom:1px solid var(--hair); margin-bottom:20px; }
+  nav.tabs button {
+    border:0; background:transparent; color:var(--boneDim); font-family:var(--body); font-weight:600;
+    font-size:14px; padding:10px 18px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  nav.tabs button.on { color:var(--bone); border-bottom-color:var(--accent); }
+  .tab { display:none; }
+  .tab.on { display:block; }
+
+  /* Cards */
+  .card { background:var(--ink2); border:1px solid var(--hair); border-radius:var(--r); padding:16px 18px; }
+  .card h2 { font-size:15px; margin-bottom:2px; }
+  .card .sub { font-size:12px; color:var(--boneFaint); margin-bottom:14px; }
+  .grid { display:grid; gap:var(--gap); }
+
+  /* Tiles */
+  .tiles { display:grid; grid-template-columns:repeat(6,1fr); gap:var(--gap); margin-bottom:20px; }
+  .tile { background:var(--ink2); border:1px solid var(--hair); border-radius:var(--r); padding:14px 16px; position:relative; overflow:hidden; }
+  .tile .tlabel { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
+  .tile .tval { font-family:var(--head); font-size:34px; line-height:1.1; margin-top:8px; }
+  .tile .tsub { font-size:11px; color:var(--boneDim); margin-top:4px; }
+  .tile.hero { grid-column:span 1; background:var(--inkDeep); border-color:var(--hair2); }
+  .tile.hero .tval { font-size:46px; }
+  .tile .band { position:absolute; left:0; top:0; bottom:0; width:4px; }
+  .band.good { background:var(--good); } .band.warn { background:var(--warn); } .band.alert { background:var(--alert); }
+  .val.good { color:var(--goodText); } .val.warn { color:var(--warnText); } .val.alert { color:var(--alertText); }
+
+  .cols2 { grid-template-columns:1.35fr 1fr; }
+  .cols2b { grid-template-columns:1fr 1.35fr; }
+
+  /* Insights */
+  .insight { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--hair); }
+  .insight:last-child { border-bottom:0; }
+  .insight .rank { font-family:var(--mono); color:var(--boneFaint); width:22px; text-align:right; }
+  .insight .ihead { font-weight:600; }
+  .insight .idetail { font-size:12px; color:var(--boneDim); margin-top:2px; }
+  .insight .atrisk { font-size:11px; color:var(--boneFaint); margin-top:3px; }
+
+  /* Priority lanes */
+  .lane { display:grid; grid-template-columns:230px 1fr 46px; align-items:center; gap:12px; padding:7px 0; cursor:pointer; }
+  .lane .lname { font-size:12px; color:var(--boneDim); }
+  .lane .track { background:var(--inkDeep); border-radius:6px; height:16px; overflow:hidden; }
+  .lane .fill { height:100%; border-radius:6px; }
+  .lane .fill.alert { background:var(--alert); } .lane .fill.warn { background:var(--warn); }
+  .lane .fill.neutral { background:var(--accent); } .lane .fill.faint { background:var(--hair2); }
+  .lane .lcount { font-family:var(--mono); text-align:right; }
+  .lane.sel { outline:1px solid var(--hair2); outline-offset:3px; border-radius:4px; }
+
+  /* Funnel */
+  .funnel { display:flex; align-items:stretch; gap:0; }
+  .fstage { flex:1; text-align:center; position:relative; }
+  .fstage .bar { margin:0 6px; background:var(--accent); border-radius:6px 6px 0 0; display:flex; align-items:flex-end; justify-content:center; min-height:8px; }
+  .fstage .fcount { font-family:var(--head); font-size:20px; padding-bottom:6px; color:#fff; }
+  .fstage .flabel { font-size:11px; color:var(--boneDim); margin-top:6px; }
+  .fstage .conv { position:absolute; top:40%; right:-1px; transform:translateX(50%); font-size:10px; color:var(--accentText); background:var(--inkDeep); padding:1px 5px; border-radius:4px; z-index:2; }
+
+  /* Tables */
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead th { text-align:right; font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--boneFaint); font-weight:600; padding:8px 10px; background:var(--ink3); position:sticky; top:0; cursor:pointer; white-space:nowrap; user-select:none; }
+  thead th:first-child, tbody td:first-child { text-align:left; }
+  thead th.arrow-asc::after { content:' \25B2'; color:var(--accentText); }
+  thead th.arrow-desc::after { content:' \25BC'; color:var(--accentText); }
+  tbody td { padding:9px 10px; text-align:right; border-bottom:1px solid var(--hair); white-space:nowrap; }
+  tbody tr:hover td { background:rgba(255,255,255,0.04); }
+  tbody td.name { font-weight:600; }
+  tr.rollup td { font-weight:700; background:var(--inkDeep); border-top:1px solid var(--hair2); }
+  .cellgood { color:var(--goodText); } .cellwarn { color:var(--warnText); } .cellalert { color:var(--alertText); }
+  .badge { font-size:9px; font-weight:700; letter-spacing:.5px; padding:1px 5px; border-radius:4px; margin-left:6px; vertical-align:middle; }
+  .badge.new { background:var(--accent); color:#fff; }
+  .badge.sla { background:var(--alert); color:#fff; }
+  .expander { cursor:pointer; }
+  .expander .caret { display:inline-block; width:12px; color:var(--boneFaint); transition:transform .12s; }
+  tr.open .caret { transform:rotate(90deg); }
+  .drill td { background:var(--inkDeep); padding:16px 18px; }
+
+  /* Coverage bars */
+  .cov { display:grid; grid-template-columns:120px 1fr 1fr; gap:14px 20px; align-items:center; }
+  .covrow { display:contents; }
+  .covname { font-size:12px; color:var(--boneDim); }
+  .bar2 { background:var(--inkDeep); border-radius:5px; height:14px; position:relative; overflow:hidden; }
+  .bar2 .f { height:100%; border-radius:5px; }
+  .bar2 .tgt { position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--bone); opacity:.7; }
+  .covlabel { font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
+
+  svg text { fill:var(--boneDim); font-family:var(--body); font-size:10px; }
+  .legend { display:flex; gap:16px; font-size:11px; color:var(--boneDim); margin-top:8px; flex-wrap:wrap; }
+  .legend i { display:inline-block; width:12px; height:3px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+
+  .empty { padding:40px; text-align:center; color:var(--boneDim); background:var(--inkDeep); border-radius:var(--r); }
+  footer { margin-top:26px; padding-top:16px; border-top:1px solid var(--hair); font-size:11px; color:var(--boneFaint); line-height:1.6; }
+
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--inkDeep); border:1px solid var(--hair2); color:var(--bone); padding:10px 16px; border-radius:8px; font-size:12px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:50; }
+  .toast.on { opacity:1; }
+
+  @media print {
+    body { background:#fff; color:#000; padding:0; }
+    .controls, nav.tabs, .mast-right, .dq-strip { display:none !important; }
+    .tab { display:none !important; }
+    #tab-setters { display:block !important; }
+    .card { border:1px solid #ccc; }
+    .wrap { min-width:0; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">
+      <img id="logo" alt="" hidden />
+      <span class="wordmark" id="wordmark">OBB</span>
+    </div>
+    <span class="board-title" id="boardTitle">Setter Floor Dashboard</span>
+    <div class="mast-right">
+      <span class="chip sample" id="sampleTag" hidden>SAMPLE DATA</span>
+      <span class="chip" id="freshBadge">fresh</span>
+      <span class="stamp" id="stamp"></span>
+    </div>
+  </header>
+
+  <div id="loadError" class="empty" hidden></div>
+
+  <div id="app" hidden>
+    <div class="controls">
+      <div><span class="ctl-label">Period</span><span class="segset" id="periods"></span></div>
+      <div><span class="ctl-label">Client</span><span class="segset" id="clientToggle"></span></div>
+    </div>
+
+    <div class="dq-strip" id="dqStrip"></div>
+
+    <nav class="tabs" id="tabs"></nav>
+
+    <!-- FLOOR -->
+    <section class="tab" id="tab-floor">
+      <div class="tiles" id="tiles"></div>
+      <div class="grid cols2" style="margin-bottom:20px;">
+        <div class="card">
+          <h2>What to do next</h2>
+          <div class="sub">Ranked by leads at risk, written as instructions to the floor lead.</div>
+          <div id="insights"></div>
+        </div>
+        <div class="card">
+          <h2>Priority queue</h2>
+          <div class="sub">Depth per lane. P1 is engaged in the last 24 hours.</div>
+          <div id="lanes"></div>
+        </div>
+      </div>
+      <div class="grid cols2b">
+        <div class="card">
+          <h2>Funnel</h2>
+          <div class="sub" id="funnelSub">Cumulative by event date, not current stage.</div>
+          <div class="funnel" id="funnel"></div>
+        </div>
+        <div class="card">
+          <h2>Trend</h2>
+          <div class="sub">Leads, worked and booked, with median speed to lead on the right axis.</div>
+          <div id="trend"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTERS -->
+    <section class="tab" id="tab-setters">
+      <div class="card" style="margin-bottom:20px;">
+        <h2>Setters</h2>
+        <div class="sub">Sortable on every column. Attempts and dials are separate on purpose: the ratio is the attempt definition working. Default sort: book rate.</div>
+        <div id="settersTableWrap"></div>
+      </div>
+      <div class="card">
+        <h2>Coverage</h2>
+        <div class="sub">Day-one coverage and form compliance per setter, against target. These two predict the rest of the table.</div>
+        <div class="cov" id="coverage"></div>
+      </div>
+    </section>
+
+    <!-- CLIENTS -->
+    <section class="tab" id="tab-clients">
+      <div class="card">
+        <h2>Clients</h2>
+        <div class="sub">One row per home-care agency, plus the roll-up. Expand a row for its funnel and the median lag between stages.</div>
+        <div id="clientsTableWrap"></div>
+      </div>
+    </section>
+
+    <footer id="footer"></footer>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ *
+ * Load config + data. Everything downstream is driven by these.
+ * ------------------------------------------------------------------ */
+const CFG = { brand:null, dash:null };
+let DATA = null;
+let STATE = { tab:null, period:null, client:"__all__", sort:{ key:"bookRate", dir:-1 } };
+
+async function getJSON(paths) {
+  // Try each path in order, return first that loads.
+  for (const p of paths) {
+    try {
+      const r = await fetch(p, { cache:"no-store" });
+      if (r.ok) return await r.json();
+    } catch (e) { /* try next */ }
+  }
+  throw new Error("could not load any of: " + paths.join(", "));
+}
+
+async function boot() {
+  try {
+    CFG.brand = await getJSON(["config/brand.json"]);
+    CFG.dash  = await getJSON(["config/dashboard-config.json"]);
+    DATA      = await getJSON(["data/dashboard-data.json", "data/dashboard-data.sample.json"]);
+  } catch (e) {
+    const el = document.getElementById("loadError");
+    el.hidden = false;
+    el.innerHTML = "Could not load config or data. If you opened this file directly, serve it over http instead "
+      + "(see RUNBOOK.md), because browsers block fetch() on file:// URLs.<br><span class='mono faint'>"
+      + String(e.message) + "</span>";
+    return;
+  }
+  applyBrand(CFG.brand);
+  STATE.period = DATA.period || CFG.dash.defaultPeriod;
+  STATE.tab = CFG.dash.defaultTab || CFG.dash.tabs[0];
+  const ds = defaultSort();
+  if (ds) STATE.sort = ds;
+  render();
+  document.getElementById("app").hidden = false;
+}
+
+/* Brand tokens -> CSS variables + fonts. This is the whole theming layer. */
+function applyBrand(b) {
+  const root = document.documentElement.style;
+  for (const [k, v] of Object.entries(b.tokens || {})) root.setProperty("--" + k, v);
+  if (b.fonts) {
+    if (b.fonts.googleImport) {
+      const l = document.createElement("link"); l.rel = "stylesheet"; l.href = b.fonts.googleImport;
+      document.head.appendChild(l);
+    }
+    if (b.fonts.head) root.setProperty("--head", "'" + b.fonts.head + "',Georgia,serif");
+    if (b.fonts.body) root.setProperty("--body", "'" + b.fonts.body + "',system-ui,sans-serif");
+    if (b.fonts.mono) root.setProperty("--mono", "'" + b.fonts.mono + "',monospace");
+  }
+  document.getElementById("wordmark").textContent = b.wordmark || "";
+  document.getElementById("boardTitle").textContent = b.boardTitle || "";
+  document.title = (b.wordmark ? b.wordmark + " " : "") + (b.boardTitle || "Dashboard");
+  if (b.logoPath) {
+    const img = document.getElementById("logo");
+    img.onload = () => { img.hidden = false; document.getElementById("wordmark").style.display = "none"; };
+    img.onerror = () => { img.hidden = true; }; // keep wordmark fallback
+    img.src = b.logoPath;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Formatting helpers. null never renders as 0.
+ * ------------------------------------------------------------------ */
+const isNil = v => v === null || v === undefined || (typeof v === "number" && isNaN(v));
+function dash(why) { return '<span class="dash" title="' + (why || "Not available in this window") + '">-</span>'; }
+function fmtCount(n) { return isNil(n) ? dash() : Number(n).toLocaleString("en-US"); }
+function fmtPct(x)   { return isNil(x) ? dash() : (x * 100).toFixed(1) + "%"; }
+function fmtMin(x)   { return isNil(x) ? dash() : Number(x).toFixed(1); }
+function fmtMoney(x) { return isNil(x) ? dash() : "$" + Number(x).toLocaleString("en-US", { maximumFractionDigits:0 }); }
+function fmtByFormat(v, f) {
+  if (f === "pct") return fmtPct(v);
+  if (f === "min") return fmtMin(v);
+  if (f === "money") return fmtMoney(v);
+  return fmtCount(v);
+}
+
+/* Goal-band classification. Returns 'good' | 'warn' | 'alert' | null.
+   Cells and tiles use the *Text tints for these (see brand _contrastRule). */
+function bandTarget(value, target, invert) {
+  if (isNil(value) || isNil(target)) return null;
+  if (!invert) {
+    if (value >= target) return "good";
+    if (value >= target * 0.9) return "warn";
+    return "alert";
+  } else {
+    if (value <= target) return "good";
+    if (value <= target * 1.1) return "warn";
+    return "alert";
+  }
+}
+function bandSpeed(value) {
+  const b = (CFG.dash.goals && CFG.dash.goals.speedToLeadBandsMin) || [5, 15, 30];
+  if (isNil(value)) return null;
+  if (value < b[0]) return "good";
+  if (value < b[2]) return "warn";
+  return "alert";
+}
+const goals = () => CFG.dash.goals || {};
+function resolveTarget(t) { // column/tile "target" is a key into goals
+  if (isNil(t)) return null;
+  return typeof t === "string" ? goals()[t] : t;
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2200);
+}
+
+/* ------------------------------------------------------------------ *
+ * Render orchestrator
+ * ------------------------------------------------------------------ */
+function render() {
+  renderChrome();
+  renderControls();
+  renderDataQuality();
+  renderTabs();
+  renderFloor();
+  renderSetters();
+  renderClients();
+  renderFooter();
+  showTab(STATE.tab);
+}
+
+function renderChrome() {
+  document.getElementById("sampleTag").hidden = !DATA.sample;
+  const fm = DATA.freshnessMin;
+  const fb = document.getElementById("freshBadge");
+  let cls = "good", txt;
+  if (isNil(fm)) { cls = "neutral"; txt = "freshness unknown"; }
+  else { txt = fm + " min old"; cls = fm > 180 ? "alert" : fm > 60 ? "warn" : "good"; }
+  fb.className = "chip " + cls; fb.textContent = txt;
+  const gen = DATA.generatedAt ? new Date(DATA.generatedAt).toLocaleString("en-US", { dateStyle:"medium", timeStyle:"short" }) : "";
+  document.getElementById("stamp").innerHTML =
+    (DATA.dateRange ? esc(DATA.dateRange) + "<br>" : "") + (gen ? "updated " + esc(gen) : "");
+}
+
+function renderControls() {
+  // Period chips. Only the window in the data file is real; others prompt for live data.
+  const per = document.getElementById("periods");
+  per.innerHTML = "";
+  (CFG.dash.periods || []).forEach(p => {
+    const b = document.createElement("button");
+    b.textContent = p;
+    b.className = (p === STATE.period) ? "on" : "";
+    b.title = (p === STATE.period) ? "Current window" : "Period switching activates with live data (prompt 03)";
+    b.onclick = () => {
+      if (p === STATE.period) return;
+      toast("This build renders the " + STATE.period + " window from the data file. Connect live data to switch periods.");
+    };
+    per.appendChild(b);
+  });
+
+  // Client toggle from the clients present in the data, plus All Clients.
+  const ct = document.getElementById("clientToggle");
+  ct.innerHTML = "";
+  const mk = (key, label) => {
+    const b = document.createElement("button");
+    b.textContent = label; b.className = (STATE.client === key) ? "on" : "";
+    b.onclick = () => { STATE.client = key; render(); };
+    return b;
+  };
+  if (CFG.dash.showAllClientsRollup !== false) ct.appendChild(mk("__all__", "All Clients"));
+  (DATA.clients || []).filter(c => c.active !== false).forEach(c => ct.appendChild(mk(c.key, c.label)));
+}
+
+function renderDataQuality() {
+  const strip = document.getElementById("dqStrip");
+  const dq = DATA.dataQuality || [];
+  strip.innerHTML = "";
+  dq.forEach(f => {
+    const div = document.createElement("div");
+    div.className = "dq" + (f.severity === "warn" ? " warn" : "");
+    div.innerHTML =
+      '<span class="chip ' + (f.severity === "warn" ? "warn" : "alert") + '">' + esc(f.severity || "alert") + '</span>' +
+      '<div class="dq-body">' +
+        '<div class="dq-code">' + esc(f.code || "") + '</div>' +
+        '<div class="dq-msg">' + esc(f.message || "") + '</div>' +
+        (f.affects && f.affects.length ? '<div class="affects">Affects: ' + f.affects.map(esc).join(", ") + '</div>' : "") +
+      '</div>';
+    strip.appendChild(div);
+  });
+}
+
+function renderTabs() {
+  const nav = document.getElementById("tabs");
+  nav.innerHTML = "";
+  const labels = { floor:"Floor", setters:"Setters", clients:"Clients" };
+  (CFG.dash.tabs || []).forEach(t => {
+    const b = document.createElement("button");
+    b.textContent = labels[t] || t;
+    b.className = (t === STATE.tab) ? "on" : "";
+    b.onclick = () => { STATE.tab = t; showTab(t); [...nav.children].forEach(c => c.classList.toggle("on", c === b)); };
+    nav.appendChild(b);
+  });
+}
+function showTab(t) {
+  document.querySelectorAll(".tab").forEach(s => s.classList.toggle("on", s.id === "tab-" + t));
+}
+
+/* ---------------------------- FLOOR ---------------------------- */
+function renderFloor() {
+  renderTiles();
+  renderInsights();
+  renderLanes();
+  renderFunnel();
+  renderTrend();
+}
+
+function renderTiles() {
+  const host = document.getElementById("tiles");
+  host.innerHTML = "";
+  const f = DATA.floor || {};
+  (CFG.dash.floorTiles || []).forEach(t => {
+    const raw = tileValue(t, f);
+    let band = null;
+    if (t.bands === "speedToLeadBandsMin") band = bandSpeed(raw);
+    else if (t.target) band = bandTarget(raw, resolveTarget(t.target), t.invert);
+    const val = fmtByFormat(raw, t.format);
+    const sub = tileSub(t, f);
+    const el = document.createElement("div");
+    el.className = "tile" + (t.hero ? " hero" : "");
+    el.innerHTML =
+      (band ? '<span class="band ' + band + '"></span>' : "") +
+      '<div class="tlabel">' + esc(t.label) + '</div>' +
+      '<div class="tval ' + (band ? "val " + band : "") + '">' + val + '</div>' +
+      (sub ? '<div class="tsub">' + sub + '</div>' : "");
+    host.appendChild(el);
+  });
+}
+function tileValue(t, f) {
+  // A few tiles read a nested field rather than a top-level floor key.
+  if (t.key === "p1QueueDepth") return (f.queue || {}).p1;
+  return f[t.key];
+}
+function tileSub(t, f) {
+  if (t.key === "p1QueueDepth") { const q = f.queue || {}; return isNil(q.p2) ? null : fmtCount(q.p2) + " in P2"; }
+  if (t.key === "unworkedNow" && !isNil(f.unworkedPastSla)) return f.unworkedPastSla + " past SLA";
+  if (t.key === "leadsToday" && !isNil(f.leadsInRange)) return fmtCount(f.leadsInRange) + " in range";
+  if (t.key === "speedToLeadMedianMin") return "median, SLA " + (goals().speedToLeadSlaMin || 30) + " min";
+  if (t.key === "dayOneCoverage" && !isNil(resolveTarget(t.target))) return "target " + fmtPct(resolveTarget(t.target));
+  if (t.key === "formCompliance" && !isNil(resolveTarget(t.target))) return "target " + fmtPct(resolveTarget(t.target));
+  if (t.key === "p1QueueDepth" || t.key === "p1QueueDepth") return null;
+  return null;
+}
+
+function renderInsights() {
+  const host = document.getElementById("insights");
+  const ins = (DATA.insights || []).slice().sort((a, b) => (a.rank || 99) - (b.rank || 99));
+  if (!ins.length) { host.innerHTML = '<div class="muted">No insights fired. The floor is inside every goal band.</div>'; return; }
+  host.innerHTML = "";
+  ins.forEach(i => {
+    const div = document.createElement("div");
+    div.className = "insight";
+    div.innerHTML =
+      '<div class="rank">' + (i.rank != null ? i.rank : "") + '</div>' +
+      '<div style="flex:1">' +
+        '<span class="chip ' + sev(i.severity) + '" style="margin-right:8px">' + esc(i.severity || "") + '</span>' +
+        '<span class="ihead">' + esc(i.headline || "") + '</span>' +
+        (i.detail ? '<div class="idetail">' + esc(i.detail) + '</div>' : "") +
+        (i.leadsAtRisk != null ? '<div class="atrisk">' + fmtCount(i.leadsAtRisk) + ' leads at risk</div>' : "") +
+      '</div>';
+    host.appendChild(div);
+  });
+}
+const sev = s => (s === "good" ? "good" : s === "warn" ? "warn" : "alert");
+
+function renderLanes() {
+  const host = document.getElementById("lanes");
+  const q = (DATA.floor && DATA.floor.queue) || {};
+  const lanes = CFG.dash.priorityLanes || [];
+  const max = Math.max(1, ...lanes.map(l => q[l.key] || 0));
+  host.innerHTML = "";
+  lanes.forEach(l => {
+    const n = q[l.key] || 0;
+    const div = document.createElement("div");
+    div.className = "lane";
+    div.innerHTML =
+      '<div class="lname">' + esc(l.label) + '</div>' +
+      '<div class="track"><div class="fill ' + esc(l.tone || "neutral") + '" style="width:' + (n / max * 100) + '%"></div></div>' +
+      '<div class="lcount">' + fmtCount(n) + '</div>';
+    div.onclick = () => { div.classList.toggle("sel"); toast("Lane filtering by contact activates with live data."); };
+    host.appendChild(div);
+  });
+}
+
+/* Funnel derives from client rows so the client toggle drives it. */
+function currentFunnelSource() {
+  const stages = CFG.dash.funnelStages || [];
+  const clients = DATA.clients || [];
+  const pick = STATE.client === "__all__" ? clients : clients.filter(c => c.key === STATE.client);
+  const acc = {};
+  stages.forEach(s => acc[s.key] = 0);
+  let any = false;
+  pick.forEach(c => stages.forEach(s => { if (!isNil(c[s.key])) { acc[s.key] += c[s.key]; any = true; } }));
+  return any ? acc : null;
+}
+function renderFunnel() {
+  const host = document.getElementById("funnel");
+  const stages = CFG.dash.funnelStages || [];
+  const src = currentFunnelSource();
+  document.getElementById("funnelSub").textContent =
+    (STATE.client === "__all__" ? "All clients. " : "") + "Cumulative by event date, not current stage.";
+  if (!src) { host.innerHTML = '<div class="muted">No client stage data in this window.</div>'; return; }
+  const max = Math.max(1, ...stages.map(s => src[s.key] || 0));
+  host.innerHTML = "";
+  stages.forEach((s, i) => {
+    const v = src[s.key] || 0;
+    const h = 30 + (v / max) * 150;
+    let conv = "";
+    if (i > 0) {
+      const prev = src[stages[i - 1].key] || 0;
+      conv = prev > 0 ? Math.round(v / prev * 100) + "%" : "";
+    }
+    const el = document.createElement("div");
+    el.className = "fstage";
+    el.innerHTML =
+      (conv ? '<div class="conv">' + conv + '</div>' : "") +
+      '<div class="bar" style="height:' + h + 'px"><span class="fcount">' + fmtCount(v) + '</span></div>' +
+      '<div class="flabel">' + esc(s.label) + '</div>';
+    host.appendChild(el);
+  });
+}
+
+/* Inline SVG trend: three count lines (left axis) + speed line (right axis). */
+function renderTrend() {
+  const host = document.getElementById("trend");
+  const ts = DATA.timeseries;
+  if (!ts || !ts.days || !ts.days.length) { host.innerHTML = '<div class="muted">No trend data in this window.</div>'; return; }
+  const W = 560, H = 240, padL = 34, padR = 40, padT = 14, padB = 26;
+  const days = ts.days;
+  const n = days.length;
+  const countMax = Math.max(1, ...["leads", "worked", "booked"].flatMap(k => (ts[k] || []).filter(v => !isNil(v))));
+  const speedArr = (ts.speedToLeadMedianMin || []).filter(v => !isNil(v));
+  const speedMax = Math.max(1, ...speedArr) * 1.2;
+  const x = i => padL + (n === 1 ? (W - padL - padR) / 2 : i * (W - padL - padR) / (n - 1));
+  const yL = v => padT + (1 - v / countMax) * (H - padT - padB);
+  const yR = v => padT + (1 - v / speedMax) * (H - padT - padB);
+  const line = (arr, sc, dashed) => {
+    const pts = arr.map((v, i) => isNil(v) ? null : x(i) + "," + yL(v)).filter(Boolean).join(" ");
+    return '<polyline points="' + pts + '" fill="none" stroke="' + sc + '" stroke-width="2"' + (dashed ? ' stroke-dasharray="4 3"' : "") + ' />';
+  };
+  const speedLine = () => {
+    const pts = (ts.speedToLeadMedianMin || []).map((v, i) => isNil(v) ? null : x(i) + "," + yR(v)).filter(Boolean).join(" ");
+    return '<polyline points="' + pts + '" fill="none" stroke="var(--boneDim)" stroke-width="1.5" stroke-dasharray="2 3" />';
+  };
+  let grid = "";
+  for (let g = 0; g <= 4; g++) {
+    const yy = padT + g * (H - padT - padB) / 4;
+    grid += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--hair)" />';
+    grid += '<text x="' + (padL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + Math.round(countMax * (1 - g / 4)) + '</text>';
+    grid += '<text x="' + (W - padR + 6) + '" y="' + (yy + 3) + '" text-anchor="start">' + Math.round(speedMax * (1 - g / 4)) + '</text>';
+  }
+  let xl = "";
+  days.forEach((d, i) => {
+    if (n > 8 && i % 2) return;
+    xl += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(shortDay(d)) + '</text>';
+  });
+  host.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' +
+      grid + xl +
+      line(ts.leads || [], "var(--accent)") +
+      line(ts.worked || [], "var(--accentText)") +
+      line(ts.booked || [], "var(--accent2)") +
+      speedLine() +
+    '</svg>' +
+    '<div class="legend">' +
+      '<span><i style="background:var(--accent)"></i>Leads in</span>' +
+      '<span><i style="background:var(--accentText)"></i>Worked</span>' +
+      '<span><i style="background:var(--accent2)"></i>Booked</span>' +
+      '<span><i style="background:var(--boneDim)"></i>Speed to lead (median min, right axis)</span>' +
+    '</div>';
+}
+function shortDay(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? iso : d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
+}
+
+/* ---------------------------- SETTERS ---------------------------- */
+function defaultSort() {
+  const cols = CFG.dash.setterColumns || [];
+  return cols.some(c => c.key === "bookRate") ? { key:"bookRate", dir:-1 } : null;
+}
+function renderSetters() {
+  const wrap = document.getElementById("settersTableWrap");
+  const cols = CFG.dash.setterColumns || [];
+  const rows = (DATA.setters || []).slice();
+  if (!rows.length) {
+    wrap.innerHTML = '<div class="empty">No setter rows in this window. The Intro Call Form has no submissions yet, '
+      + 'so per-rep numbers cannot be attributed. This is expected before the CRM build (prompt 02).</div>';
+    renderCoverage([]); return;
+  }
+  const { key, dir } = STATE.sort;
+  rows.sort((a, b) => {
+    const av = a[key], bv = b[key];
+    if (isNil(av) && isNil(bv)) return 0;
+    if (isNil(av)) return 1; if (isNil(bv)) return -1;
+    if (typeof av === "string") return dir * av.localeCompare(bv);
+    return dir * (av - bv);
+  });
+
+  let thead = "<tr>";
+  cols.forEach(c => {
+    const arrow = c.key === key ? (dir === 1 ? "arrow-asc" : "arrow-desc") : "";
+    thead += '<th class="' + arrow + '" data-k="' + esc(c.key) + '">' + esc(c.label) + '</th>';
+  });
+  thead += "</tr>";
+
+  let tbody = "";
+  rows.forEach(s => {
+    tbody += "<tr>";
+    cols.forEach((c, ci) => {
+      tbody += "<td" + (ci === 0 ? ' class="name"' : "") + ">" + setterCell(s, c) + "</td>";
+    });
+    tbody += "</tr>";
+  });
+
+  wrap.innerHTML = '<table><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>';
+  wrap.querySelectorAll("th").forEach(th => th.onclick = () => {
+    const k = th.getAttribute("data-k");
+    STATE.sort = { key:k, dir: (STATE.sort.key === k ? -STATE.sort.dir : (k === "name" ? 1 : -1)) };
+    renderSetters();
+  });
+  renderCoverage(rows);
+}
+function setterCell(s, c) {
+  const v = s[c.key];
+  if (c.key === "name") {
+    let b = "";
+    if (s.isNew) b += '<span class="badge new" title="Inside ramp, exempt from warnings">NEW</span>';
+    if (s.belowSla && !s.isNew) b += '<span class="badge sla" title="Median speed to lead over SLA">SLA</span>';
+    const spark = sparkline(s.byDay);
+    return esc(s.name) + b + (s.role ? ' <span class="faint" style="font-size:11px">' + esc(s.role) + '</span>' : "") + spark;
+  }
+  const tgt = resolveTarget(c.target);
+  let band = null;
+  if (c.key === "speedToLeadMedianMin") band = bandSpeed(v);
+  else if (!isNil(tgt)) band = bandTarget(v, tgt, c.invert);
+  const cls = band ? " class='cell" + band + "'" : "";
+  return "<span" + cls + ">" + fmtByFormat(v, c.format) + "</span>";
+}
+function sparkline(byDay) {
+  if (!byDay || !byDay.attempts || !byDay.attempts.length) return "";
+  const a = byDay.attempts, max = Math.max(1, ...a), min = Math.min(...a);
+  const w = 62, h = 16, n = a.length;
+  const x = i => (n === 1 ? w / 2 : i * w / (n - 1));
+  const y = v => h - 2 - ((v - min) / (max - min || 1)) * (h - 4);
+  const pts = a.map((v, i) => x(i).toFixed(1) + "," + y(v).toFixed(1)).join(" ");
+  return ' <svg width="' + w + '" height="' + h + '" style="vertical-align:middle;margin-left:8px" aria-hidden="true">'
+    + '<polyline points="' + pts + '" fill="none" stroke="var(--accentText)" stroke-width="1.5"/></svg>';
+}
+function renderCoverage(rows) {
+  const host = document.getElementById("coverage");
+  const dayTgt = goals().dayOneCoverageTarget, formTgt = goals().formSubmissionComplianceTarget;
+  if (!rows.length) { host.innerHTML = '<div class="muted">No setters to chart.</div>'; return; }
+  let html = '<div class="covrow"><div></div><div class="covlabel">Day-one coverage (target ' + fmtPct(dayTgt)
+    + ')</div><div class="covlabel">Form compliance (target ' + fmtPct(formTgt) + ')</div></div>';
+  rows.forEach(s => {
+    html += '<div class="covrow"><div class="covname">' + esc(s.name) + '</div>'
+      + covBar(s.dayOneCoverage, dayTgt) + covBar(s.formCompliance, formTgt) + '</div>';
+  });
+  host.innerHTML = html;
+}
+function covBar(v, tgt) {
+  if (isNil(v)) return '<div class="bar2">' + dash() + '</div>';
+  const band = bandTarget(v, tgt, false) || "warn";
+  const color = band === "good" ? "var(--good)" : band === "warn" ? "var(--warn)" : "var(--alert)";
+  return '<div class="bar2"><div class="f" style="width:' + Math.min(100, v * 100) + '%;background:' + color + '"></div>'
+    + (isNil(tgt) ? "" : '<div class="tgt" style="left:' + Math.min(100, tgt * 100) + '%"></div>')
+    + '</div>';
+}
+
+/* ---------------------------- CLIENTS ---------------------------- */
+function renderClients() {
+  const wrap = document.getElementById("clientsTableWrap");
+  const cols = CFG.dash.clientColumns || [];
+  let rows = (DATA.clients || []).slice().filter(c => c.active !== false);
+  if (STATE.client !== "__all__") rows = rows.filter(c => c.key === STATE.client);
+  if (!rows.length) { wrap.innerHTML = '<div class="empty">No client rows in this window.</div>'; return; }
+  rows.sort((a, b) => (b.leads || 0) - (a.leads || 0));
+
+  const showRollup = CFG.dash.showAllClientsRollup !== false && STATE.client === "__all__";
+  const rollup = showRollup ? buildRollup(rows) : null;
+
+  let thead = "<tr><th style='width:22px'></th>";
+  cols.forEach(c => { if (!(c.optional && rows.every(r => isNil(r[c.key])))) thead += "<th>" + esc(c.label) + "</th>"; });
+  thead += "</tr>";
+  const activeCols = cols.filter(c => !(c.optional && rows.every(r => isNil(r[c.key]))));
+
+  let tbody = "";
+  rows.forEach((r, idx) => {
+    tbody += '<tr class="expander" data-i="' + idx + '"><td><span class="caret">›</span></td>';
+    activeCols.forEach(c => tbody += "<td>" + clientCell(r, c) + "</td>");
+    tbody += "</tr>";
+    tbody += '<tr class="drill" id="drill-' + idx + '" hidden><td></td><td colspan="' + activeCols.length + '">' + clientDrill(r) + "</td></tr>";
+  });
+  if (rollup) {
+    tbody += '<tr class="rollup"><td></td>';
+    activeCols.forEach(c => tbody += "<td>" + clientCell(rollup, c, true) + "</td>");
+    tbody += "</tr>";
+  }
+
+  wrap.innerHTML = '<table><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>';
+  wrap.querySelectorAll("tr.expander").forEach(tr => tr.onclick = () => {
+    const i = tr.getAttribute("data-i");
+    const d = document.getElementById("drill-" + i);
+    d.hidden = !d.hidden; tr.classList.toggle("open", !d.hidden);
+  });
+}
+function clientCell(r, c, isRollup) {
+  if (c.key === "label") return (isRollup ? "All Clients" : esc(r.label));
+  if (c.key === "market") return isRollup ? '<span class="faint">rollup</span>' : esc(r.market || dash());
+  const tgt = resolveTarget(c.target);
+  const band = isNil(tgt) ? null : bandTarget(r[c.key], tgt, c.invert);
+  const cls = band ? " class='cell" + band + "'" : "";
+  return "<span" + cls + ">" + fmtByFormat(r[c.key], c.format) + "</span>";
+}
+function buildRollup(rows) {
+  const sum = k => rows.reduce((a, r) => a + (isNil(r[k]) ? 0 : r[k]), 0);
+  const leads = sum("leads"), worked = sum("worked"), contacted = sum("contacted"),
+        booked = sum("booked"), shows = sum("shows"), wons = sum("wons");
+  return {
+    label:"All Clients", market:null, leads, worked, contacted, booked, shows, wons,
+    workedPct: leads ? worked / leads : null,
+    connectRate: worked ? contacted / worked : null,
+    bookRate: contacted ? booked / contacted : null,
+    showRate: booked ? shows / booked : null
+  };
+}
+function clientDrill(r) {
+  const stages = CFG.dash.funnelStages || [];
+  const max = Math.max(1, ...stages.map(s => r[s.key] || 0));
+  let bars = '<div class="funnel" style="max-width:520px">';
+  stages.forEach((s, i) => {
+    const v = r[s.key] || 0, h = 24 + (v / max) * 90;
+    let conv = "";
+    if (i > 0) { const p = r[stages[i - 1].key] || 0; conv = p ? Math.round(v / p * 100) + "%" : ""; }
+    bars += '<div class="fstage">' + (conv ? '<div class="conv">' + conv + '</div>' : "")
+      + '<div class="bar" style="height:' + h + 'px"><span class="fcount">' + fmtCount(v) + '</span></div>'
+      + '<div class="flabel">' + esc(s.label) + '</div></div>';
+  });
+  bars += "</div>";
+  const lg = r.lags || {};
+  const lagRow = (label, v) => '<div><span class="faint" style="font-size:11px">' + label + '</span><br>'
+    + (isNil(v) ? dash() : '<span class="mono">' + Number(v).toFixed(1) + ' h</span>') + '</div>';
+  const lags = '<div style="display:flex;gap:26px;margin-top:14px;flex-wrap:wrap">'
+    + lagRow("Lead to first attempt", lg.leadToFirstAttempt)
+    + lagRow("Lead to connect", lg.leadToConnect)
+    + lagRow("Connect to booked", lg.connectToBooked)
+    + lagRow("Booked to held", lg.bookedToHeld)
+    + '</div>';
+  const speed = isNil(r.speedToLeadMedianMin) ? "" :
+    '<div style="margin-top:12px" class="muted">Median speed to lead: <span class="mono">' + fmtMin(r.speedToLeadMedianMin) + ' min</span></div>';
+  return '<div class="muted" style="margin-bottom:10px">Where ' + esc(r.label) + "'s leads stall, not just how many.</div>" + bars + lags + speed;
+}
+
+/* ---------------------------- FOOTER ---------------------------- */
+function renderFooter() {
+  const f = CFG.dash.footer || {};
+  const gen = DATA.generatedAt ? new Date(DATA.generatedAt).toLocaleString("en-US", { dateStyle:"medium", timeStyle:"short" }) : "";
+  document.getElementById("footer").innerHTML =
+    (f.dataSourceLine ? esc(f.dataSourceLine) + "<br>" : "") +
+    (f.disclaimer ? esc(f.disclaimer) + "<br>" : "") +
+    (gen ? "Generated " + esc(gen) + ". " : "") +
+    (CFG.brand.preparedBy ? "Prepared by " + esc(CFG.brand.preparedBy) + "." : "");
+}
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[m]));
+}
+
+boot();
+</script>
