@@ -184,10 +184,11 @@ def main():
     users = api_get(cfg, token, "/users/", {"locationId": location_id}).get("users", []) or []
     dump("users", users)
 
-    # 3) contacts, with their tags and custom field values
+    # 3) contacts, with their tags and custom field values. The GET /contacts/ endpoint does not
+    #    accept a server-side date filter (startAfterUpdatedAt is rejected 422), so page through the
+    #    location and let build_data.py filter by the event-date fields inside the window.
     contacts = paginate(cfg, token, "/contacts/", {
         "locationId": location_id,
-        "startAfterUpdatedAt": ms(since),
     }, "contacts")
     dump("contacts", contacts)
 
