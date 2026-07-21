@@ -6,7 +6,6 @@
   "source": "SAMPLE",
   "generatedAt": "2026-07-20T18:05:00Z",
   "freshnessMin": 12,
-
   "floor": {
     "leadsToday": 84,
     "leadsInRange": 512,
@@ -18,10 +17,17 @@
     "attemptsLogged": 2140,
     "dialsLogged": 3210,
     "attemptIntegrity": 1.5,
-    "queue": { "p1": 12, "p2": 48, "p3": 130, "p4": 322 },
-    "onFloorNow": 4
+    "queue": {
+      "p1": 12,
+      "p2": 48,
+      "p3": 130,
+      "p4": 322
+    },
+    "onFloorNow": 4,
+    "introsBookedToday": 6,
+    "introsBookedInRange": 41,
+    "talkTimeSec": 20880
   },
-
   "clients": [
     {
       "key": "acme-home-care",
@@ -39,7 +45,12 @@
       "bookRate": 0.39,
       "showRate": 0.68,
       "speedToLeadMedianMin": 6.1,
-      "lags": { "leadToFirstAttempt": 0.1, "leadToConnect": 4.2, "connectToBooked": 0.3, "bookedToHeld": 52.0 }
+      "lags": {
+        "leadToFirstAttempt": 0.1,
+        "leadToConnect": 4.2,
+        "connectToBooked": 0.3,
+        "bookedToHeld": 52.0
+      }
     },
     {
       "key": "bright-path-care",
@@ -55,9 +66,14 @@
       "workedPct": 0.84,
       "connectRate": 0.31,
       "bookRate": 0.34,
-      "showRate": 0.60,
+      "showRate": 0.6,
       "speedToLeadMedianMin": 11.8,
-      "lags": { "leadToFirstAttempt": 0.2, "leadToConnect": 7.9, "connectToBooked": 0.4, "bookedToHeld": 61.0 }
+      "lags": {
+        "leadToFirstAttempt": 0.2,
+        "leadToConnect": 7.9,
+        "connectToBooked": 0.4,
+        "bookedToHeld": 61.0
+      }
     },
     {
       "key": "riverside-home",
@@ -75,10 +91,14 @@
       "bookRate": 0.41,
       "showRate": 0.76,
       "speedToLeadMedianMin": 4.4,
-      "lags": { "leadToFirstAttempt": 0.1, "leadToConnect": 3.1, "connectToBooked": 0.2, "bookedToHeld": 47.0 }
+      "lags": {
+        "leadToFirstAttempt": 0.1,
+        "leadToConnect": 3.1,
+        "connectToBooked": 0.2,
+        "bookedToHeld": 47.0
+      }
     }
   ],
-
   "setters": [
     {
       "name": "Michelle",
@@ -100,7 +120,29 @@
       "dayOneCoverage": 0.93,
       "isNew": false,
       "belowSla": false,
-      "byDay": { "days": ["Mon","Tue","Wed","Thu","Fri"], "attempts": [104,118,96,122,100], "booked": [3,4,2,3,2] }
+      "byDay": {
+        "days": [
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri"
+        ],
+        "attempts": [
+          104,
+          118,
+          96,
+          122,
+          100
+        ],
+        "booked": [
+          3,
+          4,
+          2,
+          3,
+          2
+        ]
+      }
     },
     {
       "name": "Dana",
@@ -122,7 +164,29 @@
       "dayOneCoverage": 0.86,
       "isNew": false,
       "belowSla": false,
-      "byDay": { "days": ["Mon","Tue","Wed","Thu","Fri"], "attempts": [96,101,88,99,86], "booked": [2,3,2,2,2] }
+      "byDay": {
+        "days": [
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri"
+        ],
+        "attempts": [
+          96,
+          101,
+          88,
+          99,
+          86
+        ],
+        "booked": [
+          2,
+          3,
+          2,
+          2,
+          2
+        ]
+      }
     },
     {
       "name": "Marcus",
@@ -136,7 +200,7 @@
       "booked": 6,
       "bookRate": 0.27,
       "shows": 3,
-      "showRate": 0.50,
+      "showRate": 0.5,
       "wons": 1,
       "speedToLeadMedianMin": 38.5,
       "formsSubmitted": 39,
@@ -144,7 +208,29 @@
       "dayOneCoverage": 0.64,
       "isNew": false,
       "belowSla": true,
-      "byDay": { "days": ["Mon","Tue","Wed","Thu","Fri"], "attempts": [82,71,88,74,73], "booked": [1,2,1,1,1] }
+      "byDay": {
+        "days": [
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri"
+        ],
+        "attempts": [
+          82,
+          71,
+          88,
+          74,
+          73
+        ],
+        "booked": [
+          1,
+          2,
+          1,
+          1,
+          1
+        ]
+      }
     },
     {
       "name": "Priya",
@@ -166,18 +252,68 @@
       "dayOneCoverage": 0.79,
       "isNew": true,
       "belowSla": false,
-      "byDay": { "days": ["Mon","Tue","Wed","Thu","Fri"], "attempts": [30,38,42,44,42], "booked": [0,1,1,1,1] }
+      "byDay": {
+        "days": [
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri"
+        ],
+        "attempts": [
+          30,
+          38,
+          42,
+          44,
+          42
+        ],
+        "booked": [
+          0,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
     }
   ],
-
   "timeseries": {
-    "days": ["2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-18"],
-    "leads": [96, 104, 88, 121, 103],
-    "worked": [90, 99, 84, 110, 96],
-    "booked": [12, 15, 9, 17, 13],
-    "speedToLeadMedianMin": [6.2, 5.4, 9.1, 7.0, 8.3]
+    "days": [
+      "2026-07-14",
+      "2026-07-15",
+      "2026-07-16",
+      "2026-07-17",
+      "2026-07-18"
+    ],
+    "leads": [
+      96,
+      104,
+      88,
+      121,
+      103
+    ],
+    "worked": [
+      90,
+      99,
+      84,
+      110,
+      96
+    ],
+    "booked": [
+      12,
+      15,
+      9,
+      17,
+      13
+    ],
+    "speedToLeadMedianMin": [
+      6.2,
+      5.4,
+      9.1,
+      7.0,
+      8.3
+    ]
   },
-
   "insights": [
     {
       "rank": 1,
@@ -212,21 +348,25 @@
       "leadsAtRisk": 74
     }
   ],
-
   "dataQuality": [
     {
       "code": "ATTEMPT_INTEGRITY",
       "severity": "alert",
       "message": "Dials per attempt is 1.5, under the 1.6 floor. The attempt counter is likely incrementing per dial rather than once per completed bundle, which inflates every attempt count below. Fix the sales-attempt-bundle workflow before acting on per-setter attempt numbers.",
-      "affects": ["setters.attempts", "floor.attemptsLogged", "floor.attemptIntegrity"]
+      "affects": [
+        "setters.attempts",
+        "floor.attemptsLogged",
+        "floor.attemptIntegrity"
+      ]
     },
     {
       "code": "FORM_COMPLIANCE_LOW",
       "severity": "warn",
       "message": "Form compliance is 71 percent. Per-setter attribution depends on the Intro Call Form setter dropdown, so any setter under 80 percent is undercounted here.",
-      "affects": ["setters"]
+      "affects": [
+        "setters"
+      ]
     }
   ],
-
   "_sampleNote": "Placeholder data for first render. Deliberately includes a fired ATTEMPT_INTEGRITY flag, a below-SLA setter (Marcus), and a new setter (Priya) so the data-quality strip, the warning badge, and the NEW badge can all be verified before live data is connected."
 }

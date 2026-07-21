@@ -78,6 +78,15 @@
   .segset button.on { background:var(--accent); color:#fff; }
   .segset button:not(.on):hover { color:var(--bone); }
   .ctl-label { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--boneFaint); margin-right:2px; }
+  .client-select {
+    background:var(--inkDeep); color:var(--bone); border:1px solid var(--hair2); border-radius:999px;
+    padding:7px 34px 7px 15px; font-family:var(--body); font-size:12px; font-weight:600; cursor:pointer;
+    -webkit-appearance:none; appearance:none; min-width:210px;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4.5l4 4 4-4" stroke="%2393C0FF" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>');
+    background-repeat:no-repeat; background-position:right 13px center;
+  }
+  .client-select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,0.25); }
+  .client-select option { background:var(--ink2); color:var(--bone); }
 
   /* Data-quality strip: above everything, alert tone */
   .dq-strip { margin-bottom:18px; display:flex; flex-direction:column; gap:8px; }
@@ -109,7 +118,7 @@
   .grid { display:grid; gap:var(--gap); }
 
   /* Tiles */
-  .tiles { display:grid; grid-template-columns:repeat(6,1fr); gap:var(--gap); margin-bottom:20px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(184px,1fr)); gap:var(--gap); margin-bottom:20px; }
   .tile { background:var(--ink2); border:1px solid var(--hair); border-radius:var(--r); padding:14px 16px; position:relative; overflow:hidden;
     box-shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 30px -16px rgba(0,0,0,0.55); }
   .tile .tlabel { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
@@ -217,7 +226,7 @@
   <div id="app" hidden>
     <div class="controls">
       <div><span class="ctl-label">Period</span><span class="segset" id="periods"></span></div>
-      <div><span class="ctl-label">Client</span><span class="segset" id="clientToggle"></span></div>
+      <div><span class="ctl-label">Client</span><span id="clientToggle"></span></div>
     </div>
 
     <div class="dq-strip" id="dqStrip"></div>
@@ -334,8 +343,8 @@ function applyBrand(b) {
       const l = document.createElement("link"); l.rel = "stylesheet"; l.href = b.fonts.googleImport;
       document.head.appendChild(l);
     }
-    if (b.fonts.head) root.setProperty("--head", "'" + b.fonts.head + "',Georgia,serif");
-    if (b.fonts.body) root.setProperty("--body", "'" + b.fonts.body + "',system-ui,sans-serif");
+    if (b.fonts.head) root.setProperty("--head", "'" + b.fonts.head + "',system-ui,-apple-system,Segoe UI,Roboto,sans-serif");
+    if (b.fonts.body) root.setProperty("--body", "'" + b.fonts.body + "',system-ui,-apple-system,Segoe UI,Roboto,sans-serif");
     if (b.fonts.mono) root.setProperty("--mono", "'" + b.fonts.mono + "',monospace");
   }
   document.getElementById("wordmark").textContent = b.wordmark || "";
@@ -358,10 +367,19 @@ function fmtCount(n) { return isNil(n) ? dash() : Number(n).toLocaleString("en-U
 function fmtPct(x)   { return isNil(x) ? dash() : (x * 100).toFixed(1) + "%"; }
 function fmtMin(x)   { return isNil(x) ? dash() : Number(x).toFixed(1); }
 function fmtMoney(x) { return isNil(x) ? dash() : "$" + Number(x).toLocaleString("en-US", { maximumFractionDigits:0 }); }
+function fmtDuration(s) {
+  if (isNil(s)) return dash();
+  s = Math.round(Number(s));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  if (h) return h + "h " + m + "m";
+  if (m) return m + "m";
+  return s + "s";
+}
 function fmtByFormat(v, f) {
   if (f === "pct") return fmtPct(v);
   if (f === "min") return fmtMin(v);
   if (f === "money") return fmtMoney(v);
+  if (f === "duration") return fmtDuration(v);
   return fmtCount(v);
 }
 
@@ -442,17 +460,24 @@ function renderControls() {
     per.appendChild(b);
   });
 
-  // Client toggle from the clients present in the data, plus All Clients.
+  // Client selector: a dropdown (the roster can be dozens of agencies). All Clients plus one option
+  // per client present in the data, sorted by leads so the busiest agencies are near the top.
   const ct = document.getElementById("clientToggle");
   ct.innerHTML = "";
-  const mk = (key, label) => {
-    const b = document.createElement("button");
-    b.textContent = label; b.className = (STATE.client === key) ? "on" : "";
-    b.onclick = () => { STATE.client = key; render(); };
-    return b;
+  const sel = document.createElement("select");
+  sel.className = "client-select";
+  const opt = (key, label) => {
+    const o = document.createElement("option");
+    o.value = key; o.textContent = label;
+    if (STATE.client === key) o.selected = true;
+    return o;
   };
-  if (CFG.dash.showAllClientsRollup !== false) ct.appendChild(mk("__all__", "All Clients"));
-  (DATA.clients || []).filter(c => c.active !== false).forEach(c => ct.appendChild(mk(c.key, c.label)));
+  if (CFG.dash.showAllClientsRollup !== false) sel.appendChild(opt("__all__", "All Clients"));
+  (DATA.clients || []).filter(c => c.active !== false)
+    .slice().sort((a, b) => (b.leads || 0) - (a.leads || 0))
+    .forEach(c => sel.appendChild(opt(c.key, c.label)));
+  sel.onchange = () => { STATE.client = sel.value; render(); };
+  ct.appendChild(sel);
 }
 
 function renderDataQuality() {
@@ -528,7 +553,9 @@ function tileSub(t, f) {
   if (t.key === "p1QueueDepth") { const q = f.queue || {}; return isNil(q.p2) ? null : fmtCount(q.p2) + " in P2"; }
   if (t.key === "unworkedNow" && !isNil(f.unworkedPastSla)) return f.unworkedPastSla + " past SLA";
   if (t.key === "leadsToday" && !isNil(f.leadsInRange)) return fmtCount(f.leadsInRange) + " in range";
-  if (t.key === "speedToLeadMedianMin") return "median, SLA " + (goals().speedToLeadSlaMin || 30) + " min";
+  if (t.key === "speedToLeadMedianMin") return "median, target " + (goals().speedToLeadTargetMin || 5) + " min";
+  if (t.key === "introsBookedToday") { const n = f.introsBookedInRange; return isNil(n) ? null : fmtCount(n) + " in range"; }
+  if (t.key === "talkTimeSec") return "last call per lead, approx";
   if (t.key === "dayOneCoverage" && !isNil(resolveTarget(t.target))) return "target " + fmtPct(resolveTarget(t.target));
   if (t.key === "formCompliance" && !isNil(resolveTarget(t.target))) return "target " + fmtPct(resolveTarget(t.target));
   if (t.key === "p1QueueDepth" || t.key === "p1QueueDepth") return null;

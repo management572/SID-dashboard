@@ -264,6 +264,7 @@ def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val):
                     if field_value(c, "contact.partner_acronym") else None),
         "leadDate": lead_d, "firstAttempt": first_a, "connect": connect_d, "bookedDate": booked_d,
         "booked": booked, "held": held, "attempts": attempts, "assignedTo": assigned_to,
+        "lastCallSec": to_int(field_value(c, "contact.sid_last_call_duration_sec")),
         "tags": [t.lower() for t in c.get("tags", [])],
     }
 
@@ -325,15 +326,28 @@ def build_floor(facts, since, until, goals, lane_map):
     # form compliance is forms / connected calls; forms are counted in build_setters, so compute the
     # denominator (connects) here and let insights/floor read the ratio set below.
     connects = sum(1 for f in facts if in_window(f["connect"], since, until))
+
+    # Intros booked: a booking whose booked date lands today (and in the window, for the sub-count).
+    intros_today = sum(1 for f in facts if f["booked"] and f["bookedDate"] and f["bookedDate"].date() == today)
+    intros_range = sum(1 for f in facts if f["booked"] and in_window(f["bookedDate"], since, until))
+
+    # Talk time (approximate): SID stores only the last call duration per contact, not a running
+    # total, so this sums the last-call seconds across contacts with activity in the window. It is a
+    # floor of true talk time; a real total needs the call-log/dialer feed.
+    talk_sec = sum(f["lastCallSec"] or 0 for f in facts
+                   if in_window(f["firstAttempt"], since, until) or in_window(f["connect"], since, until))
+
     return {
         "leadsToday": leads_today, "leadsInRange": leads_in_range,
+        "introsBookedToday": intros_today, "introsBookedInRange": intros_range,
         "unworkedNow": unworked, "unworkedPastSla": unworked_sla,
         "speedToLeadMedianMin": median_or_none(stl),
         "dayOneCoverage": ratio(day_one_hits, day_one_elig),
-        "formCompliance": None,           # set by attach_form_compliance once forms are counted
+        "formCompliance": None,           # set from setters/connects in build_from_raw
         "attemptsLogged": attempts_total or None,
         "dialsLogged": None,              # no dialer API
         "attemptIntegrity": None,         # dials/attempt not computable without dials
+        "talkTimeSec": talk_sec or None,
         "queue": queue,
         "connectsInRange": connects,
         "onFloorNow": None,
