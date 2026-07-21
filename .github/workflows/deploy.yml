@@ -70,6 +70,38 @@ jobs:
           if [ -d assets ]; then cp -r assets/. dist/assets/ 2>/dev/null || true; fi
           echo "Deploying these files:" && find dist -type f
 
+      - name: Fetch the onlinebizbuilders favicon
+        run: |
+          set +e
+          SITE="https://onlinebizbuilders.com"
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36"
+          html=$(curl -sL --max-time 25 -A "$UA" "$SITE/")
+          # Prefer a PNG site-icon if the page declares one, else any declared icon, else /favicon.ico.
+          icon=$(printf '%s' "$html" | tr '\n' ' ' \
+            | grep -oiE '<link[^>]+rel="[^"]*icon[^"]*"[^>]*>' \
+            | grep -oiE 'href="[^"]+"' | sed -E 's/.*href="([^"]+)".*/\1/I' | head -1)
+          case "$icon" in
+            "" ) url="$SITE/favicon.ico" ;;
+            http*) url="$icon" ;;
+            //*) url="https:$icon" ;;
+            /*) url="$SITE$icon" ;;
+            *) url="$SITE/$icon" ;;
+          esac
+          echo "favicon source: $url"
+          curl -sL --max-time 25 -A "$UA" "$url" -o dist/site-favicon
+          sz=$(wc -c < dist/site-favicon 2>/dev/null || echo 0)
+          echo "downloaded $sz bytes"
+          if [ "$sz" -lt 70 ] || head -c 40 dist/site-favicon | grep -qi "<html\|<!doctype"; then
+            echo "::warning::favicon fetch looked invalid, keeping the default"; rm -f dist/site-favicon
+          else
+            # Serve it as both favicon.ico and favicon.png so either <link> resolves.
+            cp dist/site-favicon dist/favicon.ico
+            cp dist/site-favicon dist/favicon.png
+            rm -f dist/site-favicon
+            echo "favicon.ico / favicon.png written"
+          fi
+          find dist -maxdepth 1 -name 'favicon*' -exec ls -la {} \;
+
       - name: Create Pages project (idempotent)
         uses: cloudflare/wrangler-action@v3
         continue-on-error: true
