@@ -120,19 +120,21 @@ def paginate(cfg, token, path, params, items_key):
         items = data.get(items_key) or data.get("items") or []
         out.extend(items)
         meta = data.get("meta") or {}
-        next_url = meta.get("nextPageUrl") or meta.get("nextPage")
         start_after = meta.get("startAfter")
         start_after_id = meta.get("startAfterId")
-        if start_after and start_after_id:
-            params["startAfter"] = start_after
-            params["startAfterId"] = start_after_id
-        elif next_url:
-            # Some endpoints return an absolute nextPageUrl; extract its query.
+        next_url = meta.get("nextPageUrl")
+        if start_after is not None and start_after_id:
+            # GHL v2 cursor pagination. Coerce to str: startAfter is an int timestamp.
+            params["startAfter"] = str(start_after)
+            params["startAfterId"] = str(start_after_id)
+        elif isinstance(next_url, str) and next_url:
+            # Some endpoints return an absolute nextPageUrl instead; extract its query.
             q = urllib.parse.urlparse(next_url).query
             if not q:
                 break
             params = dict(urllib.parse.parse_qsl(q))
         else:
+            # No usable cursor (e.g. a numeric nextPage we cannot follow, or the last page). Stop.
             break
         if not items or page > 1000:
             break
