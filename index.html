@@ -27,6 +27,8 @@
     --r:10px; --gap:18px;
   }
   * { box-sizing:border-box; }
+  /* The [hidden] attribute must always win, even over class display rules like .chip. */
+  [hidden] { display:none !important; }
   html,body { margin:0; }
   body {
     background:var(--ink); color:var(--bone);
