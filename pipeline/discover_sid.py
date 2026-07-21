@@ -74,6 +74,10 @@ def api_get(cfg, token, path, params=None):
         "Authorization": "Bearer " + token,
         "Version": cfg.get("apiVersion", "2021-07-28"),
         "Accept": "application/json",
+        # LeadConnector sits behind Cloudflare, which blocks the default Python-urllib User-Agent
+        # (Error 1010). Send a normal browser-like UA so the request is not filtered as a bot.
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     }
     last = None
     for attempt in range(MAX_RETRIES):
