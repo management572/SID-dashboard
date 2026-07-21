@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
 """
-build_data.py: transform data/raw/*.json into data/dashboard-data.json, in exactly the shape in
-docs/data-schema.md. This is where every metric, rate, median, lag and flag is computed.
+build_data.py: transform data/raw/*.json into data/dashboard-data.json (schema in docs/data-schema.md).
 
-It honors every rule in the "Rules the pipeline must honor" section of the schema doc:
+This build is wired to SID's real Belt Engine model (see SID_System_Documentation.md), not the
+generic kit template:
 
-  1. Count by cumulative event-date custom fields inside the window, never current pipeline stage.
-  2. An attempt is a bundle (attemptCount custom field), never a raw dial. dials come separately.
-     dials/attempts under the integrity floor raises the ATTEMPT_INTEGRITY data-quality flag.
-  3. A downstream stage may never exceed its upstream stage. If it does, fall back to the stage tag
-     and raise a data-quality flag.
-  4. Deepest stage tag wins when classifying a contact. Terminal tags (dq, nurture) rank lowest.
-  5. Speed to lead is a median, not a mean.
-  6. The SLA clock does not run outside floor hours.
-  7. New setters (inside goals.rampDays of start_date) get a NEW badge and are exempt from warnings.
-  8. No PHI in the output. Aggregates and setter names only.
+  - Lead state comes from custom DATE fields and two SINGLE_OPTIONS outcome fields, NOT pipeline
+    stages. Fields are resolved by fieldKey.
+  - A contact belongs to a client via the partner_acronym custom FIELD, not a stage tag.
+  - Funnel: Lead In = entered_24h_at, Worked = first_dial_at, Contacted/Connect = assigned_at
+    (a connected call over 15s auto-claims the lead), Booked = schedule_call_date or
+    Intro Call Outcome == Booked, Held = Client Call Outcome == Complete. Won is downstream and
+    intentionally omitted.
+  - Queue lanes collapse the 8 belt tiers onto 4 board lanes per config.queueLaneMap.
+  - Dials are not available (no dialer API), so the dials column and dials/attempt integrity ratio
+    are null; instead a stuck sid-dial-1 toggle raises a data-quality flag.
+  - Setter attribution: funnel metrics key off assigned_to (the claim), forms key off the Intro Call
+    Form Submitted By. The two name systems do not match and attempts are not attributable before a
+    claim; both gaps are raised as data-quality flags rather than papered over.
 
-Anything that cannot be computed is written as null, never 0 (a 0 reads as a real measurement).
+Anything that cannot be computed is null, never 0.
 
 Usage:
-    python pipeline/build_data.py                    # reads data/raw, writes data/dashboard-data.json
-    python pipeline/build_data.py --sample           # rebuild from the sample instead (no raw needed)
-
-This script writes only aggregates. It never copies a contact-level record into the output file.
+    python pipeline/build_data.py            # reads data/raw, writes data/dashboard-data.json
+    python pipeline/build_data.py --sample   # rebuild from the committed sample (no raw needed)
 """
 
 import argparse
@@ -38,10 +39,8 @@ RAW_DIR = os.path.join(ROOT, "data", "raw")
 OUT_PATH = os.path.join(ROOT, "data", "dashboard-data.json")
 SAMPLE_PATH = os.path.join(ROOT, "data", "dashboard-data.sample.json")
 
-ATTEMPT_INTEGRITY_FLOOR = 1.6            # dials/attempts below this means the double-dial bug is back
-STAGE_ORDER = ["lead", "worked", "contacted", "booked", "show", "won"]
-TERMINAL_TAGS = ["dq", "nurture"]        # rank lowest, never override a real stage
-FLOOR_HOURS = (10, 22)                   # local floor open/close (EST 10:00-22:00), for the SLA clock (rule 6)
+FLOOR_HOURS = (10, 22)                    # EST 10:00-22:00, for the SLA clock (rule 6)
+DAY_SECONDS = 86400
 
 
 # ------------------------------------------------------------------ helpers
@@ -53,9 +52,8 @@ def load_json(path, default=None):
 
 
 def cfg_load():
-    ghl = load_json(os.path.join(CONFIG_DIR, "ghl-config.json"), {})
-    dash = load_json(os.path.join(CONFIG_DIR, "dashboard-config.json"), {})
-    return ghl, dash
+    return (load_json(os.path.join(CONFIG_DIR, "ghl-config.json"), {}),
+            load_json(os.path.join(CONFIG_DIR, "dashboard-config.json"), {}))
 
 
 def median_or_none(values):
@@ -64,18 +62,12 @@ def median_or_none(values):
 
 
 def ratio(numer, denom):
-    """Safe rate. Returns null when the denominator is zero, never 0.0 (rule: null, not zero)."""
-    if not denom:
-        return None
-    return round(numer / denom, 4)
-
-
-def pct(numer, denom):
-    return ratio(numer, denom)
+    """Rate, or null when the denominator is zero. Never 0.0 by accident."""
+    return round(numer / denom, 4) if denom else None
 
 
 def parse_ms(value):
-    if value is None:
+    if value in (None, "", 0):
         return None
     try:
         if isinstance(value, (int, float)):
@@ -86,8 +78,7 @@ def parse_ms(value):
 
 
 def field_value(contact, field_ref):
-    """Read a contact custom field by id OR fieldKey from the LeadConnector customFields array.
-    Config now stores GHL fieldKeys (e.g. contact.sid_attempt_count), so match either form."""
+    """Read a contact custom field by id OR fieldKey. Config stores GHL fieldKeys."""
     if not field_ref or str(field_ref).startswith("TODO"):
         return None
     for f in contact.get("customFields", []) or contact.get("customField", []) or []:
@@ -96,15 +87,25 @@ def field_value(contact, field_ref):
     return None
 
 
+def in_window(d, since, until):
+    return bool(d and since <= d <= until)
+
+
+def hours(a, b):
+    return round((b - a).total_seconds() / 3600, 1) if a and b and b >= a else None
+
+
+def first_name(name):
+    return (str(name).strip().split() or [""])[0].lower() if name else ""
+
+
 def sla_minutes(created, first_attempt):
-    """Minutes from lead creation to first attempt, with the clock paused outside floor hours (rule 6)."""
+    """Minutes from lead creation to first attempt, clock paused outside floor hours (rule 6)."""
     if not created or not first_attempt or first_attempt < created:
         return None
-    minutes = 0.0
-    cur = created
+    minutes, cur, guard = 0.0, created, 0
     step = dt.timedelta(minutes=1)
-    guard = 0
-    while cur < first_attempt and guard < 60 * 24 * 14:  # cap at two weeks of minutes
+    while cur < first_attempt and guard < 60 * 24 * 14:
         if FLOOR_HOURS[0] <= cur.hour < FLOOR_HOURS[1]:
             minutes += 1
         cur += step
@@ -112,114 +113,96 @@ def sla_minutes(created, first_attempt):
     return round(minutes, 1) if minutes else round((first_attempt - created).total_seconds() / 60, 1)
 
 
-# ------------------------------------------------------------------ classification (rules 1, 3, 4)
-def division_for(contact, divisions):
-    """Classify a contact to a client by its deepest stage tag. Deepest stage wins (rule 4)."""
+def now_utc():
+    return dt.datetime.now(dt.timezone.utc)
+
+
+# ------------------------------------------------------------------ classification (belt model)
+def acronym_of(contact, client_field):
+    v = field_value(contact, client_field)
+    return str(v).strip().lower() if v else None
+
+
+def outcome_of(contact, field_key):
+    v = field_value(contact, field_key)
+    return str(v).strip() if v else None
+
+
+def tier_lane(contact, lane_map):
+    """Map a contact's belt tier tag to a board queue lane via config.queueLaneMap."""
     tags = [t.lower().strip() for t in contact.get("tags", [])]
-    best = None
-    best_rank = -1
-    for div in divisions:
-        prefix = (div.get("tagPrefix") or div.get("key") or "").lower().strip()
-        if not prefix or prefix.startswith("todo"):
-            continue
-        for tag in tags:
-            if tag.startswith(prefix + " "):
-                stage = tag[len(prefix):].strip()
-                rank = stage_rank(stage)
-                if rank > best_rank:
-                    best_rank = rank
-                    best = (div, stage)
-    return best  # (division, stage) or None
+    for lane, tier_tags in lane_map.items():
+        for tt in tier_tags:
+            if tt.lower() in tags:
+                return lane
+    return None
 
 
-def stage_rank(stage):
-    if stage in TERMINAL_TAGS:
-        return 0  # terminal tags rank lowest, never override a real stage (rule 4)
-    return STAGE_ORDER.index(stage) + 1 if stage in STAGE_ORDER else -1
-
-
-def enforce_funnel(counts, flags, label):
-    """A downstream stage may never exceed its upstream stage (rule 3). If it does, flag it."""
-    order = ["leads", "worked", "contacted", "booked", "shows", "wons"]
-    for i in range(1, len(order)):
-        up, down = order[i - 1], order[i]
-        if counts.get(down, 0) > counts.get(up, 0):
-            flags.append({
-                "code": "FUNNEL_WIDENED",
-                "severity": "warn",
-                "message": ("%s funnel widened: %s (%d) exceeds %s (%d). Falling back to stage tags "
-                            "for this client. A funnel that widens is a data bug, never a result."
-                            % (label, down, counts[down], up, counts[up])),
-                "affects": ["clients"],
-            })
-            counts[down] = counts[up]
-    return counts
-
-
-# ------------------------------------------------------------------ build from raw
+# ------------------------------------------------------------------ build
 def build_from_raw(ghl, dash):
     meta = load_json(os.path.join(RAW_DIR, "_meta.json"), {})
-    contacts = load_json(os.path.join(RAW_DIR, "contacts.json"), []) or []
-    opportunities = load_json(os.path.join(RAW_DIR, "opportunities.json"), []) or []
-    users = load_json(os.path.join(RAW_DIR, "users.json"), []) or []
-    submissions = load_json(os.path.join(RAW_DIR, "form_submissions.json"), []) or []
-
     if not meta:
         die("No data/raw/_meta.json. Run pipeline/fetch_sid.py first.")
+    contacts = load_json(os.path.join(RAW_DIR, "contacts.json"), []) or []
+    submissions = load_json(os.path.join(RAW_DIR, "form_submissions.json"), []) or []
 
-    since = parse_ms(meta.get("since")) or (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=7))
-    until = parse_ms(meta.get("until")) or dt.datetime.now(dt.timezone.utc)
+    since = parse_ms(meta.get("since")) or (now_utc() - dt.timedelta(days=7))
+    until = parse_ms(meta.get("until")) or now_utc()
 
     efid = ghl.get("eventDateFieldIds", {})
     afid = ghl.get("attemptFieldIds", {})
-    divisions = ghl.get("divisions", [])
+    outc = ghl.get("outcomeFields", {})
+    client_field = ghl.get("clientField")
+    lane_map = ghl.get("queueLaneMap", {})
+    divisions = [d for d in ghl.get("divisions", []) if d.get("active", True)]
     goals = dash.get("goals", {})
-
     flags = []
 
-    # ---- per-client funnels, counted by event-date fields inside the window (rule 1) ----
+    intro_key = (outc.get("introCallOutcome") or {}).get("fieldKey")
+    intro_booked = (outc.get("introCallOutcome") or {}).get("booked", "Booked")
+    held_key = (outc.get("clientCallOutcome") or {}).get("fieldKey")
+    held_val = (outc.get("clientCallOutcome") or {}).get("held", "Complete")
+
+    # Index contacts by client acronym, computing per-contact belt facts once.
+    facts = [contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val) for c in contacts]
+
     clients = []
     for div in divisions:
-        if str(div.get("key", "")).startswith("TODO"):
-            continue
-        clients.append(build_client(div, contacts, efid, since, until, flags))
+        rows = [f for f in facts if f["acronym"] == div.get("acronym")]
+        client = build_client(div, rows, since, until)
+        if client["leads"] or client["worked"] or client["booked"]:   # active = has activity in window
+            clients.append(client)
 
-    # ---- per-setter table from form submissions + attempt fields ----
-    setters = build_setters(users, contacts, submissions, ghl, goals, since, until)
+    floor = build_floor(facts, since, until, goals, lane_map)
+    setters = build_setters(facts, submissions, ghl, goals, since, until)
 
-    # ---- floor aggregates ----
-    floor = build_floor(contacts, efid, afid, goals, since, until, flags)
-
-    # ---- attempt integrity check (rule 2) ----
-    if floor.get("attemptsLogged") and floor.get("dialsLogged") is not None:
-        integrity = ratio(floor["dialsLogged"], floor["attemptsLogged"])
-        floor["attemptIntegrity"] = integrity
-        if integrity is not None and integrity < ATTEMPT_INTEGRITY_FLOOR:
-            flags.insert(0, {
-                "code": "ATTEMPT_INTEGRITY",
-                "severity": "alert",
-                "message": ("Dials per attempt is %.1f, under the %.1f floor. The attempt counter is "
-                            "likely incrementing per dial rather than once per completed bundle, which "
-                            "inflates every attempt count. Fix the sales-attempt-bundle workflow before "
-                            "acting on per-setter attempt numbers." % (integrity, ATTEMPT_INTEGRITY_FLOOR)),
-                "affects": ["setters.attempts", "floor.attemptsLogged", "floor.attemptIntegrity"],
-            })
-    else:
-        floor["attemptIntegrity"] = None
-
-    # ---- form compliance flag ----
+    # ---- data-quality flags for the documented gaps ----
+    stuck = sum(1 for c in contacts if ghl.get("attemptToggleTag", "sid-dial-1").lower() in [t.lower() for t in c.get("tags", [])])
+    if stuck > max(10, 0.02 * (floor.get("leadsInRange") or 0)):
+        flags.insert(0, {
+            "code": "ATTEMPT_INTEGRITY",
+            "severity": "alert",
+            "message": ("%d contacts are stuck carrying the sid-dial-1 toggle tag, which means dial pairs "
+                        "are not completing and attempt counts are not incrementing correctly. Check WF-2 "
+                        "before trusting attempt numbers." % stuck),
+            "affects": ["setters.attempts", "floor.attemptsLogged"],
+        })
     if floor.get("formCompliance") is not None and floor["formCompliance"] < goals.get("formSubmissionComplianceTarget", 0.95):
         flags.append({
-            "code": "FORM_COMPLIANCE_LOW",
-            "severity": "warn",
-            "message": ("Form compliance is %d percent. Per-setter attribution depends on the Intro "
-                        "Call Form setter dropdown, so any setter under target is undercounted here."
-                        % round(floor["formCompliance"] * 100)),
+            "code": "FORM_COMPLIANCE_LOW", "severity": "warn",
+            "message": "Form compliance is %d percent of connected calls, under target. Per-setter "
+                       "attribution depends on the Intro Call Form, so low-compliance setters are undercounted."
+                       % round(floor["formCompliance"] * 100),
             "affects": ["setters"],
         })
-
-    timeseries = build_timeseries(contacts, efid, afid, since, until)
-    insights = build_insights(floor, clients, setters, goals)
+    flags.append({
+        "code": "SETTER_ATTRIBUTION", "severity": "warn",
+        "message": "Attempts are logged on contacts but SID does not record which setter dialed before a "
+                   "lead is claimed, so per-setter Attempts count only claimed leads. Also the Intro Call "
+                   "Form Submitted By names (Michelle, Sarah, Heart, May, Sophia) do not match the GHL user "
+                   "roster, so form-based and claim-based numbers may split across names until reconciled.",
+        "affects": ["setters.attempts", "setters.formCompliance"],
+    })
 
     return {
         "title": dash.get("title", "Setter Floor Dashboard"),
@@ -227,216 +210,193 @@ def build_from_raw(ghl, dash):
         "period": dash.get("defaultPeriod", "7d"),
         "sample": False,
         "source": ghl.get("crm", "SID"),
-        "generatedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+        "generatedAt": now_utc().replace(microsecond=0).isoformat(),
         "freshnessMin": freshness_min(meta),
         "floor": floor,
-        "clients": clients,
+        "clients": sorted(clients, key=lambda c: -(c.get("leads") or 0)),
         "setters": setters,
-        "timeseries": timeseries,
-        "insights": insights,
+        "timeseries": build_timeseries(facts, since, until),
+        "insights": build_insights(floor, clients, setters, goals),
         "dataQuality": flags,
     }
 
 
-def build_client(div, contacts, efid, since, until, flags):
-    counts = {"leads": 0, "worked": 0, "contacted": 0, "booked": 0, "shows": 0, "wons": 0}
-    stl = []
-    lags = {"leadToFirstAttempt": [], "leadToConnect": [], "connectToBooked": [], "bookedToHeld": []}
-    for c in contacts:
-        cls = division_for(c, [div])
-        if not cls:
-            continue
-        # count by event-date field inside the window (rule 1), cumulative
-        lead_d = parse_ms(field_value(c, efid.get("leadDate")))
-        first_a = parse_ms(field_value(c, efid.get("firstAttemptDate")))
-        connect_d = parse_ms(field_value(c, efid.get("firstConnectDate")))
-        booked_d = parse_ms(field_value(c, efid.get("bookedDate")))
-        show_d = parse_ms(field_value(c, efid.get("showDate")))
-        won_d = parse_ms(field_value(c, efid.get("wonDate")))
-
-        if in_window(lead_d, since, until):
-            counts["leads"] += 1
-        if in_window(first_a, since, until):
-            counts["worked"] += 1
-        if in_window(connect_d, since, until):
-            counts["contacted"] += 1
-        if in_window(booked_d, since, until):
-            counts["booked"] += 1
-        if in_window(show_d, since, until):
-            counts["shows"] += 1
-        if in_window(won_d, since, until):
-            counts["wons"] += 1
-
-        if lead_d and first_a:
-            stl.append(sla_minutes(lead_d, first_a))
-        if lead_d and first_a:
-            lags["leadToFirstAttempt"].append(hours(lead_d, first_a))
-        if lead_d and connect_d:
-            lags["leadToConnect"].append(hours(lead_d, connect_d))
-        if connect_d and booked_d:
-            lags["connectToBooked"].append(hours(connect_d, booked_d))
-        if booked_d and show_d:
-            lags["bookedToHeld"].append(hours(booked_d, show_d))
-
-    counts = enforce_funnel(counts, flags, div.get("label", div.get("key", "client")))
+def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val):
+    """Compute the belt facts for one contact once, so client/floor/setter builds share them."""
+    lead_d = parse_ms(field_value(c, efid.get("leadDate")))
+    first_a = parse_ms(field_value(c, efid.get("firstAttemptDate")))
+    connect_d = parse_ms(field_value(c, efid.get("firstConnectDate")))
+    booked_d = parse_ms(field_value(c, efid.get("bookedDate")))
+    intro_outcome = outcome_of(c, intro_key)
+    held_outcome = outcome_of(c, held_key)
+    booked = bool(booked_d) or (intro_outcome == intro_booked)
+    held = (held_outcome == held_val)
+    attempts = to_int(field_value(c, afid.get("attemptCount")))
+    assigned_to = field_value(c, afid.get("assignedSetter"))
     return {
-        "key": div.get("key"),
-        "label": div.get("label", div.get("key")),
-        "market": div.get("market"),
-        "active": div.get("active", True),
-        "leads": counts["leads"],
-        "worked": counts["worked"],
-        "contacted": counts["contacted"],
-        "booked": counts["booked"],
-        "shows": counts["shows"],
-        "wons": counts["wons"],
-        "workedPct": pct(counts["worked"], counts["leads"]),
-        "connectRate": pct(counts["contacted"], counts["worked"]),
-        "bookRate": pct(counts["booked"], counts["contacted"]),
-        "showRate": pct(counts["shows"], counts["booked"]),
-        "speedToLeadMedianMin": median_or_none(stl),
-        "lags": {k: median_or_none(v) for k, v in lags.items()},
+        "acronym": (str(field_value(c, "contact.partner_acronym")).strip().lower()
+                    if field_value(c, "contact.partner_acronym") else None),
+        "leadDate": lead_d, "firstAttempt": first_a, "connect": connect_d, "bookedDate": booked_d,
+        "booked": booked, "held": held, "attempts": attempts, "assignedTo": assigned_to,
+        "tags": [t.lower() for t in c.get("tags", [])],
     }
 
 
-def build_setters(users, contacts, submissions, ghl, goals, since, until):
-    icf = ghl.get("introCallForm", {})
-    setter_field = icf.get("setterFieldId")
-    afid = ghl.get("attemptFieldIds", {})
-    ramp_days = goals.get("rampDays", 30)
-    sla = goals.get("speedToLeadSlaMin", 30)
-    user_names = ghl.get("users", {})
-
-    # Bucket form submissions by setter (attribution source).
-    by_setter = {}
-    for s in submissions:
-        name = submission_field(s, setter_field)
-        if not name:
-            continue
-        by_setter.setdefault(name, {"forms": 0, "worked_contacts": set()})
-        by_setter[name]["forms"] += 1
-
-    setters = []
-    for u in users:
-        uid = u.get("id")
-        name = user_names.get(uid) or u.get("name") or (u.get("firstName", "") + " " + u.get("lastName", "")).strip()
-        if not name:
-            continue
-        rec = by_setter.get(name, {"forms": 0})
-        start = parse_ms(u.get("dateAdded") or u.get("createdAt"))
-        is_new = bool(start and (dt.datetime.now(dt.timezone.utc) - start).days < ramp_days)
-
-        # Attempts/dials for this setter come from their assigned contacts' custom fields.
-        assigned = [c for c in contacts if assigned_setter(c, afid) == name]
-        attempts = sum_field(assigned, afid.get("attemptCount"))
-        dials = None  # dials come from the dialer integration, null until wired (see .env.example)
-        stl = [sla_minutes(parse_ms(field_value(c, ghl.get("eventDateFieldIds", {}).get("leadDate"))),
-                           parse_ms(field_value(c, ghl.get("eventDateFieldIds", {}).get("firstAttemptDate"))))
-               for c in assigned]
-        stl = [x for x in stl if x is not None]
-        speed = median_or_none(stl)
-        below_sla = bool(speed is not None and speed > sla)
-
-        worked = len(assigned)
-        setters.append({
-            "name": name,
-            "sidUserId": uid,
-            "role": u.get("role") or None,
-            "assigned": len(assigned) or None,
-            "attempts": attempts,
-            "dials": dials,
-            "connects": None,
-            "connectRate": None,
-            "booked": None,
-            "bookRate": None,
-            "shows": None,
-            "showRate": None,
-            "wons": None,
-            "speedToLeadMedianMin": speed,
-            "formsSubmitted": rec.get("forms"),
-            "formCompliance": pct(rec.get("forms", 0), worked),
-            "dayOneCoverage": None,
-            "isNew": is_new,
-            "belowSla": below_sla and not is_new,
-            "byDay": None,
-        })
-    return setters
+def build_client(div, rows, since, until):
+    leads = sum(1 for f in rows if in_window(f["leadDate"], since, until))
+    worked = sum(1 for f in rows if in_window(f["firstAttempt"], since, until))
+    contacted = sum(1 for f in rows if in_window(f["connect"], since, until))
+    booked = sum(1 for f in rows if f["booked"] and (in_window(f["bookedDate"], since, until) or in_window(f["connect"], since, until)))
+    shows = sum(1 for f in rows if f["held"] and (in_window(f["bookedDate"], since, until) or in_window(f["connect"], since, until)))
+    # A downstream stage can never exceed its upstream (rule 3).
+    worked = min(worked, leads) if leads else worked
+    contacted = min(contacted, worked) if worked else contacted
+    booked = min(booked, contacted) if contacted else booked
+    shows = min(shows, booked) if booked else shows
+    stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in rows if f["leadDate"] and f["firstAttempt"]]
+    return {
+        "key": div.get("key"), "label": div.get("label", div.get("key")),
+        "market": div.get("market"), "active": True,
+        "leads": leads, "worked": worked, "contacted": contacted, "booked": booked, "shows": shows,
+        "workedPct": ratio(worked, leads), "connectRate": ratio(contacted, worked),
+        "bookRate": ratio(booked, contacted), "showRate": ratio(shows, booked),
+        "speedToLeadMedianMin": median_or_none(stl),
+        "lags": {
+            "leadToFirstAttempt": median_or_none([hours(f["leadDate"], f["firstAttempt"]) for f in rows]),
+            "leadToConnect": median_or_none([hours(f["leadDate"], f["connect"]) for f in rows]),
+            "connectToBooked": median_or_none([hours(f["connect"], f["bookedDate"]) for f in rows]),
+            "bookedToHeld": None,
+        },
+    }
 
 
-def build_floor(contacts, efid, afid, goals, since, until, flags):
-    today = dt.datetime.now(dt.timezone.utc).date()
+def build_floor(facts, since, until, goals, lane_map):
+    today = now_utc().date()
     leads_today = leads_in_range = unworked = unworked_sla = 0
-    stl, day_one_hits, day_one_elig = [], 0, 0
-    attempts_total = 0
-    queue = {"p1": 0, "p2": 0, "p3": 0, "p4": 0}
-
-    for c in contacts:
-        lead_d = parse_ms(field_value(c, efid.get("leadDate")))
-        first_a = parse_ms(field_value(c, efid.get("firstAttemptDate")))
+    stl, day_one_hits, day_one_elig, attempts_total = [], 0, 0, 0
+    queue = {k: 0 for k in (lane_map or {"p1": 0, "p2": 0, "p3": 0, "p4": 0})}
+    now = now_utc()
+    for f in facts:
+        lead_d, first_a = f["leadDate"], f["firstAttempt"]
         if in_window(lead_d, since, until):
             leads_in_range += 1
             if lead_d.date() == today:
                 leads_today += 1
             day_one_elig += 1
-            if first_a and (first_a - lead_d).total_seconds() <= 86400:
+            if first_a and (first_a - lead_d).total_seconds() <= DAY_SECONDS:
                 day_one_hits += 1
             if not first_a:
                 unworked += 1
-                m = sla_minutes(lead_d, dt.datetime.now(dt.timezone.utc))
+                m = sla_minutes(lead_d, now)
                 if m is not None and m > goals.get("speedToLeadSlaMin", 30):
                     unworked_sla += 1
         if lead_d and first_a:
             stl.append(sla_minutes(lead_d, first_a))
-        attempts_total += int(field_value(c, afid.get("attemptCount")) or 0)
-        p = priority_of(c)
-        if p:
-            queue[p] += 1
-
+        attempts_total += f["attempts"] or 0
+        lane = tier_lane_from_tags(f["tags"], lane_map)
+        if lane:
+            queue[lane] += 1
+    # form compliance is forms / connected calls; forms are counted in build_setters, so compute the
+    # denominator (connects) here and let insights/floor read the ratio set below.
+    connects = sum(1 for f in facts if in_window(f["connect"], since, until))
     return {
-        "leadsToday": leads_today,
-        "leadsInRange": leads_in_range,
-        "unworkedNow": unworked,
-        "unworkedPastSla": unworked_sla,
+        "leadsToday": leads_today, "leadsInRange": leads_in_range,
+        "unworkedNow": unworked, "unworkedPastSla": unworked_sla,
         "speedToLeadMedianMin": median_or_none(stl),
-        "dayOneCoverage": pct(day_one_hits, day_one_elig),
-        "formCompliance": None,  # set from setters below if forms exist
+        "dayOneCoverage": ratio(day_one_hits, day_one_elig),
+        "formCompliance": None,           # set by attach_form_compliance once forms are counted
         "attemptsLogged": attempts_total or None,
-        "dialsLogged": None,     # from the dialer integration, null until wired
-        "attemptIntegrity": None,
+        "dialsLogged": None,              # no dialer API
+        "attemptIntegrity": None,         # dials/attempt not computable without dials
         "queue": queue,
+        "connectsInRange": connects,
         "onFloorNow": None,
     }
 
 
-def build_timeseries(contacts, efid, afid, since, until):
+def tier_lane_from_tags(tags, lane_map):
+    for lane, tier_tags in (lane_map or {}).items():
+        for tt in tier_tags:
+            if tt.lower() in tags:
+                return lane
+    return None
+
+
+def build_setters(facts, submissions, ghl, goals, since, until):
+    users = ghl.get("users", {})
+    icf = ghl.get("introCallForm", {})
+    setter_field = icf.get("setterFieldId")
+
+    # Union of setter first-names seen on claims (assigned_to) and on forms (Submitted By).
+    display = {}   # first-name -> best display label
+    for full in users.values():
+        display.setdefault(first_name(full), full)
+    for opt in icf.get("setterOptions", []):
+        display.setdefault(first_name(opt), opt)
+
+    forms_by = {}
+    for s in submissions:
+        nm = first_name(submission_field(s, setter_field))
+        if nm:
+            forms_by[nm] = forms_by.get(nm, 0) + 1
+            display.setdefault(nm, submission_field(s, setter_field))
+
+    setters = []
+    for key, label in display.items():
+        mine = [f for f in facts if first_name(f["assignedTo"]) == key]
+        connects = sum(1 for f in mine if in_window(f["connect"], since, until) or f["connect"])
+        booked = sum(1 for f in mine if f["booked"])
+        shows = sum(1 for f in mine if f["held"])
+        attempts = sum(f["attempts"] or 0 for f in mine)
+        stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in mine if f["leadDate"] and f["firstAttempt"]]
+        speed = median_or_none(stl)
+        forms = forms_by.get(key)
+        setters.append({
+            "name": label, "sidUserId": uid_for(label, users), "role": None,
+            "assigned": (len(mine) or None),
+            "attempts": (attempts or None),
+            "dials": None,
+            "connects": (connects or None),
+            "connectRate": None,                       # needs dials or pre-claim lead attribution
+            "booked": (booked or None),
+            "bookRate": ratio(booked, connects),
+            "shows": (shows or None),
+            "showRate": ratio(shows, booked),
+            "speedToLeadMedianMin": speed,
+            "formsSubmitted": forms,
+            "formCompliance": ratio(forms or 0, connects) if connects else None,
+            "dayOneCoverage": None,
+            "isNew": False,                            # start_date unknown, cannot compute ramp
+            "belowSla": bool(speed is not None and speed > goals.get("speedToLeadSlaMin", 30)),
+            "byDay": None,
+        })
+    # Drop names with no signal at all so the tab is not padded with empty rows.
+    setters = [s for s in setters if any(s[k] for k in ("assigned", "connects", "booked", "formsSubmitted"))]
+    return sorted(setters, key=lambda s: -((s.get("bookRate") or 0)))
+
+
+def build_timeseries(facts, since, until):
     days = []
     d = since.date()
     while d <= until.date():
-        days.append(d)
-        d += dt.timedelta(days=1)
+        days.append(d); d += dt.timedelta(days=1)
     days = days[-30:]
-    leads = {d: 0 for d in days}
-    worked = {d: 0 for d in days}
-    booked = {d: 0 for d in days}
-    speed = {d: [] for d in days}
-    for c in contacts:
-        lead_d = parse_ms(field_value(c, efid.get("leadDate")))
-        first_a = parse_ms(field_value(c, efid.get("firstAttemptDate")))
-        booked_d = parse_ms(field_value(c, efid.get("bookedDate")))
-        if lead_d and lead_d.date() in leads:
-            leads[lead_d.date()] += 1
-        if first_a and first_a.date() in worked:
-            worked[first_a.date()] += 1
-        if booked_d and booked_d.date() in booked:
-            booked[booked_d.date()] += 1
-        if lead_d and first_a and first_a.date() in speed:
-            speed[first_a.date()].append(sla_minutes(lead_d, first_a))
+    idx = {d: i for i, d in enumerate(days)}
+    leads = [0] * len(days); worked = [0] * len(days); booked = [0] * len(days)
+    speed = [[] for _ in days]
+    for f in facts:
+        if f["leadDate"] and f["leadDate"].date() in idx:
+            leads[idx[f["leadDate"].date()]] += 1
+        if f["firstAttempt"] and f["firstAttempt"].date() in idx:
+            worked[idx[f["firstAttempt"].date()]] += 1
+            if f["leadDate"]:
+                speed[idx[f["firstAttempt"].date()]].append(sla_minutes(f["leadDate"], f["firstAttempt"]))
+        if f["bookedDate"] and f["bookedDate"].date() in idx:
+            booked[idx[f["bookedDate"].date()]] += 1
     return {
         "days": [d.isoformat() for d in days],
-        "leads": [leads[d] for d in days],
-        "worked": [worked[d] for d in days],
-        "booked": [booked[d] for d in days],
-        "speedToLeadMedianMin": [median_or_none(speed[d]) for d in days],
+        "leads": leads, "worked": worked, "booked": booked,
+        "speedToLeadMedianMin": [median_or_none(s) for s in speed],
     }
 
 
@@ -448,9 +408,9 @@ def build_insights(floor, clients, setters, goals):
                     "metric": "unworkedPastSla", "leadsAtRisk": floor["unworkedPastSla"]})
     fc = floor.get("formCompliance")
     if fc is not None and fc < goals.get("formSubmissionComplianceTarget", 0.95):
-        ins.append({"severity": "alert", "headline": "Form compliance is %d percent against target" % round(fc * 100),
-                    "detail": "Worked leads without an Intro Call Form make per-setter numbers understated.",
-                    "metric": "formCompliance", "leadsAtRisk": floor.get("leadsInRange")})
+        ins.append({"severity": "alert", "headline": "Form compliance is %d percent of connected calls" % round(fc * 100),
+                    "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
+                    "metric": "formCompliance", "leadsAtRisk": floor.get("connectsInRange")})
     for s in setters:
         if s.get("belowSla"):
             ins.append({"severity": "warn", "headline": "%s is over the speed-to-lead SLA" % s["name"],
@@ -462,58 +422,44 @@ def build_insights(floor, clients, setters, goals):
     return ins
 
 
-# ------------------------------------------------------------------ small utilities
-def in_window(d, since, until):
-    return bool(d and since <= d <= until)
+# ------------------------------------------------------------------ small utils
+def to_int(v):
+    try:
+        return int(float(v)) if v not in (None, "") else 0
+    except (ValueError, TypeError):
+        return 0
 
 
-def hours(a, b):
-    return round((b - a).total_seconds() / 3600, 1) if a and b and b >= a else None
-
-
-def sum_field(contacts, field_id):
-    total = 0
-    seen = False
-    for c in contacts:
-        v = field_value(c, field_id)
-        if v is not None:
-            try:
-                total += int(float(v))
-                seen = True
-            except (ValueError, TypeError):
-                pass
-    return total if seen else None
-
-
-def assigned_setter(contact, afid):
-    return field_value(contact, afid.get("assignedSetter"))
-
-
-def priority_of(contact):
-    for tag in [t.lower() for t in contact.get("tags", [])]:
-        for p in ("p1", "p2", "p3", "p4"):
-            if tag.endswith(" " + p):
-                return p
+def uid_for(label, users):
+    for uid, name in users.items():
+        if name == label:
+            return uid
     return None
 
 
-def submission_field(sub, field_id):
-    for k in ("fields", "customFields", "data"):
+def submission_field(sub, field_ref):
+    for k in ("fields", "customFields", "data", "others"):
         arr = sub.get(k)
         if isinstance(arr, list):
             for f in arr:
-                if f.get("id") == field_id or f.get("fieldId") == field_id:
+                if f.get("id") == field_ref or f.get("fieldKey") == field_ref or f.get("key") == field_ref:
                     return f.get("value")
-        elif isinstance(arr, dict) and field_id in arr:
-            return arr[field_id]
+        elif isinstance(arr, dict) and field_ref in arr:
+            return arr[field_ref]
     return None
 
 
 def freshness_min(meta):
     pulled = parse_ms(meta.get("pulledAt"))
-    if not pulled:
-        return None
-    return max(0, round((dt.datetime.now(dt.timezone.utc) - pulled).total_seconds() / 60))
+    return None if not pulled else max(0, round((now_utc() - pulled).total_seconds() / 60))
+
+
+def attach_form_compliance(data):
+    """Floor form compliance = total forms submitted / total connected calls in the window."""
+    forms = sum((s.get("formsSubmitted") or 0) for s in data.get("setters", []))
+    connects = data.get("floor", {}).get("connectsInRange")
+    data["floor"]["formCompliance"] = ratio(forms, connects) if connects else None
+    return data
 
 
 def die(msg):
@@ -522,8 +468,8 @@ def die(msg):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Build data/dashboard-data.json from data/raw/.")
-    ap.add_argument("--sample", action="store_true", help="rebuild from the committed sample instead of raw")
+    ap = argparse.ArgumentParser(description="Build data/dashboard-data.json.")
+    ap.add_argument("--sample", action="store_true", help="rebuild from the committed sample")
     args = ap.parse_args()
 
     if args.sample:
@@ -534,12 +480,14 @@ def main():
     else:
         ghl, dash = cfg_load()
         data = build_from_raw(ghl, dash)
+        data = attach_form_compliance(data)
+        # recompute the form-compliance insight now that the floor value exists
+        data["insights"] = build_insights(data["floor"], data["clients"], data["setters"], dash.get("goals", {}))
 
     with open(OUT_PATH, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2)
-    fired = len(data.get("dataQuality", []))
     print("build_data: wrote data/dashboard-data.json (%d clients, %d setters, %d data-quality flags)"
-          % (len(data.get("clients", [])), len(data.get("setters", [])), fired))
+          % (len(data.get("clients", [])), len(data.get("setters", [])), len(data.get("dataQuality", []))))
 
 
 if __name__ == "__main__":
