@@ -98,6 +98,10 @@ def api_get(cfg, token, path, params):
                 pass
             if e.code in (429, 500, 502, 503, 504):
                 last_err = "HTTP %s: %s" % (e.code, body)
+            elif e.code == 400 and "timeout" in body.lower():
+                # GHL wraps its own 30s upstream timeout as a 400 ("Request Timeout after
+                # 30000ms"). It is transient and clears on retry, so treat it like a 5xx.
+                last_err = "HTTP 400 (upstream timeout): %s" % body
             elif e.code in (401, 403):
                 die("SID returned %s (auth). Check the token scope for this location. %s" % (e.code, body))
             else:
