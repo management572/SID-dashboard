@@ -52,10 +52,12 @@
     { "key": "speedToLeadMedianMin", "label": "Speed to Lead (median min)", "invert": true, "bands": "speedToLeadBandsMin", "target": "speedToLeadTargetMin" },
     { "key": "dayOneCoverage", "label": "Day-One Coverage", "format": "pct", "target": "dayOneCoverageTarget" },
     { "key": "formCompliance", "label": "Form Compliance", "format": "pct", "target": "formSubmissionComplianceTarget" },
+    { "key": "dialsLogged", "label": "Dials" },
+    { "key": "connectsInRange", "label": "Connects" },
     { "key": "p1QueueDepth", "label": "P1 Queue", "invert": true },
-    { "key": "talkTimeSec", "label": "Talk Time (approx)", "format": "duration" }
+    { "key": "talkTimeSec", "label": "Talk Time", "format": "duration" }
   ],
-  "_floorTilesNote": "invert = lower is better, so the goal bands reverse. hero = rendered larger. These six answer 'is the floor healthy right now'.",
+  "_floorTilesNote": "invert = lower is better, so the goal bands reverse. hero = rendered larger. Dials, Connects and Talk Time are read live from the GHL call feed (conversation call messages), since the sid_* mirror fields are not written.",
 
   "setterColumns": [
     { "key": "name", "label": "Setter" },
@@ -64,6 +66,7 @@
     { "key": "dials", "label": "Dials" },
     { "key": "connects", "label": "Connects" },
     { "key": "connectRate", "label": "Connect %", "format": "pct", "target": "connectRateTarget" },
+    { "key": "talkTimeSec", "label": "Talk Time", "format": "duration" },
     { "key": "booked", "label": "Booked" },
     { "key": "bookRate", "label": "Book %", "format": "pct", "target": "bookRateTarget" },
     { "key": "shows", "label": "Held" },

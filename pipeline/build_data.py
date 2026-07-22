@@ -182,7 +182,7 @@ def period_windows(now):
 # Floor metrics that carry a period-over-period delta on the board.
 DELTA_KEYS = ["leadsToday", "leadsInRange", "introsBookedToday", "unworkedNow", "unworkedPastSla",
               "speedToLeadMedianMin", "dayOneCoverage", "formCompliance", "attemptsLogged",
-              "talkTimeSec", "connectsInRange"]
+              "dialsLogged", "talkTimeSec", "connectsInRange"]
 
 
 def compute_deltas(cur_floor, prev_floor):
@@ -199,7 +199,7 @@ def compute_deltas(cur_floor, prev_floor):
 
 
 # ------------------------------------------------------------------ build
-def build_bundle(facts, submissions, ghl, dash, since, until):
+def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min):
     """Everything the board renders for one window: floor, clients, setters, timeseries, insights."""
     lane_map = ghl.get("queueLaneMap", {})
     divisions = [d for d in ghl.get("divisions", []) if d.get("active", True)]
@@ -213,8 +213,8 @@ def build_bundle(facts, submissions, ghl, dash, since, until):
             clients.append(client)
     clients.sort(key=lambda c: -(c.get("leads") or 0))
 
-    floor = build_floor(facts, since, until, goals, lane_map)
-    setters = build_setters(facts, submissions, ghl, goals, since, until)
+    floor = build_floor(facts, calls, since, until, goals, lane_map, connect_min)
+    setters, other_dialers = build_setters(facts, submissions, calls, ghl, goals, since, until, connect_min)
     forms_total = sum((s.get("formsSubmitted") or 0) for s in setters)
     fc = ratio(forms_total, floor.get("connectsInRange"))
     floor["formCompliance"] = min(1.0, fc) if fc is not None else None
@@ -224,14 +224,39 @@ def build_bundle(facts, submissions, ghl, dash, since, until):
         "floor": floor,
         "clients": clients,
         "setters": setters,
+        "otherDialers": other_dialers,
         "timeseries": build_timeseries(facts, since, until),
         "insights": build_insights(floor, clients, setters, goals),
     }
 
 
-def build_data_quality(bundle, contacts, ghl, goals):
+def build_data_quality(bundle, contacts, ghl, goals, calls=None, meta=None):
     floor, setters = bundle["floor"], bundle["setters"]
     flags = []
+
+    # Call metrics come from the GHL call feed, bounded to a recent window; be explicit that longer
+    # windows only cover that far back, and that some completed calls report a null duration.
+    win = (meta or {}).get("callWindowDays") or (ghl.get("calls", {}) or {}).get("windowDays", 45)
+    if calls is not None:
+        flags.append({
+            "code": "CALL_COVERAGE", "severity": "info",
+            "message": ("Dials, connects and talk time are read live from GHL call records (setters dial "
+                        "from the CRM) covering the last %d days, so the Today/7d/30d/MTD/QTD windows are "
+                        "exact; YTD and All only include calls from the last %d days. GHL reports a null "
+                        "duration on some completed calls, so talk time is a floor, not an exact total."
+                        % (win, win)),
+            "affects": ["floor.talkTimeSec", "floor.dialsLogged", "floor.connectsInRange", "setters.dials"],
+        })
+    other = bundle.get("otherDialers") or []
+    if other:
+        who = ", ".join("%s (%d dials)" % (o["name"], o["dials"]) for o in other[:6])
+        flags.append({
+            "code": "NONROSTER_DIALERS", "severity": "info",
+            "message": ("These GHL users are dialing from the CRM but are not on the active SDR roster, so "
+                        "their calls count in the floor totals but not in a setter row: %s. Confirm whether "
+                        "they should be added to the roster." % who),
+            "affects": ["setters"],
+        })
     stuck = sum(1 for c in contacts if ghl.get("attemptToggleTag", "sid-dial-1").lower() in [t.lower() for t in c.get("tags", [])])
     if stuck > max(10, 0.02 * (floor.get("leadsInRange") or 0)):
         flags.append({
@@ -253,12 +278,11 @@ def build_data_quality(bundle, contacts, ghl, goals):
     if form_only:
         flags.append({
             "code": "SETTER_ATTRIBUTION", "severity": "warn",
-            "message": ("%s submit the Intro Call Form but are not in the SID Assigned To dropdown and have "
-                        "no matching GHL user, so only their form activity is attributed (attempts, connects "
-                        "and held show a dash). Add them to Assigned To in SID for full attribution. Also, SID "
-                        "does not record which setter dialed before a lead is claimed, so per-setter Attempts "
-                        "count claimed leads only." % (" and ".join(form_only))),
-            "affects": ["setters.attempts", "setters.connects", "setters.shows"],
+            "message": ("%s have no matching GHL user account, so their outbound calls cannot be attributed "
+                        "and their Dials / Connects / Talk Time show a dash (only their Intro Call Form "
+                        "activity is counted). Give them GHL user logins to dial under for full per-setter "
+                        "call attribution." % (" and ".join(form_only))),
+            "affects": ["setters.dials", "setters.connects", "setters.talkTimeSec"],
         })
     return flags
 
@@ -270,6 +294,7 @@ def build_from_raw(ghl, dash):
     contacts = load_json(os.path.join(RAW_DIR, "contacts.json"), []) or []
     submissions = load_json(os.path.join(RAW_DIR, "form_submissions.json"), []) or []
     cfields = load_json(os.path.join(RAW_DIR, "custom_fields.json"), []) or []
+    calls = parse_calls(load_json(os.path.join(RAW_DIR, "calls.json"), []) or [])
 
     global FIELD_KEY_TO_ID
     FIELD_KEY_TO_ID = {f.get("fieldKey"): f.get("id") for f in cfields if f.get("fieldKey") and f.get("id")}
@@ -286,12 +311,22 @@ def build_from_raw(ghl, dash):
 
     facts = [contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val) for c in contacts]
 
+    # The sid_assigned_at connect stamp is empty, so derive each contact's connect timestamp from the
+    # real call feed (first outbound completed call >= connect_min seconds). This lights up the funnel
+    # Contacted stage, connect rate and lead-to-connect speed that the mirror field cannot.
+    connect_min = int((ghl.get("calls", {}) or {}).get("connectMinSec")
+                      or (ghl.get("connectedCall", {}) or {}).get("minDurationSec", 15))
+    connect_by_contact = first_connect_by_contact(calls, connect_min)
+    for f in facts:
+        if not f["connect"]:
+            f["connect"] = connect_by_contact.get(f["id"])
+
     now = now_utc()
     default = dash.get("defaultPeriod", "7d")
     periods = {}
     for key, (s, u, ps, pu) in period_windows(now).items():
-        bundle = build_bundle(facts, submissions, ghl, dash, s, u)
-        prev_floor = build_floor(facts, ps, pu, goals, lane_map) if ps else None
+        bundle = build_bundle(facts, submissions, calls, ghl, dash, s, u, connect_min)
+        prev_floor = build_floor(facts, calls, ps, pu, goals, lane_map, connect_min) if ps else None
         bundle["prevDateRange"] = fmt_range(ps, pu)
         bundle["deltas"] = compute_deltas(bundle["floor"], prev_floor)
         periods[key] = bundle
@@ -305,7 +340,8 @@ def build_from_raw(ghl, dash):
         "generatedAt": now.replace(microsecond=0).isoformat(),
         "freshnessMin": freshness_min(meta),
         "periods": periods,
-        "dataQuality": build_data_quality(periods.get(default) or next(iter(periods.values())), contacts, ghl, goals),
+        "dataQuality": build_data_quality(periods.get(default) or next(iter(periods.values())),
+                                          contacts, ghl, goals, calls, meta),
     }
 
 
@@ -322,6 +358,7 @@ def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val):
     attempts = to_int(field_value(c, afid.get("attemptCount")))
     assigned_to = field_value(c, afid.get("assignedSetter"))
     return {
+        "id": c.get("id"),
         "acronym": (str(field_value(c, "contact.partner_acronym")).strip().lower()
                     if field_value(c, "contact.partner_acronym") else None),
         "leadDate": lead_d, "firstAttempt": first_a, "connect": connect_d, "bookedDate": booked_d,
@@ -359,7 +396,62 @@ def build_client(div, rows, since, until):
     }
 
 
-def build_floor(facts, since, until, goals, lane_map):
+# ------------------------------------------------------------------ call feed (real dial/connect/talk)
+def parse_calls(raw):
+    """Normalize the raw conversation call events pulled by fetch_sid into typed records."""
+    out = []
+    for c in raw or []:
+        ts = parse_ms(c.get("dateAdded"))
+        if not ts:
+            continue
+        dur = c.get("duration")
+        out.append({
+            "contactId": c.get("contactId"),
+            "userId": c.get("userId"),
+            "direction": (c.get("direction") or "").lower(),
+            "status": (c.get("status") or "").lower(),
+            "duration": int(dur) if isinstance(dur, (int, float)) else None,
+            "ts": ts,
+        })
+    return out
+
+
+def first_connect_by_contact(calls, connect_min):
+    """Earliest outbound completed call >= connect_min seconds, per contact. Used as the funnel
+    connect timestamp when the sid_assigned_at mirror field is empty (which it is)."""
+    m = {}
+    for c in calls:
+        if c["direction"] == "outbound" and c["status"] == "completed" and (c["duration"] or 0) >= connect_min:
+            cid = c["contactId"]
+            if cid and (cid not in m or c["ts"] < m[cid]):
+                m[cid] = c["ts"]
+    return m
+
+
+def call_metrics(calls, since, until, connect_min):
+    """Floor-level and per-user dial / connect / talk-time from real outbound call events in the
+    window. Dials = outbound call attempts. Connects = outbound completed at/over connect_min seconds.
+    Talk time = summed duration of outbound completed calls (a floor: some completed calls report a
+    null duration in GHL, so true talk time is at least this)."""
+    dials = connects = talk = 0
+    per_user = {}
+    for c in calls:
+        if c["direction"] != "outbound" or not (since <= c["ts"] <= until):
+            continue
+        u = per_user.setdefault(c["userId"], {"dials": 0, "connects": 0, "talkSec": 0})
+        dials += 1
+        u["dials"] += 1
+        if c["status"] == "completed":
+            d = c["duration"] or 0
+            talk += d
+            u["talkSec"] += d
+            if d >= connect_min:
+                connects += 1
+                u["connects"] += 1
+    return {"dials": dials, "connects": connects, "talkSec": talk, "perUser": per_user}
+
+
+def build_floor(facts, calls, since, until, goals, lane_map, connect_min):
     today = now_utc().date()
     leads_today = leads_in_range = unworked = unworked_sla = 0
     stl, day_one_hits, day_one_elig, attempts_total = [], 0, 0, 0
@@ -385,19 +477,14 @@ def build_floor(facts, since, until, goals, lane_map):
         lane = tier_lane_from_tags(f["tags"], lane_map)
         if lane:
             queue[lane] += 1
-    # form compliance is forms / connected calls; forms are counted in build_setters, so compute the
-    # denominator (connects) here and let insights/floor read the ratio set below.
-    connects = sum(1 for f in facts if in_window(f["connect"], since, until))
+    # Dials, connects and talk time come from the real GHL call feed (conversation call messages),
+    # because the sid_* mirror fields (sid_assigned_at, sid_last_call_duration_sec) are not written.
+    # Connect = an outbound completed call at/over connect_min seconds -- the same definition SID uses.
+    cm = call_metrics(calls, since, until, connect_min)
 
     # Intros booked: a booking whose booked date lands today (and in the window, for the sub-count).
     intros_today = sum(1 for f in facts if f["booked"] and f["bookedDate"] and f["bookedDate"].date() == today)
     intros_range = sum(1 for f in facts if f["booked"] and in_window(f["bookedDate"], since, until))
-
-    # Talk time (approximate): SID stores only the last call duration per contact, not a running
-    # total, so this sums the last-call seconds across contacts with activity in the window. It is a
-    # floor of true talk time; a real total needs the call-log/dialer feed.
-    talk_sec = sum(f["lastCallSec"] or 0 for f in facts
-                   if in_window(f["firstAttempt"], since, until) or in_window(f["connect"], since, until))
 
     return {
         "leadsToday": leads_today, "leadsInRange": leads_in_range,
@@ -406,12 +493,13 @@ def build_floor(facts, since, until, goals, lane_map):
         "speedToLeadMedianMin": median_or_none(stl),
         "dayOneCoverage": ratio(day_one_hits, day_one_elig),
         "formCompliance": None,           # set from setters/connects in build_from_raw
-        "attemptsLogged": attempts_total or None,
-        "dialsLogged": None,              # no dialer API
-        "attemptIntegrity": None,         # dials/attempt not computable without dials
-        "talkTimeSec": talk_sec or None,
+        # sid_attempt_count is not incrementing (stuck sid-dial-1 tags), so fall back to real dials.
+        "attemptsLogged": (attempts_total or cm["dials"]) or None,
+        "dialsLogged": cm["dials"] or None,
+        "attemptIntegrity": None,         # dials/attempt not computable without the bundle definition
+        "talkTimeSec": cm["talkSec"] or None,
         "queue": queue,
-        "connectsInRange": connects,
+        "connectsInRange": cm["connects"],
         "onFloorNow": None,
     }
 
@@ -424,11 +512,14 @@ def tier_lane_from_tags(tags, lane_map):
     return None
 
 
-def build_setters(facts, submissions, ghl, goals, since, until):
+def build_setters(facts, submissions, calls, ghl, goals, since, until, connect_min):
     icf = ghl.get("introCallForm", {})
     setter_field = icf.get("setterFieldId")
     outcome_field = icf.get("outcomeFieldId")
     booked_val = (ghl.get("outcomeFields", {}).get("introCallOutcome", {}) or {}).get("booked", "Booked")
+
+    # Real per-setter dial / connect / talk-time, attributed by the GHL userId on each outbound call.
+    per_user = call_metrics(calls, since, until, connect_min)["perUser"]
 
     # Count form submissions (and booked-from-form) per setter first-name (Submitted By).
     forms_by, forms_booked_by = {}, {}
@@ -447,43 +538,61 @@ def build_setters(facts, submissions, ghl, goals, since, until):
         roster = [{"name": n.title(), "formName": n.title(), "assignedToName": None} for n in seen if n]
 
     setters = []
+    matched_uids = set()
     for r in roster:
         key = first_name(r.get("formName") or r.get("name"))
         claim_key = first_name(r.get("assignedToName")) if r.get("assignedToName") else None
-        # Claim-side metrics only exist when the setter maps to an Assigned To value.
+        uid = r.get("ghlUserId")
+        cu = per_user.get(uid) if uid else None
+        if uid and cu:
+            matched_uids.add(uid)
+        # A setter is call-attributed when they have a GHL user id (Michelle, Sarah). Sophia and Heart
+        # are not GHL users, so their calls cannot be attributed and their call columns stay dashed.
+        attributed = bool(uid)
         mine = [f for f in facts if claim_key and first_name(f["assignedTo"]) == claim_key]
-        claimed = bool(claim_key)
-        connects = sum(1 for f in mine if f["connect"]) if claimed else None
-        attempts = (sum(f["attempts"] or 0 for f in mine) or None) if claimed else None
-        claim_booked = sum(1 for f in mine if f["booked"]) if claimed else 0
-        claim_shows = sum(1 for f in mine if f["held"]) if claimed else 0
+        # Dials / connects / talk time from the real call feed for this setter's userId.
+        dials = cu["dials"] if cu else None
+        connects = cu["connects"] if cu else (None if attributed else None)
+        talk = cu["talkSec"] if cu else None
+        attempts = dials if attributed else None
+        # Held stays claim-based (needs the Client Call Outcome field); booked prefers the form.
+        claim_shows = sum(1 for f in mine if f["held"])
         stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in mine if f["leadDate"] and f["firstAttempt"]]
-        speed = median_or_none(stl) if claimed else None
+        speed = median_or_none(stl) if mine else None
         forms = forms_by.get(key)
-        # Booked: claim-based when the setter is claim-attributed, else form-based (Outcome = Booked).
-        booked = claim_booked if claimed else forms_booked_by.get(key)
+        booked = forms_booked_by.get(key)
         setters.append({
-            "name": r.get("name"), "sidUserId": r.get("ghlUserId"), "role": None,
-            "assigned": (len(mine) or None) if claimed else None,
+            "name": r.get("name"), "sidUserId": uid, "role": None,
+            "assigned": (len(mine) or None) if mine else None,
             "attempts": attempts,
-            "dials": None,
+            "dials": dials,
             "connects": connects,
-            "connectRate": None,                       # needs dials or pre-claim lead attribution
+            "connectRate": ratio(connects, dials) if (dials and connects is not None) else None,
+            "talkTimeSec": talk,
             "booked": (booked or None),
-            "bookRate": ratio(booked, connects) if (claimed and connects) else None,
-            "shows": (claim_shows or None) if claimed else None,
-            "showRate": ratio(claim_shows, claim_booked) if (claimed and claim_booked) else None,
+            "bookRate": ratio(booked, connects) if (booked and connects) else None,
+            "shows": (claim_shows or None),
+            "showRate": ratio(claim_shows, booked) if (claim_shows and booked) else None,
             "speedToLeadMedianMin": speed,
             "formsSubmitted": forms,
-            "formCompliance": (min(1.0, ratio(forms or 0, connects)) if (claimed and connects) else None),
+            "formCompliance": (min(1.0, ratio(forms or 0, connects)) if (attributed and connects) else None),
             "dayOneCoverage": None,
             "isNew": False,                            # start_date unknown, cannot compute ramp
             "belowSla": bool(speed is not None and speed > goals.get("speedToLeadSlaMin", 30)),
-            "claimAttributed": claimed,                # false = form-only (Heart, Sophia)
+            "claimAttributed": attributed,             # false = not a GHL user (Heart, Sophia)
             "byDay": None,
         })
+    # Non-roster GHL users who are dialing (e.g. Mary Lim, May Paula): surface their volume so the
+    # floor totals reconcile and attribution gaps are visible, without adding them as roster rows.
+    users = ghl.get("users", {})
+    other = []
+    for uid, m in per_user.items():
+        if uid and uid not in matched_uids and m["dials"]:
+            other.append({"name": users.get(uid, uid), "dials": m["dials"], "connects": m["connects"]})
+    other.sort(key=lambda x: -x["dials"])
     # Keep the full active roster visible even at zero (ramp and quiet reps stay on the board).
-    return sorted(setters, key=lambda s: (-(s.get("bookRate") or 0), -(s.get("formsSubmitted") or 0)))
+    setters = sorted(setters, key=lambda s: (-(s.get("connects") or 0), -(s.get("formsSubmitted") or 0)))
+    return setters, other
 
 
 def build_timeseries(facts, since, until):

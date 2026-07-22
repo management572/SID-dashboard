@@ -43,6 +43,10 @@ PAGE_LIMIT = 100
 MAX_RETRIES = 4
 RETRY_BASE_SEC = 2
 
+# Conversation message types that represent a phone call. Setters dial from the GHL CRM, so each
+# dial is one of these messages carrying meta.call.duration, a direction and the userId who placed it.
+CALL_TYPES = ("TYPE_CALL", "TYPE_IVR_CALL")
+
 
 def load_config():
     with open(CONFIG_PATH, "r", encoding="utf-8") as fh:
@@ -168,6 +172,123 @@ def ms(ts):
     return int(ts.timestamp() * 1000)
 
 
+def to_ms(v):
+    """Epoch-ms from an ISO string or a numeric epoch (ms or s), or None."""
+    if v in (None, ""):
+        return None
+    if isinstance(v, (int, float)):
+        return int(v if v > 1e12 else v * 1000)
+    try:
+        return int(dt.datetime.fromisoformat(str(v).replace("Z", "+00:00")).timestamp() * 1000)
+    except (ValueError, OverflowError, OSError):
+        return None
+
+
+def _conv_cursor(cv):
+    """The pagination cursor for /conversations/search is the last item's sort value."""
+    s = cv.get("sort")
+    if isinstance(s, list) and s:
+        return s[0]
+    return s
+
+
+def pull_conv_calls(cfg, token, conv_id, since_ms, max_pages):
+    """Pull the call messages of one conversation (newest first), stopping once past the window."""
+    out = []
+    params = {"limit": 100}
+    for _ in range(max_pages):
+        try:
+            res = api_get(cfg, token, "/conversations/%s/messages" % conv_id, params)
+        except SystemExit:
+            break
+        block = res.get("messages")
+        arr = block.get("messages") if isinstance(block, dict) else (block or [])
+        if not arr:
+            break
+        oldest = None
+        for m in arr:
+            mt = str(m.get("messageType") or m.get("type") or "")
+            if "CALL" not in mt.upper():
+                continue
+            ts = to_ms(m.get("dateAdded"))
+            if ts is not None:
+                oldest = ts if (oldest is None or ts < oldest) else oldest
+            meta = m.get("meta") if isinstance(m.get("meta"), dict) else {}
+            call = meta.get("call") if isinstance(meta.get("call"), dict) else {}
+            dur = call.get("duration")
+            out.append({
+                "contactId": m.get("contactId"),
+                "userId": m.get("userId"),
+                "direction": m.get("direction"),
+                "status": m.get("status") or call.get("status"),
+                "duration": dur if isinstance(dur, (int, float)) else None,
+                "messageType": mt,
+                "dateAdded": m.get("dateAdded"),
+            })
+        if oldest is not None and oldest < since_ms:
+            break
+        nxt = block.get("nextPage") if isinstance(block, dict) else None
+        last_id = block.get("lastMessageId") if isinstance(block, dict) else None
+        if not nxt or not last_id:
+            break
+        params["lastMessageId"] = last_id
+        time.sleep(0.1)
+    return out
+
+
+def pull_calls(cfg, token, location_id, since_dt):
+    """Authoritative call feed: page conversations newest-first and pull their call messages within
+    [since, now]. This is the real dial/connect/talk-time source (setters dial from the CRM); the
+    sid_* mirror fields are not being written. READ-ONLY. Bounded for runtime; never aborts the run.
+
+    Returns a flat list of call events: contactId, userId, direction, status, duration (s), timestamp.
+    """
+    ccfg = cfg.get("calls", {}) or {}
+    max_convs = int(ccfg.get("maxConversations", 4000))
+    max_msg_pages = int(ccfg.get("maxMessagePagesPerConversation", 4))
+    since_ms = int(since_dt.timestamp() * 1000)
+
+    calls = []
+    scanned = with_calls = 0
+    params = {"locationId": location_id, "limit": 100, "sortBy": "last_message_date", "sort": "desc"}
+    try:
+        while scanned < max_convs:
+            data = api_get(cfg, token, "/conversations/search", params)
+            convs = data.get("conversations") or []
+            if not convs:
+                break
+            cursor, stop = None, False
+            for cv in convs:
+                scanned += 1
+                cursor = _conv_cursor(cv) or cursor
+                lmd = to_ms(cv.get("lastMessageDate") or cv.get("dateUpdated"))
+                if lmd is not None and lmd < since_ms:
+                    stop = True
+                    break
+                cid = cv.get("id")
+                if not cid:
+                    continue
+                mtypes = cv.get("messageTypes") or []
+                # Skip conversations that never carried a call (SMS/email-only) to save message pulls.
+                if mtypes and not any(ct in mtypes for ct in CALL_TYPES):
+                    continue
+                with_calls += 1
+                calls.extend(pull_conv_calls(cfg, token, cid, since_ms, max_msg_pages))
+                if scanned >= max_convs:
+                    break
+            if stop or scanned >= max_convs or cursor is None:
+                break
+            params["startAfterDate"] = str(cursor)
+            time.sleep(0.1)
+    except SystemExit:
+        print("fetch_sid: conversations pull stopped on API error; keeping %d call events." % len(calls))
+    except Exception as e:  # never let the call feed abort the contacts-based build
+        print("fetch_sid: conversations pull error (%s); keeping %d call events." % (e, len(calls)))
+    print("fetch_sid: calls scanned %d conversations (%d with calls), %d call events since %s"
+          % (scanned, with_calls, len(calls), since_dt.date()))
+    return calls
+
+
 def main():
     ap = argparse.ArgumentParser(description="Pull raw SID records into data/raw/.")
     ap.add_argument("--days", type=int, default=None, help="window size in days (default 7)")
@@ -223,17 +344,27 @@ def main():
               "(form compliance will be null until prompt 02 creates the form).")
     dump("form_submissions", submissions)
 
+    # 6) call activity from conversation messages: the real dial / connect / talk-time feed. Bounded
+    #    to a recent window (config.calls.windowDays) so the message pulls stay within runtime.
+    call_days = int(cfg.get("calls", {}).get("windowDays", 45))
+    calls_since = until - dt.timedelta(days=call_days)
+    calls = pull_calls(cfg, token, location_id, calls_since)
+    dump("calls", calls)
+
     meta = {
         "locationId": location_id,
         "since": since.isoformat(),
         "until": until.isoformat(),
         "pulledAt": until.isoformat(),
+        "callsSince": calls_since.isoformat(),
+        "callWindowDays": call_days,
         "counts": {
             "customFields": len(fields),
             "users": len(users),
             "contacts": len(contacts),
             "opportunities": len(opportunities),
             "formSubmissions": len(submissions),
+            "calls": len(calls),
         },
     }
     dump("_meta", meta)

@@ -86,6 +86,14 @@
     "assignedAtField": "contact.sid_assigned_at"
   },
 
+  "_calls": "The sid_* call mirror fields (sid_assigned_at, sid_last_call_duration_sec, sid_attempt_count) are not being written, so dials/connects/talk-time are read directly from GHL conversation call messages instead (the authoritative feed, since setters dial from the CRM). windowDays bounds how far back call messages are pulled to keep the message-pull runtime sane; call metrics on windows longer than this understate totals and the board flags it. connectMinSec matches connectedCall.minDurationSec: an outbound completed call at or over it counts as a connect.",
+  "calls": {
+    "windowDays": 45,
+    "maxConversations": 4000,
+    "maxMessagePagesPerConversation": 4,
+    "connectMinSec": 15
+  },
+
   "_introCallForm": "The single write path for the floor. Attribution key is the Submitted By dropdown. NOTE a real mismatch: the form's Submitted By options (Michelle, Sarah, Heart, May, Sophia) do not match the GHL user roster or the Assigned To options. Heart and Sophia are not GHL users; Kyla, Mary and Johnny are users but not on the form. This must be reconciled or per-setter numbers will split across names.",
   "introCallForm": {
     "formId": "kERTITqTC1N423UZeEx1",
