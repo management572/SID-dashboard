@@ -149,62 +149,93 @@ def tier_lane(contact, lane_map):
     return None
 
 
+# ------------------------------------------------------------------ periods
+def fmt_range(s, u):
+    return "%s to %s" % (s.strftime("%d %b %Y"), u.strftime("%d %b %Y")) if (s and u) else None
+
+
+def period_windows(now):
+    """(since, until, prevSince, prevUntil) per period. Comparisons are calendar-aligned for
+    Today/MTD/QTD/YTD (same elapsed span in the previous day/month/quarter/year) and the immediately
+    preceding equal window for the rolling 7d/30d. All has no comparison."""
+    day = dt.timedelta(days=1)
+    sod = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    w = {}
+    elapsed_today = now - sod
+    w["Today"] = (sod, now, sod - day, sod - day + elapsed_today)
+    w["7d"] = (now - 7 * day, now, now - 14 * day, now - 7 * day)
+    w["30d"] = (now - 30 * day, now, now - 60 * day, now - 30 * day)
+    mstart = sod.replace(day=1)
+    prev_mstart = (mstart - day).replace(day=1)
+    w["MTD"] = (mstart, now, prev_mstart, prev_mstart + (now - mstart))
+    qmonth = ((now.month - 1) // 3) * 3 + 1
+    qstart = sod.replace(month=qmonth, day=1)
+    prev_qstart = qstart.replace(year=now.year - 1, month=10) if qmonth == 1 else qstart.replace(month=qmonth - 3)
+    w["QTD"] = (qstart, now, prev_qstart, prev_qstart + (now - qstart))
+    ystart = sod.replace(month=1, day=1)
+    prev_ystart = ystart.replace(year=now.year - 1)
+    w["YTD"] = (ystart, now, prev_ystart, prev_ystart + (now - ystart))
+    w["All"] = (dt.datetime(2000, 1, 1, tzinfo=dt.timezone.utc), now, None, None)
+    return w
+
+
+# Floor metrics that carry a period-over-period delta on the board.
+DELTA_KEYS = ["leadsToday", "leadsInRange", "introsBookedToday", "unworkedNow", "unworkedPastSla",
+              "speedToLeadMedianMin", "dayOneCoverage", "formCompliance", "attemptsLogged",
+              "talkTimeSec", "connectsInRange"]
+
+
+def compute_deltas(cur_floor, prev_floor):
+    if not prev_floor:
+        return None
+    out = {}
+    for k in DELTA_KEYS:
+        cv, pv = cur_floor.get(k), prev_floor.get(k)
+        pct = None
+        if cv is not None and pv not in (None, 0):
+            pct = round((cv - pv) / pv, 4)
+        out[k] = {"cur": cv, "prev": pv, "pct": pct}
+    return out
+
+
 # ------------------------------------------------------------------ build
-def build_from_raw(ghl, dash):
-    meta = load_json(os.path.join(RAW_DIR, "_meta.json"), {})
-    if not meta:
-        die("No data/raw/_meta.json. Run pipeline/fetch_sid.py first.")
-    contacts = load_json(os.path.join(RAW_DIR, "contacts.json"), []) or []
-    submissions = load_json(os.path.join(RAW_DIR, "form_submissions.json"), []) or []
-    cfields = load_json(os.path.join(RAW_DIR, "custom_fields.json"), []) or []
-
-    # Resolve config fieldKeys to the GHL field ids the contacts list uses.
-    global FIELD_KEY_TO_ID
-    FIELD_KEY_TO_ID = {f.get("fieldKey"): f.get("id") for f in cfields if f.get("fieldKey") and f.get("id")}
-
-    since = parse_ms(meta.get("since")) or (now_utc() - dt.timedelta(days=7))
-    until = parse_ms(meta.get("until")) or now_utc()
-
-    efid = ghl.get("eventDateFieldIds", {})
-    afid = ghl.get("attemptFieldIds", {})
-    outc = ghl.get("outcomeFields", {})
-    client_field = ghl.get("clientField")
+def build_bundle(facts, submissions, ghl, dash, since, until):
+    """Everything the board renders for one window: floor, clients, setters, timeseries, insights."""
     lane_map = ghl.get("queueLaneMap", {})
     divisions = [d for d in ghl.get("divisions", []) if d.get("active", True)]
     goals = dash.get("goals", {})
-    flags = []
-
-    intro_key = (outc.get("introCallOutcome") or {}).get("fieldKey")
-    intro_booked = (outc.get("introCallOutcome") or {}).get("booked", "Booked")
-    held_key = (outc.get("clientCallOutcome") or {}).get("fieldKey")
-    held_val = (outc.get("clientCallOutcome") or {}).get("held", "Complete")
-
-    # Index contacts by client acronym, computing per-contact belt facts once.
-    facts = [contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val) for c in contacts]
 
     clients = []
     for div in divisions:
         rows = [f for f in facts if f["acronym"] == div.get("acronym")]
         client = build_client(div, rows, since, until)
-        if client["leads"] or client["worked"] or client["booked"]:   # active = has activity in window
+        if client["leads"] or client["worked"] or client["booked"]:   # active = activity in window
             clients.append(client)
+    clients.sort(key=lambda c: -(c.get("leads") or 0))
 
     floor = build_floor(facts, since, until, goals, lane_map)
     setters = build_setters(facts, submissions, ghl, goals, since, until)
-
-    # Floor form compliance = total forms submitted / total connected calls in the window.
-    # Capped at 1.0: form-only setters (Heart, Sophia) submit forms without a claim-side connect,
-    # so the raw ratio can exceed 1 in thin windows; a compliance rate is bounded by definition.
     forms_total = sum((s.get("formsSubmitted") or 0) for s in setters)
     fc = ratio(forms_total, floor.get("connectsInRange"))
     floor["formCompliance"] = min(1.0, fc) if fc is not None else None
 
-    # ---- data-quality flags for the documented gaps ----
+    return {
+        "dateRange": fmt_range(since, until),
+        "floor": floor,
+        "clients": clients,
+        "setters": setters,
+        "timeseries": build_timeseries(facts, since, until),
+        "insights": build_insights(floor, clients, setters, goals),
+    }
+
+
+def build_data_quality(bundle, contacts, ghl, goals):
+    floor, setters = bundle["floor"], bundle["setters"]
+    flags = []
     stuck = sum(1 for c in contacts if ghl.get("attemptToggleTag", "sid-dial-1").lower() in [t.lower() for t in c.get("tags", [])])
     if stuck > max(10, 0.02 * (floor.get("leadsInRange") or 0)):
-        flags.insert(0, {
-            "code": "ATTEMPT_INTEGRITY",
-            "severity": "alert",
+        flags.append({
+            "code": "ATTEMPT_INTEGRITY", "severity": "alert",
             "message": ("%d contacts are stuck carrying the sid-dial-1 toggle tag, which means dial pairs "
                         "are not completing and attempt counts are not incrementing correctly. Check WF-2 "
                         "before trusting attempt numbers." % stuck),
@@ -229,21 +260,52 @@ def build_from_raw(ghl, dash):
                         "count claimed leads only." % (" and ".join(form_only))),
             "affects": ["setters.attempts", "setters.connects", "setters.shows"],
         })
+    return flags
+
+
+def build_from_raw(ghl, dash):
+    meta = load_json(os.path.join(RAW_DIR, "_meta.json"), {})
+    if not meta:
+        die("No data/raw/_meta.json. Run pipeline/fetch_sid.py first.")
+    contacts = load_json(os.path.join(RAW_DIR, "contacts.json"), []) or []
+    submissions = load_json(os.path.join(RAW_DIR, "form_submissions.json"), []) or []
+    cfields = load_json(os.path.join(RAW_DIR, "custom_fields.json"), []) or []
+
+    global FIELD_KEY_TO_ID
+    FIELD_KEY_TO_ID = {f.get("fieldKey"): f.get("id") for f in cfields if f.get("fieldKey") and f.get("id")}
+
+    efid = ghl.get("eventDateFieldIds", {})
+    afid = ghl.get("attemptFieldIds", {})
+    outc = ghl.get("outcomeFields", {})
+    lane_map = ghl.get("queueLaneMap", {})
+    goals = dash.get("goals", {})
+    intro_key = (outc.get("introCallOutcome") or {}).get("fieldKey")
+    intro_booked = (outc.get("introCallOutcome") or {}).get("booked", "Booked")
+    held_key = (outc.get("clientCallOutcome") or {}).get("fieldKey")
+    held_val = (outc.get("clientCallOutcome") or {}).get("held", "Complete")
+
+    facts = [contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val) for c in contacts]
+
+    now = now_utc()
+    default = dash.get("defaultPeriod", "7d")
+    periods = {}
+    for key, (s, u, ps, pu) in period_windows(now).items():
+        bundle = build_bundle(facts, submissions, ghl, dash, s, u)
+        prev_floor = build_floor(facts, ps, pu, goals, lane_map) if ps else None
+        bundle["prevDateRange"] = fmt_range(ps, pu)
+        bundle["deltas"] = compute_deltas(bundle["floor"], prev_floor)
+        periods[key] = bundle
 
     return {
         "title": dash.get("title", "Setter Floor Dashboard"),
-        "dateRange": "%s to %s" % (since.strftime("%d %b %Y"), until.strftime("%d %b %Y")),
-        "period": dash.get("defaultPeriod", "7d"),
+        "period": default,
+        "defaultPeriod": default,
         "sample": False,
         "source": ghl.get("crm", "SID"),
-        "generatedAt": now_utc().replace(microsecond=0).isoformat(),
+        "generatedAt": now.replace(microsecond=0).isoformat(),
         "freshnessMin": freshness_min(meta),
-        "floor": floor,
-        "clients": sorted(clients, key=lambda c: -(c.get("leads") or 0)),
-        "setters": setters,
-        "timeseries": build_timeseries(facts, since, until),
-        "insights": build_insights(floor, clients, setters, goals),
-        "dataQuality": flags,
+        "periods": periods,
+        "dataQuality": build_data_quality(periods.get(default) or next(iter(periods.values())), contacts, ghl, goals),
     }
 
 
@@ -524,8 +586,11 @@ def main():
 
     with open(OUT_PATH, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2)
-    print("build_data: wrote data/dashboard-data.json (%d clients, %d setters, %d data-quality flags)"
-          % (len(data.get("clients", [])), len(data.get("setters", [])), len(data.get("dataQuality", []))))
+    periods = data.get("periods") or {}
+    default = data.get("defaultPeriod") or (next(iter(periods), None))
+    b = periods.get(default, {}) if periods else data
+    print("build_data: wrote data/dashboard-data.json (%d periods, default %s: %d clients, %d setters; %d data-quality flags)"
+          % (len(periods), default, len(b.get("clients", [])), len(b.get("setters", [])), len(data.get("dataQuality", []))))
 
 
 if __name__ == "__main__":

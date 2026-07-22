@@ -89,6 +89,11 @@
   }
   .client-select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,0.25); }
   .client-select option { background:var(--ink2); color:var(--bone); }
+  .cmp-btn { border:1px solid var(--hair2); background:var(--inkDeep); color:var(--boneDim); font-family:var(--body); font-size:12px; font-weight:600; padding:7px 13px; border-radius:999px; cursor:pointer; }
+  .cmp-btn.on { background:var(--accent); color:#fff; border-color:transparent; }
+  .cmp-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .tile .tdelta { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:700; margin-top:6px; }
+  .tdelta.good { color:var(--goodText); } .tdelta.bad { color:var(--alertText); } .tdelta.flat { color:var(--boneFaint); }
 
   /* Data-quality strip: above everything, alert tone */
   .dq-strip { margin-bottom:18px; display:flex; flex-direction:column; gap:8px; }
@@ -228,6 +233,7 @@
   <div id="app" hidden>
     <div class="controls">
       <div><span class="ctl-label">Period</span><span class="segset" id="periods"></span></div>
+      <div><span id="compareToggle"></span></div>
       <div><span class="ctl-label">Client</span><span id="clientToggle"></span></div>
     </div>
 
@@ -301,7 +307,24 @@
  * ------------------------------------------------------------------ */
 const CFG = { brand:null, dash:null };
 let DATA = null;
-let STATE = { tab:null, period:null, client:"__all__", sort:{ key:"bookRate", dir:-1 } };
+let P = null;   // the active period bundle: { floor, clients, setters, timeseries, insights, deltas }
+let STATE = { tab:null, period:null, client:"__all__", compare:true, sort:{ key:"bookRate", dir:-1 } };
+
+/* Normalize either shape into DATA.periods. New pipeline output already has .periods; the committed
+   sample (and any old flat file) is wrapped into a single period so it still renders. */
+function normalizeData() {
+  if (DATA.periods && Object.keys(DATA.periods).length) return;
+  const key = DATA.period || CFG.dash.defaultPeriod || "7d";
+  DATA.periods = {};
+  DATA.periods[key] = {
+    dateRange: DATA.dateRange || null, prevDateRange: null, deltas: null,
+    floor: DATA.floor || {}, clients: DATA.clients || [],
+    setters: DATA.setters || [], timeseries: DATA.timeseries || {}, insights: DATA.insights || [],
+  };
+  DATA.defaultPeriod = key;
+}
+function periodKeys() { return Object.keys(DATA.periods || {}); }
+function activeBundle() { return (DATA.periods && DATA.periods[STATE.period]) || DATA.periods[periodKeys()[0]] || {}; }
 
 async function getJSON(paths) {
   // Try each path in order, return first that loads.
@@ -328,7 +351,8 @@ async function boot() {
     return;
   }
   applyBrand(CFG.brand);
-  STATE.period = DATA.period || CFG.dash.defaultPeriod;
+  normalizeData();
+  STATE.period = (DATA.periods[DATA.defaultPeriod] ? DATA.defaultPeriod : periodKeys()[0]);
   STATE.tab = CFG.dash.defaultTab || CFG.dash.tabs[0];
   const ds = defaultSort();
   if (ds) STATE.sort = ds;
@@ -422,6 +446,7 @@ function toast(msg) {
  * Render orchestrator
  * ------------------------------------------------------------------ */
 function render() {
+  P = activeBundle();
   renderChrome();
   renderControls();
   renderDataQuality();
@@ -442,28 +467,42 @@ function renderChrome() {
   else { txt = fm + " min old"; cls = fm > 180 ? "alert" : fm > 60 ? "warn" : "good"; }
   fb.className = "chip " + cls; fb.textContent = txt;
   const gen = DATA.generatedAt ? new Date(DATA.generatedAt).toLocaleString("en-US", { dateStyle:"medium", timeStyle:"short" }) : "";
+  const cmp = STATE.compare && P.prevDateRange ? "<span class='faint'>vs " + esc(P.prevDateRange) + "</span><br>" : "";
   document.getElementById("stamp").innerHTML =
-    (DATA.dateRange ? esc(DATA.dateRange) + "<br>" : "") + (gen ? "updated " + esc(gen) : "");
+    (P.dateRange ? esc(P.dateRange) + "<br>" : "") + cmp + (gen ? "updated " + esc(gen) : "");
 }
 
+const PERIOD_ORDER = ["Today", "7d", "30d", "MTD", "QTD", "YTD", "All"];
+const PERIOD_LABEL = { "7d":"7d", "30d":"30d", "Today":"Today", "MTD":"MTD", "QTD":"QTD", "YTD":"YTD", "All":"All" };
+
 function renderControls() {
-  // Period chips. Only the window in the data file is real; others prompt for live data.
+  // Period chips, functional: switch the rendered window. Only periods present in the data appear.
+  const have = new Set(periodKeys());
+  const order = PERIOD_ORDER.filter(k => have.has(k)).concat(periodKeys().filter(k => !PERIOD_ORDER.includes(k)));
   const per = document.getElementById("periods");
   per.innerHTML = "";
-  (CFG.dash.periods || []).forEach(p => {
+  order.forEach(p => {
     const b = document.createElement("button");
-    b.textContent = p;
+    b.textContent = PERIOD_LABEL[p] || p;
     b.className = (p === STATE.period) ? "on" : "";
-    b.title = (p === STATE.period) ? "Current window" : "Period switching activates with live data (prompt 03)";
-    b.onclick = () => {
-      if (p === STATE.period) return;
-      toast("This build renders the " + STATE.period + " window from the data file. Connect live data to switch periods.");
-    };
+    b.onclick = () => { if (p !== STATE.period) { STATE.period = p; render(); } };
     per.appendChild(b);
   });
 
+  // Compare toggle: show period-over-period deltas on the tiles (vs the previous equal window).
+  const cmp = document.getElementById("compareToggle");
+  const hasPrev = !!P.prevDateRange;
+  cmp.innerHTML = "";
+  const cb = document.createElement("button");
+  cb.className = "cmp-btn" + (STATE.compare ? " on" : "");
+  cb.textContent = STATE.compare ? "Compare: on" : "Compare: off";
+  cb.title = hasPrev ? "Toggle vs previous period" : "No previous period for " + STATE.period;
+  cb.disabled = !hasPrev;
+  cb.onclick = () => { STATE.compare = !STATE.compare; render(); };
+  cmp.appendChild(cb);
+
   // Client selector: a dropdown (the roster can be dozens of agencies). All Clients plus one option
-  // per client present in the data, sorted by leads so the busiest agencies are near the top.
+  // per client present in the active period, sorted by leads so the busiest agencies are near the top.
   const ct = document.getElementById("clientToggle");
   ct.innerHTML = "";
   const sel = document.createElement("select");
@@ -475,7 +514,7 @@ function renderControls() {
     return o;
   };
   if (CFG.dash.showAllClientsRollup !== false) sel.appendChild(opt("__all__", "All Clients"));
-  (DATA.clients || []).filter(c => c.active !== false)
+  (P.clients || []).filter(c => c.active !== false)
     .slice().sort((a, b) => (b.leads || 0) - (a.leads || 0))
     .forEach(c => sel.appendChild(opt(c.key, c.label)));
   sel.onchange = () => { STATE.client = sel.value; render(); };
@@ -528,7 +567,7 @@ function renderFloor() {
 function renderTiles() {
   const host = document.getElementById("tiles");
   host.innerHTML = "";
-  const f = DATA.floor || {};
+  const f = P.floor || {};
   (CFG.dash.floorTiles || []).forEach(t => {
     const raw = tileValue(t, f);
     let band = null;
@@ -542,9 +581,23 @@ function renderTiles() {
       (band ? '<span class="band ' + band + '"></span>' : "") +
       '<div class="tlabel">' + esc(t.label) + '</div>' +
       '<div class="tval ' + (band ? "val " + band : "") + '">' + val + '</div>' +
+      deltaChip(t) +
       (sub ? '<div class="tsub">' + sub + '</div>' : "");
     host.appendChild(el);
   });
+}
+/* Period-over-period delta chip for a tile: arrow shows direction, color shows improvement
+   (invert metrics like unworked/speed/queue improve when they go down). */
+function deltaChip(t) {
+  if (!STATE.compare || !P.deltas) return "";
+  const d = P.deltas[t.key];
+  if (!d || isNil(d.pct)) return "";
+  const up = d.pct > 0, flat = d.pct === 0;
+  const improved = flat ? null : (t.invert ? !up : up);
+  const cls = flat ? "flat" : (improved ? "good" : "bad");
+  const arrow = flat ? "=" : (up ? "▲" : "▼");
+  const pct = (Math.abs(d.pct) * 100).toFixed(Math.abs(d.pct) < 0.1 ? 1 : 0) + "%";
+  return '<div class="tdelta ' + cls + '" title="vs previous period">' + arrow + " " + pct + '</div>';
 }
 function tileValue(t, f) {
   // A few tiles read a nested field rather than a top-level floor key.
@@ -566,7 +619,7 @@ function tileSub(t, f) {
 
 function renderInsights() {
   const host = document.getElementById("insights");
-  const ins = (DATA.insights || []).slice().sort((a, b) => (a.rank || 99) - (b.rank || 99));
+  const ins = (P.insights || []).slice().sort((a, b) => (a.rank || 99) - (b.rank || 99));
   if (!ins.length) { host.innerHTML = '<div class="muted">No insights fired. The floor is inside every goal band.</div>'; return; }
   host.innerHTML = "";
   ins.forEach(i => {
@@ -587,7 +640,7 @@ const sev = s => (s === "good" ? "good" : s === "warn" ? "warn" : "alert");
 
 function renderLanes() {
   const host = document.getElementById("lanes");
-  const q = (DATA.floor && DATA.floor.queue) || {};
+  const q = (P.floor && P.floor.queue) || {};
   const lanes = CFG.dash.priorityLanes || [];
   const max = Math.max(1, ...lanes.map(l => q[l.key] || 0));
   host.innerHTML = "";
@@ -607,7 +660,7 @@ function renderLanes() {
 /* Funnel derives from client rows so the client toggle drives it. */
 function currentFunnelSource() {
   const stages = CFG.dash.funnelStages || [];
-  const clients = DATA.clients || [];
+  const clients = P.clients || [];
   const pick = STATE.client === "__all__" ? clients : clients.filter(c => c.key === STATE.client);
   const acc = {};
   stages.forEach(s => acc[s.key] = 0);
@@ -645,7 +698,7 @@ function renderFunnel() {
 /* Inline SVG trend: three count lines (left axis) + speed line (right axis). */
 function renderTrend() {
   const host = document.getElementById("trend");
-  const ts = DATA.timeseries;
+  const ts = P.timeseries;
   if (!ts || !ts.days || !ts.days.length) { host.innerHTML = '<div class="muted">No trend data in this window.</div>'; return; }
   const W = 560, H = 240, padL = 34, padR = 40, padT = 14, padB = 26;
   const days = ts.days;
@@ -704,7 +757,7 @@ function defaultSort() {
 function renderSetters() {
   const wrap = document.getElementById("settersTableWrap");
   const cols = CFG.dash.setterColumns || [];
-  const rows = (DATA.setters || []).slice();
+  const rows = (P.setters || []).slice();
   if (!rows.length) {
     wrap.innerHTML = '<div class="empty">No setter rows in this window. The Intro Call Form has no submissions yet, '
       + 'so per-rep numbers cannot be attributed. This is expected before the CRM build (prompt 02).</div>';
@@ -794,7 +847,7 @@ function covBar(v, tgt) {
 function renderClients() {
   const wrap = document.getElementById("clientsTableWrap");
   const cols = CFG.dash.clientColumns || [];
-  let rows = (DATA.clients || []).slice().filter(c => c.active !== false);
+  let rows = (P.clients || []).slice().filter(c => c.active !== false);
   if (STATE.client !== "__all__") rows = rows.filter(c => c.key === STATE.client);
   if (!rows.length) { wrap.innerHTML = '<div class="empty">No client rows in this window.</div>'; return; }
   rows.sort((a, b) => (b.leads || 0) - (a.leads || 0));
