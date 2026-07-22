@@ -27,7 +27,7 @@ on:
       mode:
         description: "discover (inventory IDs) or refresh (pull + build)"
         type: choice
-        options: [refresh, discover]
+        options: [refresh, discover, probe]
         default: refresh
   schedule:
     # Every 30 minutes. Narrow to floor hours once the timezone is confirmed.
@@ -69,8 +69,14 @@ jobs:
           SID_TOKEN: ${{ secrets.SID_TOKEN }}
         run: python pipeline/discover_sid.py
 
+      - name: Probe where call data lives (read only)
+        if: ${{ github.event.inputs.mode == 'probe' }}
+        env:
+          SID_TOKEN: ${{ secrets.SID_TOKEN }}
+        run: python pipeline/probe_calls.py
+
       - name: Pull SID and build board data
-        if: ${{ github.event.inputs.mode != 'discover' }}
+        if: ${{ github.event.inputs.mode != 'discover' && github.event.inputs.mode != 'probe' }}
         env:
           SID_TOKEN: ${{ secrets.SID_TOKEN }}
         run: |
@@ -83,6 +89,8 @@ jobs:
           git config user.email "sid-pipeline@users.noreply.github.com"
           if [ "${{ github.event.inputs.mode }}" = "discover" ]; then
             git add -f config/sid-discovery.json || true
+          elif [ "${{ github.event.inputs.mode }}" = "probe" ]; then
+            git add -f config/sid-call-probe.json || true
           else
             # data/dashboard-data.json is gitignored to prevent accidental local commits;
             # force-add the generated aggregate file (no PHI) so the board always has fresh data.
