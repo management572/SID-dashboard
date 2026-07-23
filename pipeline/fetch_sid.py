@@ -249,7 +249,9 @@ def pull_calls(cfg, token, location_id, since_dt):
     since_ms = int(since_dt.timestamp() * 1000)
 
     calls = []
-    scanned = with_calls = 0
+    scanned = pulled = 0
+    newest_lmd = oldest_lmd = None
+    consecutive_old = 0
     params = {"locationId": location_id, "limit": 100, "sortBy": "last_message_date", "sort": "desc"}
     try:
         while scanned < max_convs:
@@ -262,30 +264,43 @@ def pull_calls(cfg, token, location_id, since_dt):
                 scanned += 1
                 cursor = _conv_cursor(cv) or cursor
                 lmd = to_ms(cv.get("lastMessageDate") or cv.get("dateUpdated"))
+                if lmd is not None:
+                    newest_lmd = lmd if (newest_lmd is None or lmd > newest_lmd) else newest_lmd
+                    oldest_lmd = lmd if (oldest_lmd is None or lmd < oldest_lmd) else oldest_lmd
+                # A conversation whose last activity predates the window has no in-window calls. Skip it,
+                # but do NOT terminate the scan: the search is not reliably sorted, so a stray old
+                # conversation must not cut off the newer ones behind it. Only stop after a long run of
+                # consecutive old conversations (deep past the window) to bound cost.
                 if lmd is not None and lmd < since_ms:
-                    stop = True
-                    break
+                    consecutive_old += 1
+                    if consecutive_old >= 1000:
+                        stop = True
+                        break
+                    continue
+                consecutive_old = 0
                 cid = cv.get("id")
                 if not cid:
                     continue
-                mtypes = cv.get("messageTypes") or []
-                # Skip conversations that never carried a call (SMS/email-only) to save message pulls.
-                if mtypes and not any(ct in mtypes for ct in CALL_TYPES):
-                    continue
-                with_calls += 1
+                # Pull messages for every in-window conversation. (The conversation.messageTypes hint is
+                # not a reliable enumeration of a conversation's calls, so filtering on it dropped recent
+                # call-bearing conversations; message pulls are cheap, so just always pull.)
+                pulled += 1
                 calls.extend(pull_conv_calls(cfg, token, cid, since_ms, max_msg_pages))
                 if scanned >= max_convs:
                     break
             if stop or scanned >= max_convs or cursor is None:
                 break
             params["startAfterDate"] = str(cursor)
-            time.sleep(0.1)
+            time.sleep(0.05)
     except SystemExit:
         print("fetch_sid: conversations pull stopped on API error; keeping %d call events." % len(calls))
     except Exception as e:  # never let the call feed abort the contacts-based build
         print("fetch_sid: conversations pull error (%s); keeping %d call events." % (e, len(calls)))
-    print("fetch_sid: calls scanned %d conversations (%d with calls), %d call events since %s"
-          % (scanned, with_calls, len(calls), since_dt.date()))
+    def _d(msv):
+        return dt.datetime.fromtimestamp(msv / 1000, tz=dt.timezone.utc).date().isoformat() if msv else "n/a"
+    print("fetch_sid: calls scanned %d conversations, pulled messages for %d, %d call events since %s "
+          "(conversation last-activity range %s .. %s)"
+          % (scanned, pulled, len(calls), since_dt.date(), _d(oldest_lmd), _d(newest_lmd)))
     _log_call_histogram(calls)
     return calls
 
