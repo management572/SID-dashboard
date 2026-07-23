@@ -220,6 +220,8 @@
   .expander .caret { display:inline-block; width:12px; color:var(--boneFaint); transition:transform .12s; }
   tr.open .caret { transform:rotate(90deg); }
   .drill td { background:var(--inkDeep); padding:16px 18px; }
+  /* Wide tables scroll horizontally inside their card instead of overflowing the page. */
+  #settersTableWrap, #clientsTableWrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
   /* Coverage bars */
   .cov { display:grid; grid-template-columns:120px 1fr 1fr; gap:14px 20px; align-items:center; }
@@ -239,6 +241,44 @@
 
   .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--inkDeep); border:1px solid var(--hair2); color:var(--bone); padding:10px 16px; border-radius:8px; font-size:12px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:50; }
   .toast.on { opacity:1; }
+
+  /* ---------- Responsive: tablet and phone ---------- */
+  @media (max-width: 900px) {
+    .wrap { min-width:0; padding:0 16px; }
+    header.mast { flex-wrap:wrap; gap:10px 14px; padding:16px 0 12px; }
+    .board-title { display:none; }
+    .mast-right { margin-left:auto; flex-wrap:wrap; justify-content:flex-end; gap:8px 10px; }
+    .grid.cols2, .grid.cols2b { grid-template-columns:1fr; }
+    .tiles { grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+    .rateboard { grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); }
+    .bell-panel { width:min(380px, 90vw); }
+    nav.tabs { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    nav.tabs button { white-space:nowrap; }
+  }
+  @media (max-width: 560px) {
+    body { padding-bottom:48px; }
+    .wrap { padding:0 12px; }
+    .mast-right { width:100%; margin-left:0; justify-content:space-between; }
+    .stamp { text-align:left; font-size:10.5px; line-height:1.35; }
+    .controls { gap:12px; }
+    .controls > div { flex:1 1 100%; display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+    .segset { flex-wrap:wrap; }
+    .client-select { min-width:0; width:100%; flex:1 1 auto; }
+    .tiles { grid-template-columns:repeat(auto-fit, minmax(132px,1fr)); gap:10px; }
+    .tile { padding:12px 13px; }
+    .tile .tval { font-size:26px; }
+    .tile.hero .tval { font-size:32px; }
+    .ratecard .rval { font-size:25px; }
+    .card { padding:14px 14px; }
+    h2 { font-size:16px; }
+    .rateboard { grid-template-columns:1fr 1fr; }
+    .tiles-head { margin-top:4px; }
+  }
+  @media (max-width: 380px) {
+    .tiles { grid-template-columns:1fr 1fr; }
+    .tile .tval { font-size:23px; }
+    .wordmark { font-size:20px; }
+  }
 
   @media print {
     body { background:#fff; color:#000; padding:0; }
