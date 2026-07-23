@@ -194,6 +194,8 @@
   .chart-tip .tip-k { color:var(--boneFaint); font-weight:500; margin-right:7px; }
   rect[data-tip] { cursor:pointer; }
   rect[data-tip]:hover { filter:brightness(1.15); }
+  /* Transparent per-point hover columns on the line charts must still hit-test. */
+  svg rect[data-tip] { pointer-events:all; }
 
   /* Insights */
   .insight { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--hair); }
@@ -240,7 +242,32 @@
   tr.open .caret { transform:rotate(90deg); }
   .drill td { background:var(--inkDeep); padding:16px 18px; }
   /* Wide tables scroll horizontally inside their card instead of overflowing the page. */
-  #settersTableWrap, #clientsTableWrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  #settersTableWrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  /* Clients: summary strip + a card per agency */
+  .csummary { display:grid; grid-template-columns:repeat(auto-fit, minmax(110px,1fr)); gap:10px; margin-bottom:18px; }
+  .csum { background:var(--inkDeep); border:1px solid var(--hair); border-radius:var(--r); padding:11px 13px; }
+  .csum-l { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
+  .csum-v { font-family:var(--head); font-weight:700; font-size:22px; margin-top:5px; }
+  .client-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px,1fr)); gap:14px; }
+  .ccard { background:var(--ink2); border:1px solid var(--hair); border-radius:var(--r); padding:15px 16px; cursor:pointer; transition:border-color .12s, box-shadow .12s; }
+  .ccard:hover { border-color:var(--hair2); }
+  .ccard.open { border-color:var(--accent); }
+  .ccard-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .ccard-name { font-family:var(--head); font-weight:700; font-size:16px; line-height:1.2; }
+  .ccard-mkt { font-size:11px; color:var(--boneFaint); margin-top:2px; }
+  .ccard-lead { font-family:var(--head); font-weight:700; font-size:29px; margin:10px 0 2px; letter-spacing:-0.5px; }
+  .ccard-lead small { font-size:12px; color:var(--boneDim); font-weight:400; letter-spacing:0; }
+  .cfunnel { display:flex; gap:6px; margin:12px 0 4px; }
+  .cfstep { flex:1; text-align:center; background:var(--inkDeep); border-radius:7px; padding:7px 2px; }
+  .cfstep .n { font-family:var(--head); font-weight:700; font-size:16px; }
+  .cfstep .l { font-size:9.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--boneFaint); margin-top:2px; }
+  .cbar { height:7px; background:var(--inkDeep); border-radius:4px; overflow:visible; margin-top:10px; position:relative; }
+  .cbar .fill { height:100%; border-radius:4px; }
+  .cbar .tgt { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--boneDim); border-radius:2px; }
+  .cmeta { display:flex; justify-content:space-between; font-size:11px; color:var(--boneDim); margin-top:7px; }
+  .ccard-detail { margin-top:14px; padding-top:14px; border-top:1px solid var(--hair); overflow-x:auto; }
+  #clientsTableWrap { overflow-x:visible; }
 
   /* Coverage bars */
   .cov { display:grid; grid-template-columns:120px 1fr 1fr; gap:14px 20px; align-items:center; }
@@ -425,7 +452,7 @@
     <section class="tab" id="tab-clients">
       <div class="card">
         <h2>Clients</h2>
-        <div class="sub">One row per home-care agency, plus the roll-up. Expand a row for its funnel and the median lag between stages.</div>
+        <div class="sub">One card per home-care agency, sorted by volume. Tap a card for its funnel and the median lag between stages.</div>
         <div id="clientsTableWrap"></div>
       </div>
     </section>
@@ -951,13 +978,29 @@ function renderTrend() {
     if (n > 8 && i % 2) return;
     xl += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(shortDay(d)) + '</text>';
   });
+  // Per-day hover column (transparent) listing every series value for that day.
+  const slot = (W - padL - padR) / Math.max(1, n - 1);
+  const cell = (v, suffix) => isNil(v) ? null : (Number(v).toLocaleString("en-US") + (suffix || ""));
+  let hits = "";
+  for (let i = 0; i < n; i++) {
+    const parts = [
+      cell((ts.leads || [])[i]) && "Leads " + cell((ts.leads || [])[i]),
+      cell((ts.worked || [])[i]) && "Worked " + cell((ts.worked || [])[i]),
+      cell((ts.booked || [])[i]) && "Booked " + cell((ts.booked || [])[i]),
+      cell((ts.speedToLeadMedianMin || [])[i], "m") && "STL " + cell((ts.speedToLeadMedianMin || [])[i], "m"),
+    ].filter(Boolean);
+    const tip = '<span class="tip-k">' + esc(shortDay(days[i])) + '</span>' + parts.join(" · ");
+    const cx = x(i);
+    hits += '<rect x="' + (cx - slot / 2).toFixed(1) + '" y="' + padT + '" width="' + slot.toFixed(1) +
+      '" height="' + (H - padT - padB) + '" fill="var(--ink)" fill-opacity="0.01" pointer-events="all" data-tip="' + esc(tip) + '"></rect>';
+  }
   host.innerHTML =
     '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' +
       grid + xl +
       line(ts.leads || [], "var(--accent)") +
       line(ts.worked || [], "var(--accentText)") +
       line(ts.booked || [], "var(--accent2)") +
-      speedLine() +
+      speedLine() + hits +
     '</svg>' +
     '<div class="legend">' +
       '<span><i style="background:var(--accent)"></i>Leads in</span>' +
@@ -965,6 +1008,7 @@ function renderTrend() {
       '<span><i style="background:var(--accent2)"></i>Booked</span>' +
       '<span><i style="background:var(--boneDim)"></i>Speed to lead (median min, right axis)</span>' +
     '</div>';
+  wireBarTips("trend");
 }
 function shortDay(iso) {
   const d = new Date(iso);
@@ -1176,18 +1220,29 @@ function renderRevenueLine(m) {
     grid += '<text x="' + (padL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + revShort(Math.round(maxV * (1 - g / 4))) + '</text>';
   }
   const now = new Date();
+  const wkLabel = i => { const d = new Date(now); d.setDate(d.getDate() - (n - 1 - i) * 7);
+    return d.toLocaleDateString("en-US", { month:"short", day:"numeric" }); };
   let xl = "";
   for (let i = 0; i < n; i++) {
     if (i % 2) continue;
-    const d = new Date(now); d.setDate(d.getDate() - (n - 1 - i) * 7);
-    xl += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' +
-      esc(d.toLocaleDateString("en-US", { month:"short", day:"numeric" })) + '</text>';
+    xl += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(wkLabel(i)) + '</text>';
+  }
+  // Per-week hover column (transparent) + dots on the current-year line.
+  const slot = (W - padL - padR) / Math.max(1, n - 1);
+  let hits = "", dots = "";
+  for (let i = 0; i < n; i++) {
+    const cx = x(i);
+    const tip = '<span class="tip-k">' + esc(wkLabel(i)) + '</span>This yr ' + revMoney(cur[i]) + ' · Prior ' + revMoney(prior[i]);
+    hits += '<rect x="' + (cx - slot / 2).toFixed(1) + '" y="' + padT + '" width="' + slot.toFixed(1) +
+      '" height="' + (H - padT - padB) + '" fill="var(--ink)" fill-opacity="0.01" pointer-events="all" data-tip="' + esc(tip) + '"></rect>';
+    dots += '<circle cx="' + cx.toFixed(1) + '" cy="' + y(cur[i]).toFixed(1) + '" r="2.6" fill="var(--accent2)" />';
   }
   host.innerHTML =
     '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' + grid + xl +
-      poly(prior, "var(--boneDim)", true) + poly(cur, "var(--accent2)", false) + '</svg>' +
+      poly(prior, "var(--boneDim)", true) + poly(cur, "var(--accent2)", false) + dots + hits + '</svg>' +
     '<div class="legend"><span><i style="background:var(--accent2)"></i>This year</span>' +
       '<span><i style="background:var(--boneDim)"></i>Prior year</span></div>';
+  wireBarTips("revLine");
 }
 
 /* Revenue bars: WoW / MoM / YoY per the toggle. */
@@ -1331,40 +1386,49 @@ function covBar(v, tgt) {
 /* ---------------------------- CLIENTS ---------------------------- */
 function renderClients() {
   const wrap = document.getElementById("clientsTableWrap");
-  const cols = CFG.dash.clientColumns || [];
   let rows = (P.clients || []).slice().filter(c => c.active !== false);
   if (STATE.client !== "__all__") rows = rows.filter(c => c.key === STATE.client);
-  if (!rows.length) { wrap.innerHTML = '<div class="empty">No client rows in this window.</div>'; return; }
+  if (!rows.length) { wrap.innerHTML = '<div class="empty">No client activity in this window.</div>'; return; }
   rows.sort((a, b) => (b.leads || 0) - (a.leads || 0));
+  const bTgt = (CFG.dash.goals || {}).bookRateTarget;
 
-  const showRollup = CFG.dash.showAllClientsRollup !== false && STATE.client === "__all__";
-  const rollup = showRollup ? buildRollup(rows) : null;
+  // Summary strip across the clients in view.
+  const roll = buildRollup(rows);
+  const summary = '<div class="csummary">'
+    + csum("Clients", fmtCount(rows.length)) + csum("Leads In", fmtCount(roll.leads))
+    + csum("Worked", fmtCount(roll.worked)) + csum("Booked", fmtCount(roll.booked))
+    + csum("Book rate", fmtPct(roll.bookRate)) + csum("Held", fmtCount(roll.shows))
+    + '</div>';
 
-  let thead = "<tr><th style='width:22px'></th>";
-  cols.forEach(c => { if (!(c.optional && rows.every(r => isNil(r[c.key])))) thead += "<th>" + esc(c.label) + "</th>"; });
-  thead += "</tr>";
-  const activeCols = cols.filter(c => !(c.optional && rows.every(r => isNil(r[c.key]))));
-
-  let tbody = "";
+  let cards = '<div class="client-grid">';
   rows.forEach((r, idx) => {
-    tbody += '<tr class="expander" data-i="' + idx + '"><td><span class="caret">›</span></td>';
-    activeCols.forEach(c => tbody += "<td>" + clientCell(r, c) + "</td>");
-    tbody += "</tr>";
-    tbody += '<tr class="drill" id="drill-' + idx + '" hidden><td></td><td colspan="' + activeCols.length + '">' + clientDrill(r) + "</td></tr>";
+    const band = isNil(bTgt) ? null : bandTarget(r.bookRate, bTgt, false);
+    const chipCls = band === "good" ? "good" : band === "warn" ? "warn" : band === "alert" ? "alert" : "neutral";
+    const fill = band === "good" ? "var(--good)" : band === "warn" ? "var(--warn)" : band === "alert" ? "var(--alert)" : "var(--accent)";
+    const bookPct = Math.min(100, (r.bookRate || 0) * 100);
+    cards += '<div class="ccard" data-i="' + idx + '">'
+      + '<div class="ccard-top"><div><div class="ccard-name">' + esc(r.label) + '</div>'
+        + (r.market ? '<div class="ccard-mkt">' + esc(r.market) + '</div>' : '') + '</div>'
+        + '<span class="chip ' + chipCls + '">' + fmtPct(r.bookRate) + ' book</span></div>'
+      + '<div class="ccard-lead">' + fmtCount(r.leads) + ' <small>leads in</small></div>'
+      + '<div class="cfunnel">' + cstep(r.worked, "Worked") + cstep(r.booked, "Booked") + cstep(r.shows, "Held") + '</div>'
+      + '<div class="cbar"><div class="fill" style="width:' + bookPct + '%;background:' + fill + '"></div>'
+        + (isNil(bTgt) ? '' : '<div class="tgt" style="left:' + Math.min(100, bTgt * 100) + '%"></div>') + '</div>'
+      + '<div class="cmeta"><span>Worked ' + fmtPct(r.workedPct) + '</span>'
+        + (isNil(bTgt) ? '' : '<span>book target ' + fmtPct(bTgt) + '</span>') + '</div>'
+      + '<div class="ccard-detail" id="cdetail-' + idx + '" hidden>' + clientDrill(r) + '</div>'
+      + '</div>';
   });
-  if (rollup) {
-    tbody += '<tr class="rollup"><td></td>';
-    activeCols.forEach(c => tbody += "<td>" + clientCell(rollup, c, true) + "</td>");
-    tbody += "</tr>";
-  }
+  cards += '</div>';
 
-  wrap.innerHTML = '<table><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>';
-  wrap.querySelectorAll("tr.expander").forEach(tr => tr.onclick = () => {
-    const i = tr.getAttribute("data-i");
-    const d = document.getElementById("drill-" + i);
-    d.hidden = !d.hidden; tr.classList.toggle("open", !d.hidden);
-  });
+  wrap.innerHTML = summary + cards;
+  wrap.querySelectorAll(".ccard").forEach(card => card.addEventListener("click", () => {
+    const d = card.querySelector(".ccard-detail");
+    if (d) { d.hidden = !d.hidden; card.classList.toggle("open", !d.hidden); }
+  }));
 }
+function csum(label, val) { return '<div class="csum"><div class="csum-l">' + esc(label) + '</div><div class="csum-v">' + val + '</div></div>'; }
+function cstep(v, label) { return '<div class="cfstep"><div class="n">' + fmtCount(v) + '</div><div class="l">' + esc(label) + '</div></div>'; }
 function clientCell(r, c, isRollup) {
   if (c.key === "label") return (isRollup ? "All Clients" : esc(r.label));
   if (c.key === "market") return isRollup ? '<span class="faint">rollup</span>' : (r.market ? esc(r.market) : dash());
