@@ -188,6 +188,12 @@
   .ratecard .rval { font-family:var(--head); font-weight:700; font-size:29px; line-height:1.1; margin-top:8px; letter-spacing:-.5px; color:var(--bone); }
   .ratecard .rsub { font-size:11px; color:var(--boneDim); margin-top:4px; }
   .card-head { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
+  .chart-tip { position:fixed; pointer-events:none; z-index:100; opacity:0; transition:opacity .08s;
+    background:var(--ink2); border:1px solid var(--hair2); color:var(--bone); padding:6px 10px;
+    border-radius:7px; font-size:12.5px; font-weight:700; white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,.45); }
+  .chart-tip .tip-k { color:var(--boneFaint); font-weight:500; margin-right:7px; }
+  rect[data-tip] { cursor:pointer; }
+  rect[data-tip]:hover { filter:brightness(1.15); }
 
   /* Insights */
   .insight { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--hair); }
@@ -965,6 +971,39 @@ function shortDay(iso) {
   return isNaN(d) ? iso : d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
 }
 
+/* Hover/tap tooltip for bar charts. Bars carry data-tip; one shared floating element follows the
+   pointer. Uses Pointer Events so it works with mouse, touch and pen (native <title> tooltips do
+   not appear on touch, and are slow on desktop). Delegated on the host so it survives re-renders. */
+function chartTip() {
+  let t = document.getElementById("chartTip");
+  if (!t) { t = document.createElement("div"); t.id = "chartTip"; t.className = "chart-tip"; document.body.appendChild(t); }
+  return t;
+}
+function wireBarTips(hostId) {
+  const host = document.getElementById(hostId);
+  if (!host || host._tipsWired) return;
+  host._tipsWired = true;
+  const tip = chartTip();
+  const showAt = (x, y, target) => {
+    const r = target && target.closest && target.closest("rect[data-tip]");
+    if (!r) { tip.style.opacity = 0; return false; }
+    tip.innerHTML = r.getAttribute("data-tip");
+    tip.style.opacity = 1;
+    const w = tip.offsetWidth;
+    let left = x + 14;
+    if (left + w > window.innerWidth - 8) left = x - 14 - w;
+    tip.style.left = Math.max(6, left) + "px";
+    tip.style.top = Math.max(6, y - 40) + "px";
+    return true;
+  };
+  host.addEventListener("mousemove", e => showAt(e.clientX, e.clientY, e.target));       // desktop hover
+  host.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
+  host.addEventListener("pointerdown", e => showAt(e.clientX, e.clientY, e.target));      // touch/pen tap
+  host.addEventListener("pointermove", e => { if (e.pointerType !== "mouse") showAt(e.clientX, e.clientY, e.target); });
+  // On touch, hide when tapping anywhere outside the chart.
+  document.addEventListener("pointerdown", e => { if (!host.contains(e.target)) tip.style.opacity = 0; }, true);
+}
+
 /* ---------------------------- DIALER ---------------------------- */
 function renderDialer() {
   renderTileRow(CFG.dash.dialerTiles || [], "dialerTiles");
@@ -1003,9 +1042,9 @@ function renderDialerBars() {
       const v = (dl[s.key] || [])[i] || 0;
       const yy = y(v), bh = Math.max(0, plotH + padT - yy);
       const bx = gx + si * (barW + 1);
+      const tip = '<span class="tip-k">' + esc(shortDay(days[i])) + ' · ' + s.label + '</span>' + fmtCount(v);
       bars += '<rect x="' + bx.toFixed(1) + '" y="' + yy.toFixed(1) + '" width="' + barW.toFixed(1) +
-              '" height="' + bh.toFixed(1) + '" fill="' + s.color + '" rx="1"><title>' +
-              esc(shortDay(days[i])) + ' — ' + s.label + ': ' + v + '</title></rect>';
+              '" height="' + bh.toFixed(1) + '" fill="' + s.color + '" rx="1" data-tip="' + esc(tip) + '"></rect>';
     });
   }
   let xl = "";
@@ -1017,6 +1056,7 @@ function renderDialerBars() {
   host.innerHTML =
     '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' + grid + bars + xl + '</svg>' +
     '<div class="legend">' + DIALER_SERIES.map(s => '<span><i style="background:' + s.color + '"></i>' + s.label + '</span>').join("") + '</div>';
+  wireBarTips("dialerBars");
 }
 function renderDialerRates() {
   const host = document.getElementById("dialerRates");
@@ -1184,12 +1224,14 @@ function renderRevenueBars(m) {
   for (let i = 0; i < n; i++) {
     const cx = padL + i * bw + bw / 2;
     const yy = y(vals[i]), bh = Math.max(0, plotH + padT - yy);
+    const tip = '<span class="tip-k">' + esc(labels[i]) + '</span>' + revMoney(vals[i]);
     bars += '<rect x="' + (cx - barW / 2).toFixed(1) + '" y="' + yy.toFixed(1) + '" width="' + barW.toFixed(1) +
-      '" height="' + bh.toFixed(1) + '" fill="var(--accent)" rx="2"><title>' + esc(labels[i]) + ': ' + revShort(vals[i]) + '</title></rect>';
+      '" height="' + bh.toFixed(1) + '" fill="var(--accent)" rx="2" data-tip="' + esc(tip) + '"></rect>';
     if (i % showEvery === 0)
       xl += '<text x="' + cx.toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(labels[i]) + '</text>';
   }
   host.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' + grid + bars + xl + '</svg>';
+  wireBarTips("revBars");
 }
 
 /* ---------------------------- SETTERS ---------------------------- */
