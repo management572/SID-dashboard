@@ -286,7 +286,43 @@ def pull_calls(cfg, token, location_id, since_dt):
         print("fetch_sid: conversations pull error (%s); keeping %d call events." % (e, len(calls)))
     print("fetch_sid: calls scanned %d conversations (%d with calls), %d call events since %s"
           % (scanned, with_calls, len(calls), since_dt.date()))
+    _log_call_histogram(calls)
     return calls
+
+
+def _log_call_histogram(calls):
+    """Diagnostic: where do the pulled call events fall in time, by direction? This tells us whether
+    recent-window undercounts are a pull-coverage problem or a downstream counting problem."""
+    now_ms = int(dt.datetime.now(dt.timezone.utc).timestamp() * 1000)
+    day = 86400000
+    buckets = {1: 0, 3: 0, 7: 0, 14: 0, 30: 0}
+    outbound = inbound = other = 0
+    dirs = {}
+    recent = []
+    for c in calls:
+        ts = to_ms(c.get("dateAdded"))
+        d = (c.get("direction") or "none")
+        dirs[d] = dirs.get(d, 0) + 1
+        if d == "outbound":
+            outbound += 1
+        elif d == "inbound":
+            inbound += 1
+        else:
+            other += 1
+        if ts is None:
+            continue
+        age = now_ms - ts
+        for k in buckets:
+            if age <= k * day:
+                buckets[k] += 1
+        if d == "outbound":
+            recent.append(ts)
+    recent.sort(reverse=True)
+    top = [dt.datetime.fromtimestamp(t / 1000, tz=dt.timezone.utc).isoformat() for t in recent[:5]]
+    print("fetch_sid: call directions %s" % dirs)
+    print("fetch_sid: call events in last 1/3/7/14/30 days = %s" % buckets)
+    print("fetch_sid: outbound=%d inbound=%d other=%d; 5 newest outbound: %s"
+          % (outbound, inbound, other, top))
 
 
 def main():
