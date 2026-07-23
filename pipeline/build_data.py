@@ -182,7 +182,8 @@ def period_windows(now):
 # Floor metrics that carry a period-over-period delta on the board.
 DELTA_KEYS = ["leadsToday", "leadsInRange", "introsBookedToday", "unworkedNow", "unworkedPastSla",
               "speedToLeadMedianMin", "dayOneCoverage", "formCompliance", "attemptsLogged",
-              "dialsLogged", "talkTimeSec", "connectsInRange"]
+              "dialsLogged", "attemptsDialed", "connectsInRange", "bookings", "leadToConnectPct",
+              "droppedCalls", "talkTimeSec", "avgDialDurationSec", "avgConnectDurationSec"]
 
 
 def compute_deltas(cur_floor, prev_floor):
@@ -199,8 +200,8 @@ def compute_deltas(cur_floor, prev_floor):
 
 
 # ------------------------------------------------------------------ build
-def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min):
-    """Everything the board renders for one window: floor, clients, setters, timeseries, insights."""
+def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min, dropped_statuses=()):
+    """Everything the board renders for one window: floor, clients, setters, dialer, insights."""
     lane_map = ghl.get("queueLaneMap", {})
     divisions = [d for d in ghl.get("divisions", []) if d.get("active", True)]
     goals = dash.get("goals", {})
@@ -213,7 +214,7 @@ def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min
             clients.append(client)
     clients.sort(key=lambda c: -(c.get("leads") or 0))
 
-    floor = build_floor(facts, calls, since, until, goals, lane_map, connect_min)
+    floor = build_floor(facts, calls, since, until, goals, lane_map, connect_min, dropped_statuses)
     setters, other_dialers = build_setters(facts, submissions, calls, ghl, goals, since, until, connect_min)
     forms_total = sum((s.get("formsSubmitted") or 0) for s in setters)
     fc = ratio(forms_total, floor.get("connectsInRange"))
@@ -226,6 +227,7 @@ def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min
         "setters": setters,
         "otherDialers": other_dialers,
         "timeseries": build_timeseries(facts, since, until),
+        "dialer": build_dialer(calls, since, until, connect_min, dropped_statuses, floor.get("bookings") or 0),
         "insights": build_insights(floor, clients, setters, goals),
     }
 
@@ -317,6 +319,7 @@ def build_from_raw(ghl, dash):
     # Contacted stage, connect rate and lead-to-connect speed that the mirror field cannot.
     connect_min = int((ghl.get("calls", {}) or {}).get("connectMinSec")
                       or (ghl.get("connectedCall", {}) or {}).get("minDurationSec", 15))
+    dropped_statuses = (ghl.get("calls", {}) or {}).get("droppedStatuses") or []
     connect_by_contact = first_connect_by_contact(calls, connect_min)
     for f in facts:
         if not f["connect"]:
@@ -329,8 +332,8 @@ def build_from_raw(ghl, dash):
     default = dash.get("defaultPeriod", "7d")
     periods = {}
     for key, (s, u, ps, pu) in period_windows(now).items():
-        bundle = build_bundle(facts, submissions, calls, ghl, dash, s, u, connect_min)
-        prev_floor = build_floor(facts, calls, ps, pu, goals, lane_map, connect_min) if ps else None
+        bundle = build_bundle(facts, submissions, calls, ghl, dash, s, u, connect_min, dropped_statuses)
+        prev_floor = build_floor(facts, calls, ps, pu, goals, lane_map, connect_min, dropped_statuses) if ps else None
         bundle["prevDateRange"] = fmt_range(ps, pu)
         bundle["deltas"] = compute_deltas(bundle["floor"], prev_floor)
         periods[key] = bundle
@@ -448,30 +451,53 @@ def first_connect_by_contact(calls, connect_min):
     return m
 
 
-def call_metrics(calls, since, until, connect_min):
-    """Floor-level and per-user dial / connect / talk-time from real outbound call events in the
-    window. Dials = outbound call attempts. Connects = outbound completed at/over connect_min seconds.
-    Talk time = summed duration of outbound completed calls (a floor: some completed calls report a
-    null duration in GHL, so true talk time is at least this)."""
-    dials = connects = talk = 0
+def call_metrics(calls, since, until, connect_min, dropped_statuses=()):
+    """Floor-level and per-user dialer metrics from real outbound call events in the window.
+      dials       = outbound call attempts placed
+      attempts    = distinct contacts dialed (unique leads worked)
+      completed   = calls the far end answered
+      connects    = completed calls at/over connect_min seconds (a real conversation)
+      dropped     = calls in a failure status (busy/failed/dropped/...)
+      talkSec     = summed duration of completed calls (a floor: GHL reports null on some)
+      avgDial/avgConnect = mean seconds per dial-with-duration / per connect
+    Per-user counts key off the GHL userId on each call for setter attribution."""
+    dials = completed = connects = dropped = talk = connect_talk = 0
+    dur_known = []
+    contacts = set()
     per_user = {}
+    dropped_set = {str(s).lower() for s in (dropped_statuses or ())}
     for c in calls:
         if c["direction"] != "outbound" or not (since <= c["ts"] <= until):
             continue
         u = per_user.setdefault(c["userId"], {"dials": 0, "connects": 0, "talkSec": 0})
         dials += 1
         u["dials"] += 1
+        if c["contactId"]:
+            contacts.add(c["contactId"])
+        if c["duration"] is not None:
+            dur_known.append(c["duration"])
+        if c["status"] in dropped_set:
+            dropped += 1
         if c["status"] == "completed":
+            completed += 1
             d = c["duration"] or 0
             talk += d
             u["talkSec"] += d
             if d >= connect_min:
                 connects += 1
+                connect_talk += d
                 u["connects"] += 1
-    return {"dials": dials, "connects": connects, "talkSec": talk, "perUser": per_user}
+    return {
+        "dials": dials, "attempts": len(contacts), "completed": completed, "connects": connects,
+        "dropped": dropped, "talkSec": talk, "connectTalkSec": connect_talk,
+        "avgDialDurationSec": (round(sum(dur_known) / len(dur_known)) if dur_known else None),
+        "avgConnectDurationSec": (round(connect_talk / connects) if connects else None),
+        "leadToConnectPct": ratio(connects, dials),
+        "perUser": per_user,
+    }
 
 
-def build_floor(facts, calls, since, until, goals, lane_map, connect_min):
+def build_floor(facts, calls, since, until, goals, lane_map, connect_min, dropped_statuses=()):
     today = now_utc().date()
     leads_today = leads_in_range = unworked = unworked_sla = 0
     stl, day_one_hits, day_one_elig, attempts_total = [], 0, 0, 0
@@ -500,7 +526,7 @@ def build_floor(facts, calls, since, until, goals, lane_map, connect_min):
     # Dials, connects and talk time come from the real GHL call feed (conversation call messages),
     # because the sid_* mirror fields (sid_assigned_at, sid_last_call_duration_sec) are not written.
     # Connect = an outbound completed call at/over connect_min seconds -- the same definition SID uses.
-    cm = call_metrics(calls, since, until, connect_min)
+    cm = call_metrics(calls, since, until, connect_min, dropped_statuses)
 
     # Intros booked: a booking whose booked date lands today (and in the window, for the sub-count).
     intros_today = sum(1 for f in facts if f["booked"] and f["bookedDate"] and f["bookedDate"].date() == today)
@@ -513,13 +539,21 @@ def build_floor(facts, calls, since, until, goals, lane_map, connect_min):
         "speedToLeadMedianMin": median_or_none(stl),
         "dayOneCoverage": ratio(day_one_hits, day_one_elig),
         "formCompliance": None,           # set from setters/connects in build_from_raw
+        # --- dialer row (all from the real GHL call feed) ---
+        "dialsLogged": cm["dials"] or None,
+        "attemptsDialed": cm["attempts"] or None,          # distinct contacts dialed
+        "connectsInRange": cm["connects"],
+        "bookings": intros_range,                          # booked appointments in the window
+        "leadToConnectPct": cm["leadToConnectPct"],        # connects / dials
+        "droppedCalls": cm["dropped"] or None,
+        "talkTimeSec": cm["talkSec"] or None,
+        "avgDialDurationSec": cm["avgDialDurationSec"],
+        "avgConnectDurationSec": cm["avgConnectDurationSec"],
+        "completedCalls": cm["completed"],
         # sid_attempt_count is not incrementing (stuck sid-dial-1 tags), so fall back to real dials.
         "attemptsLogged": (attempts_total or cm["dials"]) or None,
-        "dialsLogged": cm["dials"] or None,
-        "attemptIntegrity": None,         # dials/attempt not computable without the bundle definition
-        "talkTimeSec": cm["talkSec"] or None,
+        "attemptIntegrity": None,
         "queue": queue,
-        "connectsInRange": cm["connects"],
         "onFloorNow": None,
     }
 
@@ -642,6 +676,46 @@ def build_timeseries(facts, since, until):
         "days": [d.isoformat() for d in days],
         "leads": leads, "worked": worked, "booked": booked,
         "speedToLeadMedianMin": [median_or_none(s) for s in speed],
+    }
+
+
+def build_dialer(calls, since, until, connect_min, dropped_statuses, bookings):
+    """Daily dials / attempts / connects for the bar chart, plus the conversion rates that show how
+    the dialer itself is performing. Attempts = distinct contacts dialed that day."""
+    days = []
+    d = since.date()
+    while d <= until.date():
+        days.append(d); d += dt.timedelta(days=1)
+    days = days[-30:]
+    idx = {d: i for i, d in enumerate(days)}
+    dials = [0] * len(days); connects = [0] * len(days)
+    seen = [set() for _ in days]
+    for c in calls:
+        if c["direction"] != "outbound":
+            continue
+        dd = c["ts"].date()
+        i = idx.get(dd)
+        if i is None:
+            continue
+        dials[i] += 1
+        if c["contactId"]:
+            seen[i].add(c["contactId"])
+        if c["status"] == "completed" and (c["duration"] or 0) >= connect_min:
+            connects[i] += 1
+    attempts = [len(s) for s in seen]
+
+    cm = call_metrics(calls, since, until, connect_min, dropped_statuses)
+    return {
+        "days": [d.isoformat() for d in days],
+        "dials": dials, "attempts": attempts, "connects": connects,
+        "totals": {"dials": cm["dials"], "attempts": cm["attempts"], "connects": cm["connects"],
+                   "dropped": cm["dropped"], "bookings": bookings},
+        "rates": {
+            "connectRate": cm["leadToConnectPct"],              # connects / dials
+            "answerRate": ratio(cm["completed"], cm["dials"]),  # answered / dials
+            "dropRate": ratio(cm["dropped"], cm["dials"]),      # dropped / dials
+            "bookingRate": ratio(bookings, cm["connects"]),     # bookings / connects
+        },
     }
 
 

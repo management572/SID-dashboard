@@ -52,12 +52,22 @@
     { "key": "speedToLeadMedianMin", "label": "Speed to Lead (median min)", "invert": true, "bands": "speedToLeadBandsMin", "target": "speedToLeadTargetMin" },
     { "key": "dayOneCoverage", "label": "Day-One Coverage", "format": "pct", "target": "dayOneCoverageTarget" },
     { "key": "formCompliance", "label": "Form Compliance", "format": "pct", "target": "formSubmissionComplianceTarget" },
-    { "key": "dialsLogged", "label": "Dials" },
-    { "key": "connectsInRange", "label": "Connects" },
-    { "key": "p1QueueDepth", "label": "P1 Queue", "invert": true },
-    { "key": "talkTimeSec", "label": "Talk Time", "format": "duration" }
+    { "key": "p1QueueDepth", "label": "P1 Queue", "invert": true }
   ],
-  "_floorTilesNote": "invert = lower is better, so the goal bands reverse. hero = rendered larger. Dials, Connects and Talk Time are read live from the GHL call feed (conversation call messages), since the sid_* mirror fields are not written.",
+  "_floorTilesNote": "Row 1 = 'is the floor healthy right now'. invert = lower is better (goal bands reverse). hero = rendered larger.",
+
+  "dialerTiles": [
+    { "key": "dialsLogged", "label": "Dials" },
+    { "key": "attemptsDialed", "label": "Attempts" },
+    { "key": "connectsInRange", "label": "Connects" },
+    { "key": "bookings", "label": "Bookings" },
+    { "key": "leadToConnectPct", "label": "Lead → Connect %", "format": "pct" },
+    { "key": "droppedCalls", "label": "Dropped Calls", "invert": true },
+    { "key": "talkTimeSec", "label": "Talk Time", "format": "duration" },
+    { "key": "avgDialDurationSec", "label": "Avg Dial Duration", "format": "duration" },
+    { "key": "avgConnectDurationSec", "label": "Avg Connect Duration", "format": "duration" }
+  ],
+  "_dialerTilesNote": "Row 2 = dialer performance, all read live from the GHL call feed. Dials = outbound calls; Attempts = distinct leads dialed; Connects = completed calls at/over connectMinSec; Dropped = calls in a failure status; durations are averaged over calls that report a duration.",
 
   "setterColumns": [
     { "key": "name", "label": "Setter" },

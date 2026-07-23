@@ -165,6 +165,16 @@
   .cols2 { grid-template-columns:1.35fr 1fr; }
   .cols2b { grid-template-columns:1fr 1.35fr; }
 
+  /* Dialer section: row label + conversion stat board */
+  .tiles-head { font-size:12px; text-transform:uppercase; letter-spacing:.7px; color:var(--boneFaint);
+    margin:2px 0 10px; display:flex; align-items:center; gap:10px; }
+  .tiles-head::after { content:""; flex:1; height:1px; background:var(--hair); }
+  .rateboard { display:grid; grid-template-columns:repeat(auto-fit,minmax(122px,1fr)); gap:12px; }
+  .ratecard { background:var(--inkDeep); border:1px solid var(--hair); border-radius:var(--r); padding:13px 14px; }
+  .ratecard .rlabel { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
+  .ratecard .rval { font-family:var(--head); font-weight:700; font-size:29px; line-height:1.1; margin-top:8px; letter-spacing:-.5px; color:var(--bone); }
+  .ratecard .rsub { font-size:11px; color:var(--boneDim); margin-top:4px; }
+
   /* Insights */
   .insight { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--hair); }
   .insight:last-child { border-bottom:0; }
@@ -277,6 +287,22 @@
     <!-- FLOOR -->
     <section class="tab" id="tab-floor">
       <div class="tiles" id="tiles"></div>
+
+      <div class="tiles-head">Dialer performance</div>
+      <div class="tiles" id="dialerTiles"></div>
+      <div class="grid cols2" style="margin-bottom:20px;">
+        <div class="card">
+          <h2>Dialer activity</h2>
+          <div class="sub">Daily dials, attempts (distinct leads dialed) and connects.</div>
+          <div id="dialerBars"></div>
+        </div>
+        <div class="card">
+          <h2>Conversion</h2>
+          <div class="sub">How the dialer itself is performing this window.</div>
+          <div class="rateboard" id="dialerRates"></div>
+        </div>
+      </div>
+
       <div class="grid cols2" style="margin-bottom:20px;">
         <div class="card">
           <h2>What to do next</h2>
@@ -429,9 +455,9 @@ function fmtMoney(x) { return isNil(x) ? dash() : "$" + Number(x).toLocaleString
 function fmtDuration(s) {
   if (isNil(s)) return dash();
   s = Math.round(Number(s));
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
   if (h) return h + "h " + m + "m";
-  if (m) return m + "m";
+  if (m) return sec ? (m + "m " + sec + "s") : (m + "m");
   return s + "s";
 }
 function fmtByFormat(v, f) {
@@ -628,17 +654,20 @@ function showTab(t) {
 /* ---------------------------- FLOOR ---------------------------- */
 function renderFloor() {
   renderTiles();
+  renderDialer();
   renderInsights();
   renderLanes();
   renderFunnel();
   renderTrend();
 }
 
-function renderTiles() {
-  const host = document.getElementById("tiles");
+function renderTiles() { renderTileRow(CFG.dash.floorTiles || [], "tiles"); }
+function renderTileRow(tiles, hostId) {
+  const host = document.getElementById(hostId);
+  if (!host) return;
   host.innerHTML = "";
   const f = P.floor || {};
-  (CFG.dash.floorTiles || []).forEach(t => {
+  tiles.forEach(t => {
     const raw = tileValue(t, f);
     let band = null;
     if (t.bands === "speedToLeadBandsMin") band = bandSpeed(raw);
@@ -680,7 +709,10 @@ function tileSub(t, f) {
   if (t.key === "leadsToday" && !isNil(f.leadsInRange)) return fmtCount(f.leadsInRange) + " in range";
   if (t.key === "speedToLeadMedianMin") return "median, target " + (goals().speedToLeadTargetMin || 5) + " min";
   if (t.key === "introsBookedToday") { const n = f.introsBookedInRange; return isNil(n) ? null : fmtCount(n) + " in range"; }
-  if (t.key === "talkTimeSec") return "last call per lead, approx";
+  if (t.key === "talkTimeSec") return "connected-call time, this window";
+  if (t.key === "leadToConnectPct") return "connects / dials";
+  if (t.key === "droppedCalls") return "failed / busy calls";
+  if (t.key === "attemptsDialed") return "distinct leads dialed";
   if (t.key === "dayOneCoverage" && !isNil(resolveTarget(t.target))) return "target " + fmtPct(resolveTarget(t.target));
   if (t.key === "formCompliance" && !isNil(resolveTarget(t.target))) return "target " + fmtPct(resolveTarget(t.target));
   if (t.key === "p1QueueDepth" || t.key === "p1QueueDepth") return null;
@@ -817,6 +849,74 @@ function renderTrend() {
 function shortDay(iso) {
   const d = new Date(iso);
   return isNaN(d) ? iso : d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
+}
+
+/* ---------------------------- DIALER ---------------------------- */
+function renderDialer() {
+  renderTileRow(CFG.dash.dialerTiles || [], "dialerTiles");
+  renderDialerBars();
+  renderDialerRates();
+}
+const DIALER_SERIES = [
+  { key:"dials", color:"var(--accent)", label:"Dials" },
+  { key:"attempts", color:"var(--accent2)", label:"Attempts" },
+  { key:"connects", color:"var(--accentText)", label:"Connects" },
+];
+function renderDialerBars() {
+  const host = document.getElementById("dialerBars");
+  if (!host) return;
+  const dl = P.dialer;
+  if (!dl || !dl.days || !dl.days.length || !(dl.dials || []).some(v => v)) {
+    host.innerHTML = '<div class="muted">No dialer activity in this window.</div>'; return;
+  }
+  const days = dl.days, n = days.length;
+  const maxV = Math.max(1, ...DIALER_SERIES.flatMap(s => dl[s.key] || []));
+  const W = 560, H = 240, padL = 34, padR = 12, padT = 14, padB = 26;
+  const plotH = H - padT - padB, plotW = W - padL - padR;
+  const groupW = plotW / n, gap = Math.min(4, groupW * 0.12);
+  const barW = Math.max(1, (groupW - gap * 2) / DIALER_SERIES.length - 1);
+  const y = v => padT + (1 - v / maxV) * plotH;
+  let grid = "";
+  for (let g = 0; g <= 4; g++) {
+    const yy = padT + g * plotH / 4;
+    grid += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--hair)" />';
+    grid += '<text x="' + (padL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + Math.round(maxV * (1 - g / 4)) + '</text>';
+  }
+  let bars = "";
+  for (let i = 0; i < n; i++) {
+    const gx = padL + i * groupW + gap;
+    DIALER_SERIES.forEach((s, si) => {
+      const v = (dl[s.key] || [])[i] || 0;
+      const yy = y(v), bh = Math.max(0, plotH + padT - yy);
+      const bx = gx + si * (barW + 1);
+      bars += '<rect x="' + bx.toFixed(1) + '" y="' + yy.toFixed(1) + '" width="' + barW.toFixed(1) +
+              '" height="' + bh.toFixed(1) + '" fill="' + s.color + '" rx="1"><title>' +
+              esc(shortDay(days[i])) + ' — ' + s.label + ': ' + v + '</title></rect>';
+    });
+  }
+  let xl = "";
+  days.forEach((d, i) => {
+    if (n > 8 && i % 2) return;
+    const cx = padL + i * groupW + groupW / 2;
+    xl += '<text x="' + cx.toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(shortDay(d)) + '</text>';
+  });
+  host.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' + grid + bars + xl + '</svg>' +
+    '<div class="legend">' + DIALER_SERIES.map(s => '<span><i style="background:' + s.color + '"></i>' + s.label + '</span>').join("") + '</div>';
+}
+function renderDialerRates() {
+  const host = document.getElementById("dialerRates");
+  if (!host) return;
+  const dl = P.dialer || {}, r = dl.rates || {}, t = dl.totals || {};
+  const cards = [
+    { label:"Connect rate", val:fmtPct(r.connectRate), sub:fmtCount(t.connects) + " of " + fmtCount(t.dials) + " dials" },
+    { label:"Answer rate", val:fmtPct(r.answerRate), sub:"answered / dials" },
+    { label:"Drop rate", val:fmtPct(r.dropRate), sub:fmtCount(t.dropped) + " dropped" },
+    { label:"Booking rate", val:fmtPct(r.bookingRate), sub:fmtCount(t.bookings) + " of " + fmtCount(t.connects) + " connects" },
+  ];
+  host.innerHTML = cards.map(c =>
+    '<div class="ratecard"><div class="rlabel">' + esc(c.label) + '</div>' +
+    '<div class="rval">' + c.val + '</div><div class="rsub">' + esc(c.sub) + '</div></div>').join("");
 }
 
 /* ---------------------------- SETTERS ---------------------------- */
