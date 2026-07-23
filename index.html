@@ -244,25 +244,35 @@
   /* Wide tables scroll horizontally inside their card instead of overflowing the page. */
   #settersTableWrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
-  /* Clients: one calm headline strip + a simple card per agency */
+  /* Clients: one calm headline strip + a high-level status table */
   .csummary { display:grid; grid-template-columns:repeat(auto-fit, minmax(110px,1fr)); gap:10px; margin-bottom:20px; }
   .csum { background:var(--inkDeep); border:1px solid var(--hair); border-radius:var(--r); padding:11px 13px; }
   .csum-l { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
   .csum-v { font-family:var(--head); font-weight:700; font-size:22px; margin-top:5px; }
-  .client-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:12px; }
-  .ccard { background:var(--ink2); border:1px solid var(--hair); border-radius:var(--r); padding:16px 18px; cursor:pointer; transition:border-color .12s; }
-  .ccard:hover { border-color:var(--hair2); }
-  .ccard.open { border-color:var(--accent); }
-  .ccard-name { font-family:var(--head); font-weight:700; font-size:16px; line-height:1.25; }
-  .ccard-mkt { font-size:11px; color:var(--boneFaint); margin-top:2px; }
-  .ccard-rate { display:flex; align-items:baseline; gap:7px; margin:14px 0 14px; }
-  .ccard-rate .v { font-family:var(--head); font-weight:700; font-size:34px; letter-spacing:-0.5px; line-height:1; }
-  .ccard-rate .l { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
-  .cstats { display:flex; gap:18px; }
-  .cstat .n { font-family:var(--head); font-weight:700; font-size:17px; }
-  .cstat .l { font-size:10px; text-transform:uppercase; letter-spacing:.4px; color:var(--boneFaint); margin-top:1px; }
-  .ccard-detail { margin-top:16px; padding-top:14px; border-top:1px solid var(--hair); overflow-x:auto; }
-  #clientsTableWrap { overflow-x:visible; }
+
+  .ctable { width:100%; border-collapse:collapse; }
+  .ctable th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); font-weight:600; padding:9px 14px; border-bottom:1px solid var(--hair); }
+  .ctable th.num, .ctable td.num { text-align:right; }
+  .ctable td { padding:13px 14px; border-bottom:1px solid var(--hair); vertical-align:middle; }
+  .crow { cursor:pointer; transition:background .1s; }
+  .crow:hover { background:var(--ink2); }
+  .crow.open { background:var(--ink2); }
+  .cname { font-weight:600; font-size:14px; }
+  .cname .mkt { font-size:11px; color:var(--boneFaint); font-weight:400; margin-left:7px; }
+  .crate { font-family:var(--head); font-weight:700; font-size:16px; }
+  .cdim { color:var(--boneDim); }
+  /* Status pill: a single on-track / watch / behind read per client */
+  .cpill { display:inline-flex; align-items:center; gap:6px; padding:3px 11px 3px 9px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .cpill::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .cpill.good { color:var(--good); background:color-mix(in srgb, var(--good) 14%, transparent); }
+  .cpill.warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); }
+  .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
+  .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
+  .cdrawer td { padding:0 14px; border-bottom:1px solid var(--hair); background:var(--inkDeep); }
+  .cdrawer .inner { padding:16px 4px 20px; overflow-x:auto; }
+  .cexp { color:var(--boneFaint); font-size:12px; transition:transform .12s; display:inline-block; }
+  .crow.open .cexp { transform:rotate(90deg); }
+  #clientsTableWrap { overflow-x:auto; }
 
   /* Coverage bars */
   .cov { display:grid; grid-template-columns:120px 1fr 1fr; gap:14px 20px; align-items:center; }
@@ -451,7 +461,7 @@
     <section class="tab" id="tab-clients">
       <div class="card">
         <h2>Clients</h2>
-        <div class="sub">One card per home-care agency, sorted by volume. Tap a card for its funnel and the median lag between stages.</div>
+        <div class="sub">One row per home-care agency, sorted by volume. Status is book rate against the 15% target. Tap a row for its funnel and the median lag between stages.</div>
         <div id="clientsTableWrap"></div>
       </div>
     </section>
@@ -1398,31 +1408,40 @@ function renderClients() {
     + csum("Booked", fmtCount(roll.booked)) + csum("Book rate", fmtPct(roll.bookRate))
     + '</div>';
 
-  // One card per client: name, the book rate as the single headline, then Leads / Booked / Held.
-  let cards = '<div class="client-grid">';
+  // High-level status table: one row per client, book rate as the metric, a status pill for the on-track read.
+  let body = '';
   rows.forEach((r, idx) => {
-    const band = isNil(bTgt) ? null : bandTarget(r.bookRate, bTgt, false);
-    const rateCol = band === "good" ? "var(--good)" : band === "warn" ? "var(--warn)"
-      : band === "alert" ? "var(--alert)" : "var(--bone)";
-    cards += '<div class="ccard" data-i="' + idx + '">'
-      + '<div class="ccard-name">' + esc(r.label) + '</div>'
-      + (r.market ? '<div class="ccard-mkt">' + esc(r.market) + '</div>' : '')
-      + '<div class="ccard-rate"><span class="v" style="color:' + rateCol + '">' + fmtPct(r.bookRate) + '</span>'
-        + '<span class="l">book rate</span></div>'
-      + '<div class="cstats">' + cstat(r.leads, "Leads") + cstat(r.booked, "Booked") + cstat(r.shows, "Held") + '</div>'
-      + '<div class="ccard-detail" id="cdetail-' + idx + '" hidden>' + clientDrill(r) + '</div>'
-      + '</div>';
+    const st = clientStatus(r, bTgt);
+    body += '<tr class="crow" data-i="' + idx + '">'
+      + '<td><span class="cexp">&#9656;</span> <span class="cname">' + esc(r.label)
+        + (r.market ? '<span class="mkt">' + esc(r.market) + '</span>' : '') + '</span></td>'
+      + '<td class="num cdim">' + fmtCount(r.leads) + '</td>'
+      + '<td class="num crate">' + fmtPct(r.bookRate) + '</td>'
+      + '<td><span class="cpill ' + st.cls + '">' + st.label + '</span></td>'
+      + '</tr>'
+      + '<tr class="cdrawer" id="cdrawer-' + idx + '" hidden><td colspan="4"><div class="inner">'
+        + clientDrill(r) + '</div></td></tr>';
   });
-  cards += '</div>';
 
-  wrap.innerHTML = summary + cards;
-  wrap.querySelectorAll(".ccard").forEach(card => card.addEventListener("click", () => {
-    const d = card.querySelector(".ccard-detail");
-    if (d) { d.hidden = !d.hidden; card.classList.toggle("open", !d.hidden); }
+  wrap.innerHTML = summary
+    + '<table class="ctable"><thead><tr>'
+    + '<th>Client</th><th class="num">Leads</th><th class="num">Book rate</th><th>Status</th>'
+    + '</tr></thead><tbody>' + body + '</tbody></table>';
+
+  wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
+    const d = wrap.querySelector("#cdrawer-" + row.dataset.i);
+    if (d) { d.hidden = !d.hidden; row.classList.toggle("open", !d.hidden); }
   }));
 }
+// On-track read against the book-rate target. Clients with no leads this window are shown neutral, not "behind".
+function clientStatus(r, tgt) {
+  if (isNil(tgt) || !r.leads) return { cls:"faint", label:"No activity" };
+  const rate = r.bookRate || 0;
+  if (rate >= tgt) return { cls:"good", label:"On track" };
+  if (rate >= tgt * 0.6) return { cls:"warn", label:"Watch" };
+  return { cls:"alert", label:"Behind" };
+}
 function csum(label, val) { return '<div class="csum"><div class="csum-l">' + esc(label) + '</div><div class="csum-v">' + val + '</div></div>'; }
-function cstat(v, label) { return '<div class="cstat"><div class="n">' + fmtCount(v) + '</div><div class="l">' + esc(label) + '</div></div>'; }
 function clientCell(r, c, isRollup) {
   if (c.key === "label") return (isRollup ? "All Clients" : esc(r.label));
   if (c.key === "market") return isRollup ? '<span class="faint">rollup</span>' : (r.market ? esc(r.market) : dash());
