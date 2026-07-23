@@ -4,8 +4,8 @@
   "defaultPeriod": "7d",
   "sample": false,
   "source": "SID",
-  "generatedAt": "2026-07-23T00:14:30+00:00",
-  "freshnessMin": 10,
+  "generatedAt": "2026-07-23T00:39:46+00:00",
+  "freshnessMin": 19,
   "periods": {
     "Today": {
       "dateRange": "23 Jul 2026 to 23 Jul 2026",
@@ -18,18 +18,18 @@
         "unworkedPastSla": 0,
         "speedToLeadMedianMin": 0.0,
         "dayOneCoverage": null,
-        "formCompliance": null,
-        "attemptsLogged": null,
-        "dialsLogged": null,
+        "formCompliance": 0.0,
+        "attemptsLogged": 12,
+        "dialsLogged": 12,
         "attemptIntegrity": null,
-        "talkTimeSec": null,
+        "talkTimeSec": 233,
         "queue": {
           "p1": 26,
           "p2": 58,
           "p3": 0,
           "p4": 0
         },
-        "connectsInRange": 0,
+        "connectsInRange": 4,
         "onFloorNow": null
       },
       "clients": [],
@@ -127,7 +127,13 @@
           "byDay": null
         }
       ],
-      "otherDialers": [],
+      "otherDialers": [
+        {
+          "name": "Mary Lim",
+          "dials": 12,
+          "connects": 4
+        }
+      ],
       "timeseries": {
         "days": [
           "2026-07-23"
@@ -145,7 +151,16 @@
           null
         ]
       },
-      "insights": [],
+      "insights": [
+        {
+          "severity": "alert",
+          "headline": "Form compliance is 0 percent of connected calls",
+          "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
+          "metric": "formCompliance",
+          "leadsAtRisk": 4,
+          "rank": 1
+        }
+      ],
       "prevDateRange": "22 Jul 2026 to 22 Jul 2026",
       "deltas": {
         "leadsToday": {
@@ -184,29 +199,29 @@
           "pct": null
         },
         "formCompliance": {
-          "cur": null,
+          "cur": 0.0,
           "prev": null,
           "pct": null
         },
         "attemptsLogged": {
-          "cur": null,
-          "prev": null,
-          "pct": null
+          "cur": 12,
+          "prev": 8,
+          "pct": 0.5
         },
         "dialsLogged": {
-          "cur": null,
-          "prev": null,
-          "pct": null
+          "cur": 12,
+          "prev": 8,
+          "pct": 0.5
         },
         "talkTimeSec": {
-          "cur": null,
-          "prev": null,
-          "pct": null
+          "cur": 233,
+          "prev": 590,
+          "pct": -0.6051
         },
         "connectsInRange": {
-          "cur": 0,
-          "prev": 0,
-          "pct": null
+          "cur": 4,
+          "prev": 3,
+          "pct": 0.3333
         }
       }
     },
@@ -217,1040 +232,22 @@
         "leadsInRange": 88,
         "introsBookedToday": 0,
         "introsBookedInRange": 0,
-        "unworkedNow": 25,
-        "unworkedPastSla": 25,
-        "speedToLeadMedianMin": 0.0,
-        "dayOneCoverage": 0.7045,
-        "formCompliance": null,
-        "attemptsLogged": null,
-        "dialsLogged": null,
-        "attemptIntegrity": null,
-        "talkTimeSec": null,
-        "queue": {
-          "p1": 26,
-          "p2": 58,
-          "p3": 0,
-          "p4": 0
-        },
-        "connectsInRange": 0,
-        "onFloorNow": null
-      },
-      "clients": [
-        {
-          "key": "ENC",
-          "label": "ENC",
-          "market": null,
-          "active": true,
-          "leads": 20,
-          "worked": 20,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "JHC",
-          "label": "JHC",
-          "market": null,
-          "active": true,
-          "leads": 11,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 0.0909,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "AHC",
-          "label": "AHC",
-          "market": null,
-          "active": true,
-          "leads": 6,
-          "worked": 6,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "SHA",
-          "label": "SHA",
-          "market": null,
-          "active": true,
-          "leads": 5,
-          "worked": 5,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "BCF",
-          "label": "BCF",
-          "market": null,
-          "active": true,
-          "leads": 4,
-          "worked": 4,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "THC",
-          "label": "THC",
-          "market": null,
-          "active": true,
-          "leads": 4,
-          "worked": 4,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HPI",
-          "label": "HPI",
-          "market": null,
-          "active": true,
-          "leads": 3,
-          "worked": 3,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "OYL",
-          "label": "OYL",
-          "market": null,
-          "active": true,
-          "leads": 3,
-          "worked": 3,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACS",
-          "label": "ACS",
-          "market": null,
-          "active": true,
-          "leads": 2,
-          "worked": 2,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "KTY",
-          "label": "KTY",
-          "market": null,
-          "active": true,
-          "leads": 2,
-          "worked": 2,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "SHS",
-          "label": "SHS",
-          "market": null,
-          "active": true,
-          "leads": 2,
-          "worked": 2,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ABC",
-          "label": "ABC",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACL",
-          "label": "ACL",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "AVA",
-          "label": "AVA",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "GXY",
-          "label": "GXY",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HSE",
-          "label": "HSE",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "JOY",
-          "label": "JOY",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "OYV",
-          "label": "OYV",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "PCH",
-          "label": "PCH",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "PHC",
-          "label": "PHC",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "RHW",
-          "label": "RHW",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": 0.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALB",
-          "label": "ALB",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 2,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALM",
-          "label": "ALM",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 1,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALP",
-          "label": "ALP",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 3,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "APA",
-          "label": "APA",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 2,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "EVC",
-          "label": "EVC",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 6,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "EVG",
-          "label": "EVG",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 2,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HHA",
-          "label": "HHA",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 9,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HHC",
-          "label": "Hallmark Home Care Houston",
-          "market": "Houston, TX",
-          "active": true,
-          "leads": 0,
-          "worked": 2,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HPH",
-          "label": "HPH",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 3,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "LPC",
-          "label": "Lenorah's Personal Care",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 11,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "PCA",
-          "label": "PCA",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 4,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "RHC",
-          "label": "RHC",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 4,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ROC",
-          "label": "ROC",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 10,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "SHI",
-          "label": "SHI",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 4,
-          "contacted": 0,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        }
-      ],
-      "setters": [
-        {
-          "name": "Sophia",
-          "sidUserId": null,
-          "role": null,
-          "assigned": null,
-          "attempts": null,
-          "dials": null,
-          "connects": null,
-          "connectRate": null,
-          "talkTimeSec": null,
-          "booked": null,
-          "bookRate": null,
-          "shows": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "formsSubmitted": null,
-          "formCompliance": null,
-          "dayOneCoverage": null,
-          "isNew": false,
-          "belowSla": false,
-          "claimAttributed": false,
-          "byDay": null
-        },
-        {
-          "name": "Michelle",
-          "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
-          "role": null,
-          "assigned": null,
-          "attempts": null,
-          "dials": null,
-          "connects": null,
-          "connectRate": null,
-          "talkTimeSec": null,
-          "booked": null,
-          "bookRate": null,
-          "shows": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "formsSubmitted": null,
-          "formCompliance": null,
-          "dayOneCoverage": null,
-          "isNew": false,
-          "belowSla": false,
-          "claimAttributed": true,
-          "byDay": null
-        },
-        {
-          "name": "Sarah",
-          "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
-          "role": null,
-          "assigned": null,
-          "attempts": null,
-          "dials": null,
-          "connects": null,
-          "connectRate": null,
-          "talkTimeSec": null,
-          "booked": null,
-          "bookRate": null,
-          "shows": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "formsSubmitted": null,
-          "formCompliance": null,
-          "dayOneCoverage": null,
-          "isNew": false,
-          "belowSla": false,
-          "claimAttributed": true,
-          "byDay": null
-        },
-        {
-          "name": "Heart",
-          "sidUserId": null,
-          "role": null,
-          "assigned": null,
-          "attempts": null,
-          "dials": null,
-          "connects": null,
-          "connectRate": null,
-          "talkTimeSec": null,
-          "booked": null,
-          "bookRate": null,
-          "shows": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "formsSubmitted": null,
-          "formCompliance": null,
-          "dayOneCoverage": null,
-          "isNew": false,
-          "belowSla": false,
-          "claimAttributed": false,
-          "byDay": null
-        }
-      ],
-      "otherDialers": [],
-      "timeseries": {
-        "days": [
-          "2026-07-16",
-          "2026-07-17",
-          "2026-07-18",
-          "2026-07-19",
-          "2026-07-20",
-          "2026-07-21",
-          "2026-07-22",
-          "2026-07-23"
-        ],
-        "leads": [
-          0,
-          2,
-          0,
-          0,
-          30,
-          36,
-          20,
-          0
-        ],
-        "worked": [
-          0,
-          90,
-          53,
-          46,
-          64,
-          57,
-          79,
-          0
-        ],
-        "booked": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "speedToLeadMedianMin": [
-          null,
-          null,
-          null,
-          null,
-          0.0,
-          0.0,
-          0.0,
-          null
-        ]
-      },
-      "insights": [
-        {
-          "severity": "alert",
-          "headline": "25 leads unworked past the SLA",
-          "detail": "Inside floor hours, past 30 minutes with zero attempts.",
-          "metric": "unworkedPastSla",
-          "leadsAtRisk": 25,
-          "rank": 1
-        }
-      ],
-      "prevDateRange": "09 Jul 2026 to 16 Jul 2026",
-      "deltas": {
-        "leadsToday": {
-          "cur": 0,
-          "prev": 0,
-          "pct": null
-        },
-        "leadsInRange": {
-          "cur": 88,
-          "prev": 0,
-          "pct": null
-        },
-        "introsBookedToday": {
-          "cur": 0,
-          "prev": 0,
-          "pct": null
-        },
-        "unworkedNow": {
-          "cur": 25,
-          "prev": 0,
-          "pct": null
-        },
-        "unworkedPastSla": {
-          "cur": 25,
-          "prev": 0,
-          "pct": null
-        },
-        "speedToLeadMedianMin": {
-          "cur": 0.0,
-          "prev": 0.0,
-          "pct": null
-        },
-        "dayOneCoverage": {
-          "cur": 0.7045,
-          "prev": null,
-          "pct": null
-        },
-        "formCompliance": {
-          "cur": null,
-          "prev": null,
-          "pct": null
-        },
-        "attemptsLogged": {
-          "cur": null,
-          "prev": 6,
-          "pct": null
-        },
-        "dialsLogged": {
-          "cur": null,
-          "prev": 6,
-          "pct": null
-        },
-        "talkTimeSec": {
-          "cur": null,
-          "prev": 58,
-          "pct": null
-        },
-        "connectsInRange": {
-          "cur": 0,
-          "prev": 2,
-          "pct": -1.0
-        }
-      }
-    },
-    "30d": {
-      "dateRange": "23 Jun 2026 to 23 Jul 2026",
-      "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 88,
-        "introsBookedToday": 0,
-        "introsBookedInRange": 0,
-        "unworkedNow": 25,
-        "unworkedPastSla": 25,
+        "unworkedNow": 24,
+        "unworkedPastSla": 24,
         "speedToLeadMedianMin": 0.0,
         "dayOneCoverage": 0.7045,
         "formCompliance": 0.0,
-        "attemptsLogged": 691,
-        "dialsLogged": 691,
+        "attemptsLogged": 1255,
+        "dialsLogged": 1255,
         "attemptIntegrity": null,
-        "talkTimeSec": 27818,
+        "talkTimeSec": 75992,
         "queue": {
           "p1": 26,
           "p2": 58,
           "p3": 0,
           "p4": 0
         },
-        "connectsInRange": 267,
+        "connectsInRange": 552,
         "onFloorNow": null
       },
       "clients": [
@@ -1261,17 +258,17 @@
           "active": true,
           "leads": 20,
           "worked": 20,
-          "contacted": 0,
+          "contacted": 20,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1282,18 +279,18 @@
           "market": null,
           "active": true,
           "leads": 11,
-          "worked": 1,
+          "worked": 2,
           "contacted": 1,
           "booked": 0,
           "shows": 0,
-          "workedPct": 0.0909,
-          "connectRate": 1.0,
+          "workedPct": 0.1818,
+          "connectRate": 0.5,
           "bookRate": 0.0,
           "showRate": null,
-          "speedToLeadMedianMin": null,
+          "speedToLeadMedianMin": 1440.0,
           "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToFirstAttempt": 48.0,
+            "leadToConnect": 72.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1315,7 +312,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1327,17 +324,17 @@
           "active": true,
           "leads": 5,
           "worked": 5,
-          "contacted": 1,
+          "contacted": 5,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.2,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1359,7 +356,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1371,17 +368,17 @@
           "active": true,
           "leads": 4,
           "worked": 4,
-          "contacted": 3,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.75,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1393,17 +390,17 @@
           "active": true,
           "leads": 3,
           "worked": 3,
-          "contacted": 2,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.6667,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 22.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1425,7 +422,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1437,17 +434,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 41.4,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1459,17 +456,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 1,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.5,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 18.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1481,17 +478,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1513,7 +510,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1535,7 +532,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1547,17 +544,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
             "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToConnect": 14.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1579,7 +576,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 23.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1591,12 +588,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -1623,7 +620,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.3,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1635,12 +632,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -1667,7 +664,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.5,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1679,17 +676,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1701,17 +698,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -1723,11 +720,11 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 2,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 1.0,
+          "connectRate": 0.5,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -1745,12 +742,12 @@
           "active": true,
           "leads": 0,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -1767,12 +764,12 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 1,
+          "contacted": 0,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.3333,
-          "bookRate": 0.0,
+          "connectRate": 0.0,
+          "bookRate": null,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -1811,11 +808,11 @@
           "active": true,
           "leads": 0,
           "worked": 6,
-          "contacted": 4,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.6667,
+          "connectRate": 0.5,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -1833,28 +830,6 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 1,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": null,
-          "connectRate": 0.5,
-          "bookRate": 0.0,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
-            "connectToBooked": null,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HHA",
-          "label": "HHA",
-          "market": null,
-          "active": true,
-          "leads": 0,
-          "worked": 9,
           "contacted": 0,
           "booked": 0,
           "shows": 0,
@@ -1871,18 +846,40 @@
           }
         },
         {
+          "key": "HHA",
+          "label": "HHA",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 9,
+          "contacted": 4,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 0.4444,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "HHC",
           "label": "Hallmark Home Care Houston",
           "market": "Houston, TX",
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 2,
+          "contacted": 0,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 1.0,
-          "bookRate": 0.0,
+          "connectRate": 0.0,
+          "bookRate": null,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -1899,11 +896,11 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 1,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.3333,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -1921,12 +918,12 @@
           "active": true,
           "leads": 0,
           "worked": 11,
-          "contacted": 0,
+          "contacted": 10,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 0.9091,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -1943,11 +940,11 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 3,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.75,
+          "connectRate": 0.25,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -1965,12 +962,12 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -1987,12 +984,12 @@
           "active": true,
           "leads": 0,
           "worked": 10,
-          "contacted": 0,
+          "contacted": 6,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 0.6,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -2009,11 +1006,11 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 2,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.5,
+          "connectRate": 0.25,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -2031,11 +1028,11 @@
           "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
           "role": null,
           "assigned": null,
-          "attempts": 353,
-          "dials": 353,
-          "connects": 130,
-          "connectRate": 0.3683,
-          "talkTimeSec": 10333,
+          "attempts": 505,
+          "dials": 505,
+          "connects": 220,
+          "connectRate": 0.4356,
+          "talkTimeSec": 25745,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -2054,11 +1051,11 @@
           "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
           "role": null,
           "assigned": null,
-          "attempts": 36,
-          "dials": 36,
-          "connects": 14,
-          "connectRate": 0.3889,
-          "talkTimeSec": 1971,
+          "attempts": 75,
+          "dials": 75,
+          "connects": 33,
+          "connectRate": 0.44,
+          "talkTimeSec": 7986,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -2122,28 +1119,1080 @@
       "otherDialers": [
         {
           "name": "Mary Lim",
-          "dials": 116,
-          "connects": 49
-        },
-        {
-          "name": "nWmmFYyRiOKEDbuCbO4B",
-          "dials": 78,
-          "connects": 36
-        },
-        {
-          "name": "May Paula",
-          "dials": 74,
-          "connects": 29
-        },
-        {
-          "name": "Cxwbrr38lJZiwD9GfFQv",
-          "dials": 32,
-          "connects": 8
+          "dials": 428,
+          "connects": 199
         },
         {
           "name": "HNYZbzBXUZ6aAMewDmH3",
-          "dials": 2,
-          "connects": 1
+          "dials": 246,
+          "connects": 100
+        },
+        {
+          "name": "kKuwMaqRByatfUH7jF5q",
+          "dials": 1,
+          "connects": 0
+        }
+      ],
+      "timeseries": {
+        "days": [
+          "2026-07-16",
+          "2026-07-17",
+          "2026-07-18",
+          "2026-07-19",
+          "2026-07-20",
+          "2026-07-21",
+          "2026-07-22",
+          "2026-07-23"
+        ],
+        "leads": [
+          0,
+          2,
+          0,
+          0,
+          30,
+          36,
+          20,
+          0
+        ],
+        "worked": [
+          0,
+          90,
+          53,
+          46,
+          64,
+          57,
+          81,
+          0
+        ],
+        "booked": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "speedToLeadMedianMin": [
+          null,
+          null,
+          null,
+          null,
+          0.0,
+          0.0,
+          0.0,
+          null
+        ]
+      },
+      "insights": [
+        {
+          "severity": "alert",
+          "headline": "Form compliance is 0 percent of connected calls",
+          "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
+          "metric": "formCompliance",
+          "leadsAtRisk": 552,
+          "rank": 1
+        },
+        {
+          "severity": "alert",
+          "headline": "24 leads unworked past the SLA",
+          "detail": "Inside floor hours, past 30 minutes with zero attempts.",
+          "metric": "unworkedPastSla",
+          "leadsAtRisk": 24,
+          "rank": 2
+        }
+      ],
+      "prevDateRange": "09 Jul 2026 to 16 Jul 2026",
+      "deltas": {
+        "leadsToday": {
+          "cur": 0,
+          "prev": 0,
+          "pct": null
+        },
+        "leadsInRange": {
+          "cur": 88,
+          "prev": 0,
+          "pct": null
+        },
+        "introsBookedToday": {
+          "cur": 0,
+          "prev": 0,
+          "pct": null
+        },
+        "unworkedNow": {
+          "cur": 24,
+          "prev": 0,
+          "pct": null
+        },
+        "unworkedPastSla": {
+          "cur": 24,
+          "prev": 0,
+          "pct": null
+        },
+        "speedToLeadMedianMin": {
+          "cur": 0.0,
+          "prev": 0.0,
+          "pct": null
+        },
+        "dayOneCoverage": {
+          "cur": 0.7045,
+          "prev": null,
+          "pct": null
+        },
+        "formCompliance": {
+          "cur": 0.0,
+          "prev": null,
+          "pct": null
+        },
+        "attemptsLogged": {
+          "cur": 1255,
+          "prev": 1385,
+          "pct": -0.0939
+        },
+        "dialsLogged": {
+          "cur": 1255,
+          "prev": 1385,
+          "pct": -0.0939
+        },
+        "talkTimeSec": {
+          "cur": 75992,
+          "prev": 54256,
+          "pct": 0.4006
+        },
+        "connectsInRange": {
+          "cur": 552,
+          "prev": 574,
+          "pct": -0.0383
+        }
+      }
+    },
+    "30d": {
+      "dateRange": "23 Jun 2026 to 23 Jul 2026",
+      "floor": {
+        "leadsToday": 0,
+        "leadsInRange": 88,
+        "introsBookedToday": 0,
+        "introsBookedInRange": 0,
+        "unworkedNow": 24,
+        "unworkedPastSla": 24,
+        "speedToLeadMedianMin": 0.0,
+        "dayOneCoverage": 0.7045,
+        "formCompliance": 0.0,
+        "attemptsLogged": 5939,
+        "dialsLogged": 5939,
+        "attemptIntegrity": null,
+        "talkTimeSec": 256318,
+        "queue": {
+          "p1": 26,
+          "p2": 58,
+          "p3": 0,
+          "p4": 0
+        },
+        "connectsInRange": 2415,
+        "onFloorNow": null
+      },
+      "clients": [
+        {
+          "key": "ENC",
+          "label": "ENC",
+          "market": null,
+          "active": true,
+          "leads": 20,
+          "worked": 20,
+          "contacted": 20,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 38.7,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "JHC",
+          "label": "JHC",
+          "market": null,
+          "active": true,
+          "leads": 11,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.1818,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 1440.0,
+          "lags": {
+            "leadToFirstAttempt": 48.0,
+            "leadToConnect": 72.2,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "AHC",
+          "label": "AHC",
+          "market": null,
+          "active": true,
+          "leads": 6,
+          "worked": 6,
+          "contacted": 6,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 16.8,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "SHA",
+          "label": "SHA",
+          "market": null,
+          "active": true,
+          "leads": 5,
+          "worked": 5,
+          "contacted": 5,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 17.7,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "BCF",
+          "label": "BCF",
+          "market": null,
+          "active": true,
+          "leads": 4,
+          "worked": 4,
+          "contacted": 4,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 21.6,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "THC",
+          "label": "THC",
+          "market": null,
+          "active": true,
+          "leads": 4,
+          "worked": 4,
+          "contacted": 4,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 16.9,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "HPI",
+          "label": "HPI",
+          "market": null,
+          "active": true,
+          "leads": 3,
+          "worked": 3,
+          "contacted": 3,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 22.7,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "OYL",
+          "label": "OYL",
+          "market": null,
+          "active": true,
+          "leads": 3,
+          "worked": 3,
+          "contacted": 3,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 17.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 41.4,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "KTY",
+          "label": "KTY",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 18.8,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "SHS",
+          "label": "SHS",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 21.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ABC",
+          "label": "ABC",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 16.2,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ACL",
+          "label": "ACL",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 16.2,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "AVA",
+          "label": "AVA",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": 14.9,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "GXY",
+          "label": "GXY",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 23.9,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "HSE",
+          "label": "HSE",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "JOY",
+          "label": "JOY",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 14.3,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "OYV",
+          "label": "OYV",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "PCH",
+          "label": "PCH",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 14.5,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "PHC",
+          "label": "PHC",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 38.8,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "RHW",
+          "label": "RHW",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 14.6,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ALM",
+          "label": "ALM",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 1,
+          "contacted": 1,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ALP",
+          "label": "ALP",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 3,
+          "contacted": 3,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "APA",
+          "label": "APA",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "EVC",
+          "label": "EVC",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 6,
+          "contacted": 6,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "EVG",
+          "label": "EVG",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "HHA",
+          "label": "HHA",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 9,
+          "contacted": 8,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 0.8889,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "HHC",
+          "label": "Hallmark Home Care Houston",
+          "market": "Houston, TX",
+          "active": true,
+          "leads": 0,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "HPH",
+          "label": "HPH",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 3,
+          "contacted": 3,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "LPC",
+          "label": "Lenorah's Personal Care",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 11,
+          "contacted": 11,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "PCA",
+          "label": "PCA",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 4,
+          "contacted": 4,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "RHC",
+          "label": "RHC",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 4,
+          "contacted": 4,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ROC",
+          "label": "ROC",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 10,
+          "contacted": 10,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "SHI",
+          "label": "SHI",
+          "market": null,
+          "active": true,
+          "leads": 0,
+          "worked": 4,
+          "contacted": 4,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": null,
+            "leadToConnect": null,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        }
+      ],
+      "setters": [
+        {
+          "name": "Sarah",
+          "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
+          "role": null,
+          "assigned": null,
+          "attempts": 2063,
+          "dials": 2063,
+          "connects": 837,
+          "connectRate": 0.4057,
+          "talkTimeSec": 82681,
+          "booked": null,
+          "bookRate": null,
+          "shows": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "formsSubmitted": null,
+          "formCompliance": 0.0,
+          "dayOneCoverage": null,
+          "isNew": false,
+          "belowSla": false,
+          "claimAttributed": true,
+          "byDay": null
+        },
+        {
+          "name": "Michelle",
+          "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
+          "role": null,
+          "assigned": null,
+          "attempts": 316,
+          "dials": 316,
+          "connects": 122,
+          "connectRate": 0.3861,
+          "talkTimeSec": 19211,
+          "booked": null,
+          "bookRate": null,
+          "shows": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "formsSubmitted": null,
+          "formCompliance": 0.0,
+          "dayOneCoverage": null,
+          "isNew": false,
+          "belowSla": false,
+          "claimAttributed": true,
+          "byDay": null
+        },
+        {
+          "name": "Sophia",
+          "sidUserId": null,
+          "role": null,
+          "assigned": null,
+          "attempts": null,
+          "dials": null,
+          "connects": null,
+          "connectRate": null,
+          "talkTimeSec": null,
+          "booked": null,
+          "bookRate": null,
+          "shows": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "formsSubmitted": null,
+          "formCompliance": null,
+          "dayOneCoverage": null,
+          "isNew": false,
+          "belowSla": false,
+          "claimAttributed": false,
+          "byDay": null
+        },
+        {
+          "name": "Heart",
+          "sidUserId": null,
+          "role": null,
+          "assigned": null,
+          "attempts": null,
+          "dials": null,
+          "connects": null,
+          "connectRate": null,
+          "talkTimeSec": null,
+          "booked": null,
+          "bookRate": null,
+          "shows": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "formsSubmitted": null,
+          "formCompliance": null,
+          "dayOneCoverage": null,
+          "isNew": false,
+          "belowSla": false,
+          "claimAttributed": false,
+          "byDay": null
+        }
+      ],
+      "otherDialers": [
+        {
+          "name": "Mary Lim",
+          "dials": 1798,
+          "connects": 726
+        },
+        {
+          "name": "May Paula",
+          "dials": 921,
+          "connects": 401
+        },
+        {
+          "name": "nWmmFYyRiOKEDbuCbO4B",
+          "dials": 393,
+          "connects": 149
+        },
+        {
+          "name": "HNYZbzBXUZ6aAMewDmH3",
+          "dials": 384,
+          "connects": 160
+        },
+        {
+          "name": "Cxwbrr38lJZiwD9GfFQv",
+          "dials": 60,
+          "connects": 20
+        },
+        {
+          "name": "ulYmZptEHURHKNHQS8Rs",
+          "dials": 3,
+          "connects": 0
+        },
+        {
+          "name": "kKuwMaqRByatfUH7jF5q",
+          "dials": 1,
+          "connects": 0
         }
       ],
       "timeseries": {
@@ -2240,7 +2289,7 @@
           46,
           64,
           57,
-          79,
+          81,
           0
         ],
         "booked": [
@@ -2314,15 +2363,15 @@
           "headline": "Form compliance is 0 percent of connected calls",
           "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
           "metric": "formCompliance",
-          "leadsAtRisk": 267,
+          "leadsAtRisk": 2415,
           "rank": 1
         },
         {
           "severity": "alert",
-          "headline": "25 leads unworked past the SLA",
+          "headline": "24 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 25,
+          "leadsAtRisk": 24,
           "rank": 2
         }
       ],
@@ -2344,12 +2393,12 @@
           "pct": null
         },
         "unworkedNow": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
@@ -2369,24 +2418,24 @@
           "pct": null
         },
         "attemptsLogged": {
-          "cur": 691,
-          "prev": 2294,
-          "pct": -0.6988
+          "cur": 5939,
+          "prev": 2977,
+          "pct": 0.995
         },
         "dialsLogged": {
-          "cur": 691,
-          "prev": 2294,
-          "pct": -0.6988
+          "cur": 5939,
+          "prev": 2977,
+          "pct": 0.995
         },
         "talkTimeSec": {
-          "cur": 27818,
-          "prev": 77429,
-          "pct": -0.6407
+          "cur": 256318,
+          "prev": 111270,
+          "pct": 1.3036
         },
         "connectsInRange": {
-          "cur": 267,
-          "prev": 901,
-          "pct": -0.7037
+          "cur": 2415,
+          "prev": 1197,
+          "pct": 1.0175
         }
       }
     },
@@ -2397,22 +2446,22 @@
         "leadsInRange": 88,
         "introsBookedToday": 0,
         "introsBookedInRange": 0,
-        "unworkedNow": 25,
-        "unworkedPastSla": 25,
+        "unworkedNow": 24,
+        "unworkedPastSla": 24,
         "speedToLeadMedianMin": 0.0,
         "dayOneCoverage": 0.7045,
         "formCompliance": 0.0,
-        "attemptsLogged": 16,
-        "dialsLogged": 16,
+        "attemptsLogged": 4574,
+        "dialsLogged": 4574,
         "attemptIntegrity": null,
-        "talkTimeSec": 155,
+        "talkTimeSec": 202951,
         "queue": {
           "p1": 26,
           "p2": 58,
           "p3": 0,
           "p4": 0
         },
-        "connectsInRange": 6,
+        "connectsInRange": 1886,
         "onFloorNow": null
       },
       "clients": [
@@ -2423,17 +2472,17 @@
           "active": true,
           "leads": 20,
           "worked": 20,
-          "contacted": 0,
+          "contacted": 20,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2444,18 +2493,18 @@
           "market": null,
           "active": true,
           "leads": 11,
-          "worked": 1,
-          "contacted": 0,
+          "worked": 2,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
-          "workedPct": 0.0909,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "workedPct": 0.1818,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
-          "speedToLeadMedianMin": null,
+          "speedToLeadMedianMin": 1440.0,
           "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToFirstAttempt": 48.0,
+            "leadToConnect": 72.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2467,17 +2516,17 @@
           "active": true,
           "leads": 6,
           "worked": 6,
-          "contacted": 0,
+          "contacted": 6,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2489,17 +2538,17 @@
           "active": true,
           "leads": 5,
           "worked": 5,
-          "contacted": 0,
+          "contacted": 5,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2511,17 +2560,17 @@
           "active": true,
           "leads": 4,
           "worked": 4,
-          "contacted": 1,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.25,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2533,17 +2582,17 @@
           "active": true,
           "leads": 4,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2555,17 +2604,17 @@
           "active": true,
           "leads": 3,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 22.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2577,17 +2626,17 @@
           "active": true,
           "leads": 3,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2599,17 +2648,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 41.4,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2621,17 +2670,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 18.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2643,17 +2692,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2665,17 +2714,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2687,17 +2736,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2709,17 +2758,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
             "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToConnect": 14.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2731,17 +2780,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 23.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2753,12 +2802,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -2775,17 +2824,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.3,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2797,12 +2846,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -2819,17 +2868,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.5,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2841,17 +2890,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2863,17 +2912,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -2885,12 +2934,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -2907,12 +2956,12 @@
           "active": true,
           "leads": 0,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -2929,12 +2978,12 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -2951,12 +3000,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -2973,12 +3022,12 @@
           "active": true,
           "leads": 0,
           "worked": 6,
-          "contacted": 0,
+          "contacted": 6,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -2995,12 +3044,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3017,12 +3066,12 @@
           "active": true,
           "leads": 0,
           "worked": 9,
-          "contacted": 0,
+          "contacted": 8,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 0.8889,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3039,12 +3088,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3061,12 +3110,12 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3083,12 +3132,12 @@
           "active": true,
           "leads": 0,
           "worked": 11,
-          "contacted": 0,
+          "contacted": 11,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3105,12 +3154,12 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3127,12 +3176,12 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3149,12 +3198,12 @@
           "active": true,
           "leads": 0,
           "worked": 10,
-          "contacted": 0,
+          "contacted": 10,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3171,12 +3220,12 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -3193,11 +3242,34 @@
           "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
           "role": null,
           "assigned": null,
-          "attempts": 8,
-          "dials": 8,
-          "connects": 4,
-          "connectRate": 0.5,
-          "talkTimeSec": 95,
+          "attempts": 1506,
+          "dials": 1506,
+          "connects": 627,
+          "connectRate": 0.4163,
+          "talkTimeSec": 65357,
+          "booked": null,
+          "bookRate": null,
+          "shows": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "formsSubmitted": null,
+          "formCompliance": 0.0,
+          "dayOneCoverage": null,
+          "isNew": false,
+          "belowSla": false,
+          "claimAttributed": true,
+          "byDay": null
+        },
+        {
+          "name": "Michelle",
+          "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
+          "role": null,
+          "assigned": null,
+          "attempts": 247,
+          "dials": 247,
+          "connects": 96,
+          "connectRate": 0.3887,
+          "talkTimeSec": 16758,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -3235,29 +3307,6 @@
           "byDay": null
         },
         {
-          "name": "Michelle",
-          "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
-          "role": null,
-          "assigned": null,
-          "attempts": null,
-          "dials": null,
-          "connects": null,
-          "connectRate": null,
-          "talkTimeSec": null,
-          "booked": null,
-          "bookRate": null,
-          "shows": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "formsSubmitted": null,
-          "formCompliance": null,
-          "dayOneCoverage": null,
-          "isNew": false,
-          "belowSla": false,
-          "claimAttributed": true,
-          "byDay": null
-        },
-        {
           "name": "Heart",
           "sidUserId": null,
           "role": null,
@@ -3283,18 +3332,33 @@
       ],
       "otherDialers": [
         {
+          "name": "Mary Lim",
+          "dials": 1451,
+          "connects": 583
+        },
+        {
           "name": "May Paula",
-          "dials": 4,
-          "connects": 1
+          "dials": 806,
+          "connects": 352
         },
         {
           "name": "HNYZbzBXUZ6aAMewDmH3",
-          "dials": 2,
-          "connects": 1
+          "dials": 384,
+          "connects": 160
         },
         {
-          "name": "Mary Lim",
-          "dials": 2,
+          "name": "nWmmFYyRiOKEDbuCbO4B",
+          "dials": 176,
+          "connects": 68
+        },
+        {
+          "name": "ulYmZptEHURHKNHQS8Rs",
+          "dials": 3,
+          "connects": 0
+        },
+        {
+          "name": "kKuwMaqRByatfUH7jF5q",
+          "dials": 1,
           "connects": 0
         }
       ],
@@ -3371,7 +3435,7 @@
           46,
           64,
           57,
-          79,
+          81,
           0
         ],
         "booked": [
@@ -3428,18 +3492,18 @@
       "insights": [
         {
           "severity": "alert",
-          "headline": "25 leads unworked past the SLA",
-          "detail": "Inside floor hours, past 30 minutes with zero attempts.",
-          "metric": "unworkedPastSla",
-          "leadsAtRisk": 25,
+          "headline": "Form compliance is 0 percent of connected calls",
+          "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
+          "metric": "formCompliance",
+          "leadsAtRisk": 1886,
           "rank": 1
         },
         {
           "severity": "alert",
-          "headline": "Form compliance is 0 percent of connected calls",
-          "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
-          "metric": "formCompliance",
-          "leadsAtRisk": 6,
+          "headline": "24 leads unworked past the SLA",
+          "detail": "Inside floor hours, past 30 minutes with zero attempts.",
+          "metric": "unworkedPastSla",
+          "leadsAtRisk": 24,
           "rank": 2
         }
       ],
@@ -3461,12 +3525,12 @@
           "pct": null
         },
         "unworkedNow": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
@@ -3486,24 +3550,24 @@
           "pct": null
         },
         "attemptsLogged": {
-          "cur": 16,
-          "prev": 2228,
-          "pct": -0.9928
+          "cur": 4574,
+          "prev": 2877,
+          "pct": 0.5899
         },
         "dialsLogged": {
-          "cur": 16,
-          "prev": 2228,
-          "pct": -0.9928
+          "cur": 4574,
+          "prev": 2877,
+          "pct": 0.5899
         },
         "talkTimeSec": {
-          "cur": 155,
-          "prev": 74182,
-          "pct": -0.9979
+          "cur": 202951,
+          "prev": 104287,
+          "pct": 0.9461
         },
         "connectsInRange": {
-          "cur": 6,
-          "prev": 874,
-          "pct": -0.9931
+          "cur": 1886,
+          "prev": 1155,
+          "pct": 0.6329
         }
       }
     },
@@ -3514,22 +3578,22 @@
         "leadsInRange": 88,
         "introsBookedToday": 0,
         "introsBookedInRange": 0,
-        "unworkedNow": 25,
-        "unworkedPastSla": 25,
+        "unworkedNow": 24,
+        "unworkedPastSla": 24,
         "speedToLeadMedianMin": 0.0,
         "dayOneCoverage": 0.7045,
         "formCompliance": 0.0,
-        "attemptsLogged": 16,
-        "dialsLogged": 16,
+        "attemptsLogged": 4574,
+        "dialsLogged": 4574,
         "attemptIntegrity": null,
-        "talkTimeSec": 155,
+        "talkTimeSec": 202951,
         "queue": {
           "p1": 26,
           "p2": 58,
           "p3": 0,
           "p4": 0
         },
-        "connectsInRange": 6,
+        "connectsInRange": 1886,
         "onFloorNow": null
       },
       "clients": [
@@ -3540,17 +3604,17 @@
           "active": true,
           "leads": 20,
           "worked": 20,
-          "contacted": 0,
+          "contacted": 20,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3561,18 +3625,18 @@
           "market": null,
           "active": true,
           "leads": 11,
-          "worked": 1,
-          "contacted": 0,
+          "worked": 2,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
-          "workedPct": 0.0909,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "workedPct": 0.1818,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
-          "speedToLeadMedianMin": null,
+          "speedToLeadMedianMin": 1440.0,
           "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToFirstAttempt": 48.0,
+            "leadToConnect": 72.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3584,17 +3648,17 @@
           "active": true,
           "leads": 6,
           "worked": 6,
-          "contacted": 0,
+          "contacted": 6,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3606,17 +3670,17 @@
           "active": true,
           "leads": 5,
           "worked": 5,
-          "contacted": 0,
+          "contacted": 5,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3628,17 +3692,17 @@
           "active": true,
           "leads": 4,
           "worked": 4,
-          "contacted": 1,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.25,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3650,17 +3714,17 @@
           "active": true,
           "leads": 4,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3672,17 +3736,17 @@
           "active": true,
           "leads": 3,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 22.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3694,17 +3758,17 @@
           "active": true,
           "leads": 3,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3716,17 +3780,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 41.4,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3738,17 +3802,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 18.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3760,17 +3824,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3782,17 +3846,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3804,17 +3868,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3826,17 +3890,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
             "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToConnect": 14.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3848,17 +3912,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 23.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3870,12 +3934,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -3892,17 +3956,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.3,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3914,12 +3978,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -3936,17 +4000,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.5,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3958,17 +4022,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -3980,17 +4044,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4002,12 +4066,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4024,12 +4088,12 @@
           "active": true,
           "leads": 0,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4046,12 +4110,12 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4068,12 +4132,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4090,12 +4154,12 @@
           "active": true,
           "leads": 0,
           "worked": 6,
-          "contacted": 0,
+          "contacted": 6,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4112,12 +4176,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4134,12 +4198,12 @@
           "active": true,
           "leads": 0,
           "worked": 9,
-          "contacted": 0,
+          "contacted": 8,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 0.8889,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4156,12 +4220,12 @@
           "active": true,
           "leads": 0,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4178,12 +4242,12 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 0,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4200,12 +4264,12 @@
           "active": true,
           "leads": 0,
           "worked": 11,
-          "contacted": 0,
+          "contacted": 11,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4222,12 +4286,12 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4244,12 +4308,12 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4266,12 +4330,12 @@
           "active": true,
           "leads": 0,
           "worked": 10,
-          "contacted": 0,
+          "contacted": 10,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4288,12 +4352,12 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 0,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -4310,11 +4374,34 @@
           "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
           "role": null,
           "assigned": null,
-          "attempts": 8,
-          "dials": 8,
-          "connects": 4,
-          "connectRate": 0.5,
-          "talkTimeSec": 95,
+          "attempts": 1506,
+          "dials": 1506,
+          "connects": 627,
+          "connectRate": 0.4163,
+          "talkTimeSec": 65357,
+          "booked": null,
+          "bookRate": null,
+          "shows": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "formsSubmitted": null,
+          "formCompliance": 0.0,
+          "dayOneCoverage": null,
+          "isNew": false,
+          "belowSla": false,
+          "claimAttributed": true,
+          "byDay": null
+        },
+        {
+          "name": "Michelle",
+          "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
+          "role": null,
+          "assigned": null,
+          "attempts": 247,
+          "dials": 247,
+          "connects": 96,
+          "connectRate": 0.3887,
+          "talkTimeSec": 16758,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -4352,29 +4439,6 @@
           "byDay": null
         },
         {
-          "name": "Michelle",
-          "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
-          "role": null,
-          "assigned": null,
-          "attempts": null,
-          "dials": null,
-          "connects": null,
-          "connectRate": null,
-          "talkTimeSec": null,
-          "booked": null,
-          "bookRate": null,
-          "shows": null,
-          "showRate": null,
-          "speedToLeadMedianMin": null,
-          "formsSubmitted": null,
-          "formCompliance": null,
-          "dayOneCoverage": null,
-          "isNew": false,
-          "belowSla": false,
-          "claimAttributed": true,
-          "byDay": null
-        },
-        {
           "name": "Heart",
           "sidUserId": null,
           "role": null,
@@ -4400,18 +4464,33 @@
       ],
       "otherDialers": [
         {
+          "name": "Mary Lim",
+          "dials": 1451,
+          "connects": 583
+        },
+        {
           "name": "May Paula",
-          "dials": 4,
-          "connects": 1
+          "dials": 806,
+          "connects": 352
         },
         {
           "name": "HNYZbzBXUZ6aAMewDmH3",
-          "dials": 2,
-          "connects": 1
+          "dials": 384,
+          "connects": 160
         },
         {
-          "name": "Mary Lim",
-          "dials": 2,
+          "name": "nWmmFYyRiOKEDbuCbO4B",
+          "dials": 176,
+          "connects": 68
+        },
+        {
+          "name": "ulYmZptEHURHKNHQS8Rs",
+          "dials": 3,
+          "connects": 0
+        },
+        {
+          "name": "kKuwMaqRByatfUH7jF5q",
+          "dials": 1,
           "connects": 0
         }
       ],
@@ -4488,7 +4567,7 @@
           46,
           64,
           57,
-          79,
+          81,
           0
         ],
         "booked": [
@@ -4545,18 +4624,18 @@
       "insights": [
         {
           "severity": "alert",
-          "headline": "25 leads unworked past the SLA",
-          "detail": "Inside floor hours, past 30 minutes with zero attempts.",
-          "metric": "unworkedPastSla",
-          "leadsAtRisk": 25,
+          "headline": "Form compliance is 0 percent of connected calls",
+          "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
+          "metric": "formCompliance",
+          "leadsAtRisk": 1886,
           "rank": 1
         },
         {
           "severity": "alert",
-          "headline": "Form compliance is 0 percent of connected calls",
-          "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
-          "metric": "formCompliance",
-          "leadsAtRisk": 6,
+          "headline": "24 leads unworked past the SLA",
+          "detail": "Inside floor hours, past 30 minutes with zero attempts.",
+          "metric": "unworkedPastSla",
+          "leadsAtRisk": 24,
           "rank": 2
         }
       ],
@@ -4578,12 +4657,12 @@
           "pct": null
         },
         "unworkedNow": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
@@ -4603,22 +4682,22 @@
           "pct": null
         },
         "attemptsLogged": {
-          "cur": 16,
-          "prev": 3,
-          "pct": 4.3333
+          "cur": 4574,
+          "prev": 10,
+          "pct": 456.4
         },
         "dialsLogged": {
-          "cur": 16,
-          "prev": 3,
-          "pct": 4.3333
+          "cur": 4574,
+          "prev": 10,
+          "pct": 456.4
         },
         "talkTimeSec": {
-          "cur": 155,
-          "prev": null,
-          "pct": null
+          "cur": 202951,
+          "prev": 4,
+          "pct": 50736.75
         },
         "connectsInRange": {
-          "cur": 6,
+          "cur": 1886,
           "prev": 0,
           "pct": null
         }
@@ -4631,22 +4710,22 @@
         "leadsInRange": 88,
         "introsBookedToday": 0,
         "introsBookedInRange": 0,
-        "unworkedNow": 25,
-        "unworkedPastSla": 25,
+        "unworkedNow": 24,
+        "unworkedPastSla": 24,
         "speedToLeadMedianMin": 0.0,
         "dayOneCoverage": 0.7045,
         "formCompliance": 0.0,
-        "attemptsLogged": 3163,
-        "dialsLogged": 3163,
+        "attemptsLogged": 9194,
+        "dialsLogged": 9194,
         "attemptIntegrity": null,
-        "talkTimeSec": 107569,
+        "talkTimeSec": 370068,
         "queue": {
           "p1": 26,
           "p2": 58,
           "p3": 0,
           "p4": 0
         },
-        "connectsInRange": 1182,
+        "connectsInRange": 3629,
         "onFloorNow": null
       },
       "clients": [
@@ -4657,17 +4736,17 @@
           "active": true,
           "leads": 20,
           "worked": 20,
-          "contacted": 0,
+          "contacted": 20,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4678,18 +4757,18 @@
           "market": null,
           "active": true,
           "leads": 11,
-          "worked": 1,
-          "contacted": 1,
+          "worked": 2,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
-          "workedPct": 0.0909,
+          "workedPct": 0.1818,
           "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
-          "speedToLeadMedianMin": null,
+          "speedToLeadMedianMin": 1440.0,
           "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToFirstAttempt": 48.0,
+            "leadToConnect": 72.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4711,7 +4790,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4723,17 +4802,17 @@
           "active": true,
           "leads": 5,
           "worked": 5,
-          "contacted": 3,
+          "contacted": 5,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.6,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4755,7 +4834,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4777,7 +4856,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4789,17 +4868,17 @@
           "active": true,
           "leads": 3,
           "worked": 3,
-          "contacted": 2,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.6667,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 22.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4821,7 +4900,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4833,17 +4912,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 1,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.5,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 41.4,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4855,17 +4934,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 1,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.5,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 18.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4877,17 +4956,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4909,7 +4988,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4931,7 +5010,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4943,17 +5022,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
             "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToConnect": 14.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -4975,7 +5054,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 23.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5019,7 +5098,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.3,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5031,12 +5110,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -5063,7 +5142,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.5,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5075,17 +5154,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5097,17 +5176,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5207,11 +5286,11 @@
           "active": true,
           "leads": 0,
           "worked": 6,
-          "contacted": 5,
+          "contacted": 6,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.8333,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -5251,12 +5330,12 @@
           "active": true,
           "leads": 0,
           "worked": 9,
-          "contacted": 0,
+          "contacted": 8,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 0.8889,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -5295,11 +5374,11 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 1,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.3333,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -5361,11 +5440,11 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 1,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.25,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -5383,11 +5462,11 @@
           "active": true,
           "leads": 0,
           "worked": 10,
-          "contacted": 4,
+          "contacted": 10,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.4,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -5427,11 +5506,11 @@
           "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
           "role": null,
           "assigned": null,
-          "attempts": 897,
-          "dials": 897,
-          "connects": 329,
-          "connectRate": 0.3668,
-          "talkTimeSec": 22937,
+          "attempts": 2741,
+          "dials": 2741,
+          "connects": 1084,
+          "connectRate": 0.3955,
+          "talkTimeSec": 100308,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -5450,11 +5529,11 @@
           "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
           "role": null,
           "assigned": null,
-          "attempts": 265,
-          "dials": 265,
-          "connects": 100,
-          "connectRate": 0.3774,
-          "talkTimeSec": 12420,
+          "attempts": 612,
+          "dials": 612,
+          "connects": 241,
+          "connectRate": 0.3938,
+          "talkTimeSec": 35027,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -5517,28 +5596,38 @@
       ],
       "otherDialers": [
         {
-          "name": "nWmmFYyRiOKEDbuCbO4B",
-          "dials": 742,
-          "connects": 306
+          "name": "Mary Lim",
+          "dials": 2479,
+          "connects": 1016
         },
         {
-          "name": "Mary Lim",
-          "dials": 617,
-          "connects": 253
+          "name": "nWmmFYyRiOKEDbuCbO4B",
+          "dials": 1260,
+          "connects": 496
         },
         {
           "name": "May Paula",
-          "dials": 341,
-          "connects": 138
-        },
-        {
-          "name": "Cxwbrr38lJZiwD9GfFQv",
-          "dials": 161,
-          "connects": 54
+          "dials": 1245,
+          "connects": 543
         },
         {
           "name": "HNYZbzBXUZ6aAMewDmH3",
-          "dials": 2,
+          "dials": 384,
+          "connects": 160
+        },
+        {
+          "name": "Cxwbrr38lJZiwD9GfFQv",
+          "dials": 239,
+          "connects": 87
+        },
+        {
+          "name": "ulYmZptEHURHKNHQS8Rs",
+          "dials": 7,
+          "connects": 0
+        },
+        {
+          "name": "kKuwMaqRByatfUH7jF5q",
+          "dials": 5,
           "connects": 1
         },
         {
@@ -5641,7 +5730,7 @@
           46,
           64,
           57,
-          79,
+          81,
           0
         ],
         "booked": [
@@ -5715,15 +5804,15 @@
           "headline": "Form compliance is 0 percent of connected calls",
           "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
           "metric": "formCompliance",
-          "leadsAtRisk": 1182,
+          "leadsAtRisk": 3629,
           "rank": 1
         },
         {
           "severity": "alert",
-          "headline": "25 leads unworked past the SLA",
+          "headline": "24 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 25,
+          "leadsAtRisk": 24,
           "rank": 2
         }
       ],
@@ -5745,12 +5834,12 @@
           "pct": null
         },
         "unworkedNow": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 25,
+          "cur": 24,
           "prev": 0,
           "pct": null
         },
@@ -5770,22 +5859,22 @@
           "pct": null
         },
         "attemptsLogged": {
-          "cur": 3163,
+          "cur": 9194,
           "prev": null,
           "pct": null
         },
         "dialsLogged": {
-          "cur": 3163,
+          "cur": 9194,
           "prev": null,
           "pct": null
         },
         "talkTimeSec": {
-          "cur": 107569,
+          "cur": 370068,
           "prev": null,
           "pct": null
         },
         "connectsInRange": {
-          "cur": 1182,
+          "cur": 3629,
           "prev": 0,
           "pct": null
         }
@@ -5798,22 +5887,22 @@
         "leadsInRange": 88,
         "introsBookedToday": 0,
         "introsBookedInRange": 0,
-        "unworkedNow": 25,
-        "unworkedPastSla": 25,
+        "unworkedNow": 24,
+        "unworkedPastSla": 24,
         "speedToLeadMedianMin": 0.0,
         "dayOneCoverage": 0.7045,
         "formCompliance": 0.0,
-        "attemptsLogged": 3163,
-        "dialsLogged": 3163,
+        "attemptsLogged": 9197,
+        "dialsLogged": 9197,
         "attemptIntegrity": null,
-        "talkTimeSec": 107569,
+        "talkTimeSec": 370310,
         "queue": {
           "p1": 26,
           "p2": 58,
           "p3": 0,
           "p4": 0
         },
-        "connectsInRange": 1182,
+        "connectsInRange": 3632,
         "onFloorNow": null
       },
       "clients": [
@@ -5824,17 +5913,17 @@
           "active": true,
           "leads": 20,
           "worked": 20,
-          "contacted": 0,
+          "contacted": 20,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5845,18 +5934,18 @@
           "market": null,
           "active": true,
           "leads": 11,
-          "worked": 1,
-          "contacted": 1,
+          "worked": 2,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
-          "workedPct": 0.0909,
+          "workedPct": 0.1818,
           "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
-          "speedToLeadMedianMin": null,
+          "speedToLeadMedianMin": 1440.0,
           "lags": {
-            "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToFirstAttempt": 48.0,
+            "leadToConnect": 72.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5878,7 +5967,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5890,17 +5979,17 @@
           "active": true,
           "leads": 5,
           "worked": 5,
-          "contacted": 3,
+          "contacted": 5,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.6,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5922,7 +6011,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5944,7 +6033,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5956,17 +6045,17 @@
           "active": true,
           "leads": 3,
           "worked": 3,
-          "contacted": 2,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.6667,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 22.7,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -5988,7 +6077,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 17.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6000,17 +6089,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 1,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.5,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 41.4,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6022,17 +6111,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 1,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.5,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 18.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6044,17 +6133,17 @@
           "active": true,
           "leads": 2,
           "worked": 2,
-          "contacted": 0,
+          "contacted": 2,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 21.0,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6076,7 +6165,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6098,7 +6187,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 16.2,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6110,17 +6199,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
             "leadToFirstAttempt": null,
-            "leadToConnect": null,
+            "leadToConnect": 14.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6142,7 +6231,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 23.9,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6186,7 +6275,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.3,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6198,12 +6287,12 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -6230,7 +6319,7 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.5,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6242,17 +6331,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 720.0,
           "lags": {
             "leadToFirstAttempt": 24.0,
-            "leadToConnect": null,
+            "leadToConnect": 38.8,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6264,17 +6353,17 @@
           "active": true,
           "leads": 1,
           "worked": 1,
-          "contacted": 0,
+          "contacted": 1,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": null,
+            "leadToConnect": 14.6,
             "connectToBooked": null,
             "bookedToHeld": null
           }
@@ -6374,11 +6463,11 @@
           "active": true,
           "leads": 0,
           "worked": 6,
-          "contacted": 5,
+          "contacted": 6,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.8333,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -6418,12 +6507,12 @@
           "active": true,
           "leads": 0,
           "worked": 9,
-          "contacted": 0,
+          "contacted": 8,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.0,
-          "bookRate": null,
+          "connectRate": 0.8889,
+          "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
           "lags": {
@@ -6462,11 +6551,11 @@
           "active": true,
           "leads": 0,
           "worked": 3,
-          "contacted": 1,
+          "contacted": 3,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.3333,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -6528,11 +6617,11 @@
           "active": true,
           "leads": 0,
           "worked": 4,
-          "contacted": 1,
+          "contacted": 4,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.25,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -6550,11 +6639,11 @@
           "active": true,
           "leads": 0,
           "worked": 10,
-          "contacted": 4,
+          "contacted": 10,
           "booked": 0,
           "shows": 0,
           "workedPct": null,
-          "connectRate": 0.4,
+          "connectRate": 1.0,
           "bookRate": 0.0,
           "showRate": null,
           "speedToLeadMedianMin": null,
@@ -6594,11 +6683,11 @@
           "sidUserId": "ZyhQdAjohLeWSM9i0d3T",
           "role": null,
           "assigned": null,
-          "attempts": 897,
-          "dials": 897,
-          "connects": 329,
-          "connectRate": 0.3668,
-          "talkTimeSec": 22937,
+          "attempts": 2741,
+          "dials": 2741,
+          "connects": 1084,
+          "connectRate": 0.3955,
+          "talkTimeSec": 100308,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -6617,11 +6706,11 @@
           "sidUserId": "QCFNWQLCH2ihwmiNVpxi",
           "role": null,
           "assigned": null,
-          "attempts": 265,
-          "dials": 265,
-          "connects": 100,
-          "connectRate": 0.3774,
-          "talkTimeSec": 12420,
+          "attempts": 614,
+          "dials": 614,
+          "connects": 243,
+          "connectRate": 0.3958,
+          "talkTimeSec": 35245,
           "booked": null,
           "bookRate": null,
           "shows": null,
@@ -6684,28 +6773,43 @@
       ],
       "otherDialers": [
         {
-          "name": "nWmmFYyRiOKEDbuCbO4B",
-          "dials": 742,
-          "connects": 306
+          "name": "Mary Lim",
+          "dials": 2479,
+          "connects": 1016
         },
         {
-          "name": "Mary Lim",
-          "dials": 617,
-          "connects": 253
+          "name": "nWmmFYyRiOKEDbuCbO4B",
+          "dials": 1260,
+          "connects": 496
         },
         {
           "name": "May Paula",
-          "dials": 341,
-          "connects": 138
-        },
-        {
-          "name": "Cxwbrr38lJZiwD9GfFQv",
-          "dials": 161,
-          "connects": 54
+          "dials": 1245,
+          "connects": 543
         },
         {
           "name": "HNYZbzBXUZ6aAMewDmH3",
-          "dials": 2,
+          "dials": 384,
+          "connects": 160
+        },
+        {
+          "name": "Cxwbrr38lJZiwD9GfFQv",
+          "dials": 239,
+          "connects": 87
+        },
+        {
+          "name": "ulYmZptEHURHKNHQS8Rs",
+          "dials": 7,
+          "connects": 0
+        },
+        {
+          "name": "kKuwMaqRByatfUH7jF5q",
+          "dials": 5,
+          "connects": 1
+        },
+        {
+          "name": "kTQrizcaSVdatw62Qdkf",
+          "dials": 1,
           "connects": 1
         },
         {
@@ -6808,7 +6912,7 @@
           46,
           64,
           57,
-          79,
+          81,
           0
         ],
         "booked": [
@@ -6882,15 +6986,15 @@
           "headline": "Form compliance is 0 percent of connected calls",
           "detail": "Connected calls without an Intro Call Form make per-setter numbers understated.",
           "metric": "formCompliance",
-          "leadsAtRisk": 1182,
+          "leadsAtRisk": 3632,
           "rank": 1
         },
         {
           "severity": "alert",
-          "headline": "25 leads unworked past the SLA",
+          "headline": "24 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 25,
+          "leadsAtRisk": 24,
           "rank": 2
         }
       ],
@@ -6911,12 +7015,28 @@
       ]
     },
     {
+      "code": "NONROSTER_DIALERS",
+      "severity": "info",
+      "message": "These GHL users are dialing from the CRM but are not on the active SDR roster, so their calls count in the floor totals but not in a setter row: Mary Lim (428 dials), HNYZbzBXUZ6aAMewDmH3 (246 dials), kKuwMaqRByatfUH7jF5q (1 dials). Confirm whether they should be added to the roster.",
+      "affects": [
+        "setters"
+      ]
+    },
+    {
       "code": "ATTEMPT_INTEGRITY",
       "severity": "alert",
-      "message": "380 contacts are stuck carrying the sid-dial-1 toggle tag, which means dial pairs are not completing and attempt counts are not incrementing correctly. Check WF-2 before trusting attempt numbers.",
+      "message": "382 contacts are stuck carrying the sid-dial-1 toggle tag, which means dial pairs are not completing and attempt counts are not incrementing correctly. Check WF-2 before trusting attempt numbers.",
       "affects": [
         "setters.attempts",
         "floor.attemptsLogged"
+      ]
+    },
+    {
+      "code": "FORM_COMPLIANCE_LOW",
+      "severity": "warn",
+      "message": "Form compliance is 0 percent of connected calls, under target. Per-setter attribution depends on the Intro Call Form, so low-compliance setters are undercounted.",
+      "affects": [
+        "setters"
       ]
     },
     {
