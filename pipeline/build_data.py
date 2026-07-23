@@ -308,8 +308,9 @@ def build_from_raw(ghl, dash):
     intro_booked = (outc.get("introCallOutcome") or {}).get("booked", "Booked")
     held_key = (outc.get("clientCallOutcome") or {}).get("fieldKey")
     held_val = (outc.get("clientCallOutcome") or {}).get("held", "Complete")
+    ba = ghl.get("bookedAppointment", {})
 
-    facts = [contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val) for c in contacts]
+    facts = [contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val, ba) for c in contacts]
 
     # The sid_assigned_at connect stamp is empty, so derive each contact's connect timestamp from the
     # real call feed (first outbound completed call >= connect_min seconds). This lights up the funnel
@@ -320,6 +321,9 @@ def build_from_raw(ghl, dash):
     for f in facts:
         if not f["connect"]:
             f["connect"] = connect_by_contact.get(f["id"])
+        # A booking with no booking date is windowed by the connecting call (now that it is resolved).
+        if f["booked"] and not f["bookedDate"]:
+            f["bookedDate"] = f["connect"]
 
     now = now_utc()
     default = dash.get("defaultPeriod", "7d")
@@ -345,15 +349,31 @@ def build_from_raw(ghl, dash):
     }
 
 
-def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val):
+def is_yes(value, yes_set):
+    """True when a SINGLE_OPTIONS toggle holds an affirmative value."""
+    return bool(value) and str(value).strip().lower() in yes_set
+
+
+def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val, ba):
     """Compute the belt facts for one contact once, so client/floor/setter builds share them."""
     lead_d = parse_ms(field_value(c, efid.get("leadDate")))
     first_a = parse_ms(field_value(c, efid.get("firstAttemptDate")))
     connect_d = parse_ms(field_value(c, efid.get("firstConnectDate")))
-    booked_d = parse_ms(field_value(c, efid.get("bookedDate")))
     intro_outcome = outcome_of(c, intro_key)
     held_outcome = outcome_of(c, held_key)
-    booked = bool(booked_d) or (intro_outcome == intro_booked)
+
+    # Booked = the "Is booked appointment?" toggle is Yes (the live source of truth); the legacy
+    # schedule-date and intro-outcome fields are kept as fallbacks but are not currently written.
+    yes_set = {str(v).strip().lower() for v in (ba.get("yesValues") or ["yes"])}
+    booked_flag = is_yes(field_value(c, ba.get("fieldKey")), yes_set)
+    sched_d = parse_ms(field_value(c, efid.get("bookedDate")))
+    date_booked = parse_ms(field_value(c, ba.get("dateField")))
+    booked = booked_flag or bool(sched_d) or (intro_outcome == intro_booked)
+    booked_d = date_booked or sched_d
+    if booked and not booked_d:              # booked but no booking date: window by the connecting call
+        booked_d = connect_d
+    booked_by = field_value(c, ba.get("bookedByField"))
+
     held = (held_outcome == held_val)
     attempts = to_int(field_value(c, afid.get("attemptCount")))
     assigned_to = field_value(c, afid.get("assignedSetter"))
@@ -362,7 +382,7 @@ def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val):
         "acronym": (str(field_value(c, "contact.partner_acronym")).strip().lower()
                     if field_value(c, "contact.partner_acronym") else None),
         "leadDate": lead_d, "firstAttempt": first_a, "connect": connect_d, "bookedDate": booked_d,
-        "booked": booked, "held": held, "attempts": attempts, "assignedTo": assigned_to,
+        "booked": booked, "bookedBy": booked_by, "held": held, "attempts": attempts, "assignedTo": assigned_to,
         "lastCallSec": to_int(field_value(c, "contact.sid_last_call_duration_sec")),
         "tags": [t.lower() for t in c.get("tags", [])],
     }
@@ -560,7 +580,12 @@ def build_setters(facts, submissions, calls, ghl, goals, since, until, connect_m
         stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in mine if f["leadDate"] and f["firstAttempt"]]
         speed = median_or_none(stl) if mine else None
         forms = forms_by.get(key)
-        booked = forms_booked_by.get(key)
+        # Booked per setter: count "Is booked appointment?" = Yes attributed via Booked By, windowed by
+        # the booking date; fall back to the Intro Call Form booked count when Booked By is not set.
+        booked_by_count = sum(1 for f in facts
+                              if f["booked"] and first_name(f.get("bookedBy")) == key
+                              and in_window(f["bookedDate"], since, until))
+        booked = booked_by_count or forms_booked_by.get(key)
         setters.append({
             "name": r.get("name"), "sidUserId": uid, "role": None,
             "assigned": (len(mine) or None) if mine else None,

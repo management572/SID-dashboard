@@ -70,6 +70,14 @@
     "clientCallOutcome": { "fieldKey": "contact.sid_client_call_outcome", "held": "Complete", "options": ["Complete", "No Show", "DQ"] }
   },
 
+  "_bookedAppointment": "The live booked signal. 'Is booked appointment?' is toggled Yes when an appointment is booked; that is the source of truth (the sid_* outcome fields are not being written). dateField windows the booking; bookedBy attributes it to a setter. yesValues are matched case-insensitively.",
+  "bookedAppointment": {
+    "fieldKey": "contact.is_booked_appointment",
+    "yesValues": ["Yes", "true", "Booked", "1"],
+    "dateField": "contact.date_booked",
+    "bookedByField": "contact.booked_by"
+  },
+
   "_attemptFields": "attemptCount is the true bundle count (one double-dial pair = +1), incremented by WF-2 via the sid-dial-1 toggle. dayOneAttemptCount has no field: it is computed as first attempt within 24h of leadDate. dials are NOT available (GHL native dialer, no Wavv API), so the dials column renders null and the integrity check watches for stuck sid-dial-1 tags instead.",
   "attemptFieldIds": {
     "attemptCount": "contact.sid_attempt_count",
