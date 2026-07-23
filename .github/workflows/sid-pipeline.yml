@@ -98,7 +98,21 @@ jobs:
           fi
           if git diff --cached --quiet; then
             echo "No changes to commit."
-          else
-            git commit -m "chore(data): automated SID ${{ github.event.inputs.mode || 'refresh' }} [skip ci]"
-            git push origin HEAD:${GITHUB_REF_NAME}
+            exit 0
           fi
+          git commit -m "chore(data): automated SID ${{ github.event.inputs.mode || 'refresh' }} [skip ci]"
+          # The branch can advance between checkout and push (concurrent runs, manual commits), which
+          # rejects a plain push. This job only writes one generated file, so on rejection re-base our
+          # commit onto the latest remote tip (keeping our fresh file) and retry.
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:${GITHUB_REF_NAME}; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            echo "push rejected; syncing with remote (attempt $i)"
+            git fetch origin ${GITHUB_REF_NAME}
+            git reset --soft "origin/${GITHUB_REF_NAME}"
+            git commit -m "chore(data): automated SID ${{ github.event.inputs.mode || 'refresh' }} [skip ci]" || echo "nothing new to commit"
+            sleep $((i * 3))
+          done
+          echo "::error::could not push refreshed data after 5 attempts"
+          exit 1

@@ -908,11 +908,12 @@ function renderDialerRates() {
   const host = document.getElementById("dialerRates");
   if (!host) return;
   const dl = P.dialer || {}, r = dl.rates || {}, t = dl.totals || {};
+  const num = v => isNil(v) ? "0" : Number(v).toLocaleString("en-US");   // plain text, never HTML
   const cards = [
-    { label:"Connect rate", val:fmtPct(r.connectRate), sub:fmtCount(t.connects) + " of " + fmtCount(t.dials) + " dials" },
-    { label:"Answer rate", val:fmtPct(r.answerRate), sub:"answered / dials" },
-    { label:"Drop rate", val:fmtPct(r.dropRate), sub:fmtCount(t.dropped) + " dropped" },
-    { label:"Booking rate", val:fmtPct(r.bookingRate), sub:fmtCount(t.bookings) + " of " + fmtCount(t.connects) + " connects" },
+    { label:"Connect rate", val:fmtPct(r.connectRate), sub:num(t.connects) + " of " + num(t.dials) + " dials" },
+    { label:"Answer rate", val:fmtPct(r.answerRate), sub:"of " + num(t.dials) + " dials" },
+    { label:"Drop rate", val:fmtPct(r.dropRate), sub:num(t.dropped) + " dropped" },
+    { label:"Booking rate", val:fmtPct(r.bookingRate), sub:num(t.bookings) + " of " + num(t.connects) + " connects" },
   ];
   host.innerHTML = cards.map(c =>
     '<div class="ratecard"><div class="rlabel">' + esc(c.label) + '</div>' +
