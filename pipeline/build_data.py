@@ -222,6 +222,7 @@ def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min
 
     return {
         "dateRange": fmt_range(since, until),
+        "windowDays": max(1, round((until - since).total_seconds() / 86400)),
         "floor": floor,
         "clients": clients,
         "setters": setters,

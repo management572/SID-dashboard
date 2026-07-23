@@ -174,6 +174,7 @@
   .ratecard .rlabel { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); }
   .ratecard .rval { font-family:var(--head); font-weight:700; font-size:29px; line-height:1.1; margin-top:8px; letter-spacing:-.5px; color:var(--bone); }
   .ratecard .rsub { font-size:11px; color:var(--boneDim); margin-top:4px; }
+  .card-head { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
 
   /* Insights */
   .insight { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--hair); }
@@ -300,6 +301,23 @@
           <h2>Conversion</h2>
           <div class="sub">How the dialer itself is performing this window.</div>
           <div class="rateboard" id="dialerRates"></div>
+        </div>
+      </div>
+
+      <div class="tiles-head"><span>Client SDR conversion performance</span><span class="chip sample" id="revSample" hidden>SAMPLE</span></div>
+      <div class="tiles" id="revTiles"></div>
+      <div class="grid cols2" style="margin-bottom:20px;">
+        <div class="card">
+          <h2>Client revenue</h2>
+          <div class="sub" id="revLineSub">Backend client revenue this period vs the prior year.</div>
+          <div id="revLine"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><h2 style="margin:0">Revenue trend</h2><div class="sub" style="margin:3px 0 0">Compare periods.</div></div>
+            <span class="segset" id="revGran"></span>
+          </div>
+          <div id="revBars" style="margin-top:14px"></div>
         </div>
       </div>
 
@@ -655,6 +673,7 @@ function showTab(t) {
 function renderFloor() {
   renderTiles();
   renderDialer();
+  renderClientRevenue();
   renderInsights();
   renderLanes();
   renderFunnel();
@@ -918,6 +937,164 @@ function renderDialerRates() {
   host.innerHTML = cards.map(c =>
     '<div class="ratecard"><div class="rlabel">' + esc(c.label) + '</div>' +
     '<div class="rval">' + c.val + '</div><div class="rsub">' + esc(c.sub) + '</div></div>').join("");
+}
+
+/* ------------------- CLIENT SDR CONVERSION / REVENUE ------------------- */
+/* Backend client revenue is not mapped yet, so we render deterministic SAMPLE revenue (no Math.random,
+   so it doesn't jiggle between renders) and divide it by the REAL dialer activity for the $/unit tiles.
+   When the pipeline later emits a real per-period `revenue` block, this uses it and drops the badge. */
+let REV_GRAN = "wow";
+const REV_GRAN_OPTS = [{ k:"wow", label:"WoW" }, { k:"mom", label:"MoM" }, { k:"yoy", label:"YoY" }];
+
+function revWave(i, seed) { return 1 + 0.13 * Math.sin((i + seed) * 1.15) + 0.06 * Math.cos((i + seed) * 2.4); }
+function revMoney(v) {
+  if (isNil(v) || !isFinite(v)) return dash();
+  return v >= 100 ? "$" + Math.round(v).toLocaleString("en-US") : "$" + v.toFixed(2);
+}
+function revShort(v) {
+  if (isNil(v)) return dash();
+  return v >= 1000 ? "$" + (v / 1000).toFixed(v >= 10000 ? 0 : 1) + "k" : "$" + Math.round(v);
+}
+
+/* Build the revenue model for the current window + the long trend series (all sample unless real). */
+function revenueModel() {
+  const cfg = CFG.dash.clientRevenue || {};
+  const monthly = cfg.sampleMonthlyRevenue || 45000;
+  const yoy = cfg.sampleYoYGrowth || 0.15;
+  const real = P.revenue || null;                        // pipeline may supply this later
+  const days = P.windowDays || (P.dialer && P.dialer.days ? P.dialer.days.length : 7);
+  const daily = monthly / 30;
+  const total = real ? real.total : Math.round(daily * days);
+  const prev = real ? real.prev : Math.round(total / (1 + yoy));    // ~prior-year equivalent
+
+  const weekBase = monthly / 4.345, monBase = monthly, yrBase = monthly * 12;
+  const weeks = Array.from({ length: 12 }, (_, i) => Math.round(weekBase * (1 + 0.012 * i) * revWave(i, 3) / 50) * 50);
+  const weeksPrior = weeks.map((v, i) => Math.round(v / (1 + yoy) * revWave(i, 8) / 50) * 50);
+  const months = Array.from({ length: 12 }, (_, i) => Math.round(monBase * (1 + 0.02 * i) * revWave(i, 6) / 100) * 100);
+  const years = Array.from({ length: 5 }, (_, i) => Math.round(yrBase * Math.pow(1 + yoy, i - 4) * revWave(i, 1) / 1000) * 1000);
+  return { sample: !real, currency: cfg.currency || "USD", total, prev, weeks, weeksPrior, months, years };
+}
+
+function renderClientRevenue() {
+  const cfg = CFG.dash.clientRevenue || {};
+  const sec = document.getElementById("revTiles");
+  if (!sec) return;
+  if (!cfg.enabled) { return; }
+  const m = revenueModel();
+  const badge = document.getElementById("revSample");
+  if (badge) badge.hidden = !m.sample;
+  renderRevenueTiles(cfg, m);
+  renderRevenueGranToggle();
+  renderRevenueLine(m);
+  renderRevenueBars(m);
+}
+
+function renderRevenueTiles(cfg, m) {
+  const host = document.getElementById("revTiles");
+  const dl = P.dialer || {}, t = dl.totals || {}, f = P.floor || {};
+  const days = P.windowDays || (dl.days ? dl.days.length : 7);
+  const floorHours = days * (cfg.floorHoursPerDay || 12);
+  const denom = {
+    perDial: t.dials, perAttempt: t.attempts, perConnect: t.connects, perBooked: t.bookings,
+    perHour: floorHours, perDay: days, perWeek: days / 7,
+  };
+  const tiles = cfg.costTiles || [];
+  host.innerHTML = tiles.map(tl => {
+    const d = denom[tl.key];
+    const v = (d && d > 0) ? m.total / d : null;
+    const sub = { perDial:t.dials+" dials", perAttempt:t.attempts+" attempts", perConnect:t.connects+" connects",
+      perBooked:(t.bookings||0)+" booked", perHour:Math.round(floorHours)+" floor hrs",
+      perDay:days+(days===1?" day":" days"), perWeek:(days/7).toFixed(days<7?2:1)+" wks" }[tl.key] || "";
+    return '<div class="tile"><div class="tlabel">' + esc(tl.label) + '</div>' +
+           '<div class="tval">' + revMoney(v) + '</div>' +
+           '<div class="tsub">' + esc(sub) + '</div></div>';
+  }).join("");
+}
+
+function renderRevenueGranToggle() {
+  const host = document.getElementById("revGran");
+  if (!host) return;
+  host.innerHTML = REV_GRAN_OPTS.map(o =>
+    '<button class="' + (o.k === REV_GRAN ? "on" : "") + '" data-g="' + o.k + '">' + o.label + '</button>').join("");
+  host.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => {
+    REV_GRAN = btn.dataset.g;
+    renderRevenueGranToggle();
+    renderRevenueBars(revenueModel());
+  }));
+}
+
+/* Revenue line: current period vs the prior-year equivalent (comparison), weekly. */
+function renderRevenueLine(m) {
+  const host = document.getElementById("revLine");
+  if (!host) return;
+  const cur = m.weeks, prior = m.weeksPrior, n = cur.length;
+  const W = 560, H = 240, padL = 44, padR = 14, padT = 14, padB = 26;
+  const maxV = Math.max(1, ...cur, ...prior) * 1.1;
+  const x = i => padL + (n === 1 ? (W - padL - padR) / 2 : i * (W - padL - padR) / (n - 1));
+  const y = v => padT + (1 - v / maxV) * (H - padT - padB);
+  const poly = (arr, color, dash) => '<polyline points="' + arr.map((v, i) => x(i) + "," + y(v)).join(" ") +
+    '" fill="none" stroke="' + color + '" stroke-width="2"' + (dash ? ' stroke-dasharray="4 3"' : "") + ' />';
+  let grid = "";
+  for (let g = 0; g <= 4; g++) {
+    const yy = padT + g * (H - padT - padB) / 4;
+    grid += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--hair)" />';
+    grid += '<text x="' + (padL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + revShort(Math.round(maxV * (1 - g / 4))) + '</text>';
+  }
+  const now = new Date();
+  let xl = "";
+  for (let i = 0; i < n; i++) {
+    if (i % 2) continue;
+    const d = new Date(now); d.setDate(d.getDate() - (n - 1 - i) * 7);
+    xl += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' +
+      esc(d.toLocaleDateString("en-US", { month:"short", day:"numeric" })) + '</text>';
+  }
+  host.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' + grid + xl +
+      poly(prior, "var(--boneDim)", true) + poly(cur, "var(--accent2)", false) + '</svg>' +
+    '<div class="legend"><span><i style="background:var(--accent2)"></i>This year</span>' +
+      '<span><i style="background:var(--boneDim)"></i>Prior year</span></div>';
+}
+
+/* Revenue bars: WoW / MoM / YoY per the toggle. */
+function renderRevenueBars(m) {
+  const host = document.getElementById("revBars");
+  if (!host) return;
+  const now = new Date();
+  let vals, labels;
+  if (REV_GRAN === "mom") {
+    vals = m.months;
+    labels = vals.map((_, i) => { const d = new Date(now.getFullYear(), now.getMonth() - (vals.length - 1 - i), 1);
+      return d.toLocaleDateString("en-US", { month:"short" }); });
+  } else if (REV_GRAN === "yoy") {
+    vals = m.years;
+    labels = vals.map((_, i) => String(now.getFullYear() - (vals.length - 1 - i)));
+  } else {
+    vals = m.weeks;
+    labels = vals.map((_, i) => { const d = new Date(now); d.setDate(d.getDate() - (vals.length - 1 - i) * 7);
+      return d.toLocaleDateString("en-US", { month:"short", day:"numeric" }); });
+  }
+  const n = vals.length, maxV = Math.max(1, ...vals) * 1.1;
+  const W = 560, H = 240, padL = 44, padR = 12, padT = 14, padB = 26;
+  const plotH = H - padT - padB, plotW = W - padL - padR;
+  const bw = plotW / n, barW = Math.max(3, bw * 0.6);
+  const y = v => padT + (1 - v / maxV) * plotH;
+  let grid = "";
+  for (let g = 0; g <= 4; g++) {
+    const yy = padT + g * plotH / 4;
+    grid += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--hair)" />';
+    grid += '<text x="' + (padL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + revShort(Math.round(maxV * (1 - g / 4))) + '</text>';
+  }
+  let bars = "", xl = "";
+  const showEvery = n > 8 ? 2 : 1;
+  for (let i = 0; i < n; i++) {
+    const cx = padL + i * bw + bw / 2;
+    const yy = y(vals[i]), bh = Math.max(0, plotH + padT - yy);
+    bars += '<rect x="' + (cx - barW / 2).toFixed(1) + '" y="' + yy.toFixed(1) + '" width="' + barW.toFixed(1) +
+      '" height="' + bh.toFixed(1) + '" fill="var(--accent)" rx="2"><title>' + esc(labels[i]) + ': ' + revShort(vals[i]) + '</title></rect>';
+    if (i % showEvery === 0)
+      xl += '<text x="' + cx.toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(labels[i]) + '</text>';
+  }
+  host.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' + grid + bars + xl + '</svg>';
 }
 
 /* ---------------------------- SETTERS ---------------------------- */

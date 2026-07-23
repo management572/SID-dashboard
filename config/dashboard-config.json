@@ -69,6 +69,25 @@
   ],
   "_dialerTilesNote": "Row 2 = dialer performance, all read live from the GHL call feed. Dials = outbound calls; Attempts = distinct leads dialed; Connects = completed calls at/over connectMinSec; Dropped = calls in a failure status; durations are averaged over calls that report a duration.",
 
+  "clientRevenue": {
+    "enabled": true,
+    "sample": true,
+    "currency": "USD",
+    "_note": "Backend client revenue is not mapped to a real source yet, so the board renders SAMPLE revenue (clearly labeled) to showcase the layout. The $/unit tiles divide that revenue by the REAL dialer activity (dials, attempts, connects, bookings, floor hours), so they become fully live the moment a revenue source is mapped and the pipeline emits a per-period `revenue` block.",
+    "sampleMonthlyRevenue": 48000,
+    "sampleYoYGrowth": 0.18,
+    "floorHoursPerDay": 12,
+    "costTiles": [
+      { "key": "perDial", "label": "$ / Dial" },
+      { "key": "perAttempt", "label": "$ / Attempt" },
+      { "key": "perConnect", "label": "$ / Connect" },
+      { "key": "perBooked", "label": "$ / Booked Appt" },
+      { "key": "perHour", "label": "$ / Hour" },
+      { "key": "perDay", "label": "$ / Day" },
+      { "key": "perWeek", "label": "$ / Week" }
+    ]
+  },
+
   "setterColumns": [
     { "key": "name", "label": "Setter" },
     { "key": "assigned", "label": "Assigned" },
