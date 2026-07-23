@@ -313,6 +313,7 @@ def _log_call_histogram(calls):
     buckets = {1: 0, 3: 0, 7: 0, 14: 0, 30: 0}
     outbound = inbound = other = 0
     dirs = {}
+    out_status = {}
     recent = []
     for c in calls:
         ts = to_ms(c.get("dateAdded"))
@@ -320,6 +321,8 @@ def _log_call_histogram(calls):
         dirs[d] = dirs.get(d, 0) + 1
         if d == "outbound":
             outbound += 1
+            st = (c.get("status") or "none")
+            out_status[st] = out_status.get(st, 0) + 1
         elif d == "inbound":
             inbound += 1
         else:
@@ -335,6 +338,7 @@ def _log_call_histogram(calls):
     recent.sort(reverse=True)
     top = [dt.datetime.fromtimestamp(t / 1000, tz=dt.timezone.utc).isoformat() for t in recent[:5]]
     print("fetch_sid: call directions %s" % dirs)
+    print("fetch_sid: outbound call statuses %s" % out_status)
     print("fetch_sid: call events in last 1/3/7/14/30 days = %s" % buckets)
     print("fetch_sid: outbound=%d inbound=%d other=%d; 5 newest outbound: %s"
           % (outbound, inbound, other, top))
