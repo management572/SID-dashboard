@@ -372,11 +372,25 @@
 
     <nav class="tabs" id="tabs"></nav>
 
-    <!-- FLOOR -->
+    <!-- FLOOR: clean daily overview -->
     <section class="tab" id="tab-floor">
       <div class="tiles" id="tiles"></div>
+      <div class="grid cols2" style="margin-bottom:20px;">
+        <div class="card">
+          <h2>What to do next</h2>
+          <div class="sub">Ranked by leads at risk, written as instructions to the floor lead.</div>
+          <div id="insights"></div>
+        </div>
+        <div class="card">
+          <h2>Priority queue</h2>
+          <div class="sub">Depth per lane. P1 is engaged in the last 24 hours.</div>
+          <div id="lanes"></div>
+        </div>
+      </div>
+    </section>
 
-      <div class="tiles-head">Dialer performance</div>
+    <!-- DIALER -->
+    <section class="tab" id="tab-dialer">
       <div class="tiles" id="dialerTiles"></div>
       <div class="grid cols2" style="margin-bottom:20px;">
         <div class="card">
@@ -390,7 +404,22 @@
           <div class="rateboard" id="dialerRates"></div>
         </div>
       </div>
+      <div class="grid cols2b">
+        <div class="card">
+          <h2>Funnel</h2>
+          <div class="sub" id="funnelSub">Cumulative by event date, not current stage.</div>
+          <div class="funnel" id="funnel"></div>
+        </div>
+        <div class="card">
+          <h2>Trend</h2>
+          <div class="sub">Leads, worked and booked, with median speed to lead on the right axis.</div>
+          <div id="trend"></div>
+        </div>
+      </div>
+    </section>
 
+    <!-- REVENUE -->
+    <section class="tab" id="tab-revenue">
       <div class="tiles-head"><span>Client SDR conversion performance</span><span class="chip sample" id="revSample" hidden>SAMPLE</span></div>
       <div class="tiles" id="revTiles"></div>
       <div class="grid cols2" style="margin-bottom:20px;">
@@ -405,31 +434,6 @@
             <span class="segset" id="revGran"></span>
           </div>
           <div id="revBars" style="margin-top:14px"></div>
-        </div>
-      </div>
-
-      <div class="grid cols2" style="margin-bottom:20px;">
-        <div class="card">
-          <h2>What to do next</h2>
-          <div class="sub">Ranked by leads at risk, written as instructions to the floor lead.</div>
-          <div id="insights"></div>
-        </div>
-        <div class="card">
-          <h2>Priority queue</h2>
-          <div class="sub">Depth per lane. P1 is engaged in the last 24 hours.</div>
-          <div id="lanes"></div>
-        </div>
-      </div>
-      <div class="grid cols2b">
-        <div class="card">
-          <h2>Funnel</h2>
-          <div class="sub" id="funnelSub">Cumulative by event date, not current stage.</div>
-          <div class="funnel" id="funnel"></div>
-        </div>
-        <div class="card">
-          <h2>Trend</h2>
-          <div class="sub">Leads, worked and booked, with median speed to lead on the right axis.</div>
-          <div id="trend"></div>
         </div>
       </div>
     </section>
@@ -784,7 +788,7 @@ function initBell() {
 function renderTabs() {
   const nav = document.getElementById("tabs");
   nav.innerHTML = "";
-  const labels = { floor:"Floor", setters:"Setters", clients:"Clients" };
+  const labels = { floor:"Floor", dialer:"Dialer", revenue:"Revenue", setters:"Setters", clients:"Clients" };
   (CFG.dash.tabs || []).forEach(t => {
     const b = document.createElement("button");
     b.textContent = labels[t] || t;
