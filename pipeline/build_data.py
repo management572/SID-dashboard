@@ -452,6 +452,23 @@ def first_connect_by_contact(calls, connect_min):
     return m
 
 
+def first_outbound_by_contact(calls):
+    """Earliest outbound call per contact -> (ts, userId). The setter who first dials a lead owns its
+    speed-to-lead, so this attributes speed-to-lead (and lead ownership) via the call feed, since the
+    sid_assigned_to claim field is not being written."""
+    m = {}
+    for c in calls:
+        if c["direction"] != "outbound":
+            continue
+        cid = c["contactId"]
+        if not cid:
+            continue
+        cur = m.get(cid)
+        if cur is None or c["ts"] < cur[0]:
+            m[cid] = (c["ts"], c["userId"])
+    return m
+
+
 def call_metrics(calls, since, until, connect_min, dropped_statuses=()):
     """Floor-level and per-user dialer metrics from real outbound call events in the window.
       dials       = outbound call attempts placed
@@ -518,12 +535,22 @@ def build_floor(facts, calls, since, until, goals, lane_map, connect_min, droppe
                 m = sla_minutes(lead_d, now)
                 if m is not None and m > goals.get("speedToLeadSlaMin", 30):
                     unworked_sla += 1
-        if lead_d and first_a:
-            stl.append(sla_minutes(lead_d, first_a))
         attempts_total += f["attempts"] or 0
         lane = tier_lane_from_tags(f["tags"], lane_map)
         if lane:
             queue[lane] += 1
+    # Speed to lead = lead-in to the first real outbound dial (from the call feed, same basis as the
+    # per-setter column), windowed by the first dial; the sid_first_dial_at field is unreliable.
+    fd_map = first_outbound_by_contact(calls)
+    lead_map = {f["id"]: f["leadDate"] for f in facts if f.get("id")}
+    for cid, (ts, _uid) in fd_map.items():
+        if not in_window(ts, since, until):
+            continue
+        ld = lead_map.get(cid)
+        if ld:
+            m = sla_minutes(ld, ts)
+            if m is not None:
+                stl.append(m)
     # Dials, connects and talk time come from the real GHL call feed (conversation call messages),
     # because the sid_* mirror fields (sid_assigned_at, sid_last_call_duration_sec) are not written.
     # Connect = an outbound completed call at/over connect_min seconds -- the same definition SID uses.
@@ -576,6 +603,21 @@ def build_setters(facts, submissions, calls, ghl, goals, since, until, connect_m
     # Real per-setter dial / connect / talk-time, attributed by the GHL userId on each outbound call.
     per_user = call_metrics(calls, since, until, connect_min)["perUser"]
 
+    # Speed-to-lead and lead ownership per setter, attributed by whoever placed the first outbound dial
+    # to each lead (the sid_assigned_to claim field is empty, so this is the only working attribution).
+    first_dial = first_outbound_by_contact(calls)
+    lead_by_cid = {f["id"]: f["leadDate"] for f in facts if f.get("id")}
+    per_user_stl, per_user_leads = {}, {}
+    for cid, (ts, uid) in first_dial.items():
+        if not (since <= ts <= until):
+            continue
+        per_user_leads[uid] = per_user_leads.get(uid, 0) + 1
+        ld = lead_by_cid.get(cid)
+        if ld:
+            m = sla_minutes(ld, ts)
+            if m is not None:
+                per_user_stl.setdefault(uid, []).append(m)
+
     # Count form submissions (and booked-from-form) per setter first-name (Submitted By).
     forms_by, forms_booked_by = {}, {}
     for s in submissions:
@@ -612,8 +654,10 @@ def build_setters(facts, submissions, calls, ghl, goals, since, until, connect_m
         attempts = dials if attributed else None
         # Held stays claim-based (needs the Client Call Outcome field); booked prefers the form.
         claim_shows = sum(1 for f in mine if f["held"])
-        stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in mine if f["leadDate"] and f["firstAttempt"]]
-        speed = median_or_none(stl) if mine else None
+        # Speed to lead + assigned leads come from the call feed (first-dial attribution), not the empty
+        # claim field, so they populate for setters who have a GHL user id (Michelle, Sarah).
+        speed = median_or_none(per_user_stl.get(uid, [])) if uid else None
+        assigned = per_user_leads.get(uid) if uid else None
         forms = forms_by.get(key)
         # Booked per setter: count "Is booked appointment?" = Yes attributed via Booked By, windowed by
         # the booking date; fall back to the Intro Call Form booked count when Booked By is not set.
@@ -623,7 +667,7 @@ def build_setters(facts, submissions, calls, ghl, goals, since, until, connect_m
         booked = booked_by_count or forms_booked_by.get(key)
         setters.append({
             "name": r.get("name"), "sidUserId": uid, "role": None,
-            "assigned": (len(mine) or None) if mine else None,
+            "assigned": assigned,
             "attempts": attempts,
             "dials": dials,
             "connects": connects,
