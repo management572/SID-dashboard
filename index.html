@@ -1417,7 +1417,7 @@ function renderClients() {
         + (r.market ? '<span class="mkt">' + esc(r.market) + '</span>' : '') + '</span></td>'
       + '<td class="num cdim">' + fmtCount(r.leads) + '</td>'
       + '<td class="num crate">' + fmtPct(r.bookRate) + '</td>'
-      + '<td><span class="cpill ' + st.cls + '">' + st.label + '</span></td>'
+      + '<td class="num"><span class="cpill ' + st.cls + '">' + st.label + '</span></td>'
       + '</tr>'
       + '<tr class="cdrawer" id="cdrawer-' + idx + '" hidden><td colspan="4"><div class="inner">'
         + clientDrill(r) + '</div></td></tr>';
@@ -1425,7 +1425,7 @@ function renderClients() {
 
   wrap.innerHTML = summary
     + '<table class="ctable"><thead><tr>'
-    + '<th>Client</th><th class="num">Leads</th><th class="num">Book rate</th><th>Status</th>'
+    + '<th>Client</th><th class="num">Leads</th><th class="num">Book rate</th><th class="num">Status</th>'
     + '</tr></thead><tbody>' + body + '</tbody></table>';
 
   wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
