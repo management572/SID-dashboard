@@ -4,19 +4,19 @@
   "defaultPeriod": "7d",
   "sample": false,
   "source": "SID",
-  "generatedAt": "2026-07-25T07:43:55+00:00",
-  "freshnessMin": 15,
+  "generatedAt": "2026-07-25T12:04:24+00:00",
+  "freshnessMin": 16,
   "periods": {
     "Today": {
       "dateRange": "25 Jul 2026 to 25 Jul 2026",
       "windowDays": 1,
       "floor": {
-        "leadsToday": 1,
-        "leadsInRange": 1,
+        "leadsToday": 5,
+        "leadsInRange": 5,
         "introsBookedToday": 2,
         "introsBookedInRange": 2,
-        "unworkedNow": 1,
-        "unworkedPastSla": 1,
+        "unworkedNow": 5,
+        "unworkedPastSla": 5,
         "speedToLeadMedianMin": 720.0,
         "dayOneCoverage": 0.0,
         "formCompliance": 0.0,
@@ -34,8 +34,8 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 25,
-          "p2": 40,
-          "p3": 61,
+          "p2": 43,
+          "p3": 62,
           "p4": 0
         },
         "onFloorNow": null
@@ -44,6 +44,28 @@
         {
           "key": "ACL",
           "label": "ACL",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 0,
+          "contacted": 0,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.0,
+          "connectRate": null,
+          "bookRate": null,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 16.3,
+            "connectToBooked": 189.1,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "AHC",
+          "label": "AHC",
           "market": null,
           "active": true,
           "leads": 1,
@@ -58,8 +80,52 @@
           "speedToLeadMedianMin": 0.0,
           "lags": {
             "leadToFirstAttempt": 0.0,
-            "leadToConnect": 16.3,
-            "connectToBooked": 189.1,
+            "leadToConnect": 18.4,
+            "connectToBooked": 91.1,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 0,
+          "contacted": 0,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.0,
+          "connectRate": null,
+          "bookRate": null,
+          "showRate": null,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 273.9,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "BCF",
+          "label": "BCF",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 0,
+          "contacted": 0,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.0,
+          "connectRate": null,
+          "bookRate": null,
+          "showRate": null,
+          "speedToLeadMedianMin": 0.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 15.4,
+            "connectToBooked": 8.8,
             "bookedToHeld": null
           }
         },
@@ -214,7 +280,7 @@
           "2026-07-25"
         ],
         "leads": [
-          1
+          5
         ],
         "worked": [
           0
@@ -264,24 +330,24 @@
         },
         {
           "severity": "alert",
-          "headline": "1 leads unworked past the SLA",
+          "headline": "5 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 1,
+          "leadsAtRisk": 5,
           "rank": 2
         }
       ],
       "prevDateRange": "24 Jul 2026 to 24 Jul 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 1,
+          "cur": 5,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 1,
+          "cur": 5,
           "prev": 30,
-          "pct": -0.9667
+          "pct": -0.8333
         },
         "introsBookedToday": {
           "cur": 2,
@@ -289,14 +355,14 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 1,
+          "cur": 5,
           "prev": 10,
-          "pct": -0.9
+          "pct": -0.5
         },
         "unworkedPastSla": {
-          "cur": 1,
+          "cur": 5,
           "prev": 10,
-          "pct": -0.9
+          "pct": -0.5
         },
         "speedToLeadMedianMin": {
           "cur": 720.0,
@@ -369,14 +435,14 @@
       "dateRange": "18 Jul 2026 to 25 Jul 2026",
       "windowDays": 7,
       "floor": {
-        "leadsToday": 1,
-        "leadsInRange": 160,
+        "leadsToday": 5,
+        "leadsInRange": 164,
         "introsBookedToday": 2,
         "introsBookedInRange": 57,
-        "unworkedNow": 38,
-        "unworkedPastSla": 38,
+        "unworkedNow": 42,
+        "unworkedPastSla": 42,
         "speedToLeadMedianMin": 631.0,
-        "dayOneCoverage": 0.7562,
+        "dayOneCoverage": 0.7378,
         "formCompliance": 0.0,
         "dialsLogged": 1294,
         "attemptsDialed": 525,
@@ -392,8 +458,8 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 25,
-          "p2": 40,
-          "p3": 61,
+          "p2": 43,
+          "p3": 62,
           "p4": 0
         },
         "onFloorNow": null
@@ -448,14 +514,14 @@
           "label": "AHC",
           "market": null,
           "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
           "booked": 4,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.4444,
+          "bookRate": 0.4,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -470,14 +536,14 @@
           "label": "ACL",
           "market": null,
           "active": true,
-          "leads": 8,
-          "worked": 8,
-          "contacted": 8,
+          "leads": 9,
+          "worked": 9,
+          "contacted": 9,
           "booked": 1,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.125,
+          "bookRate": 0.1111,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -492,9 +558,9 @@
           "label": "BCF",
           "market": null,
           "active": true,
-          "leads": 7,
-          "worked": 7,
-          "contacted": 7,
+          "leads": 8,
+          "worked": 8,
+          "contacted": 8,
           "booked": 0,
           "shows": 0,
           "workedPct": 1.0,
@@ -752,6 +818,28 @@
           }
         },
         {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 273.9,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "ALM",
           "label": "ALM",
           "market": null,
@@ -858,28 +946,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 0.0,
             "connectToBooked": 150.5,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALB",
-          "label": "ALB",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 1,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.0,
-          "showRate": null,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 273.9,
             "bookedToHeld": null
           }
         },
@@ -1339,7 +1405,7 @@
           28,
           35,
           30,
-          1
+          5
         ],
         "worked": [
           53,
@@ -1446,10 +1512,10 @@
         },
         {
           "severity": "alert",
-          "headline": "38 leads unworked past the SLA",
+          "headline": "42 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 38,
+          "leadsAtRisk": 42,
           "rank": 3
         },
         {
@@ -1464,14 +1530,14 @@
       "prevDateRange": "11 Jul 2026 to 18 Jul 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 1,
+          "cur": 5,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 160,
+          "cur": 164,
           "prev": 2,
-          "pct": 79.0
+          "pct": 81.0
         },
         "introsBookedToday": {
           "cur": 2,
@@ -1479,14 +1545,14 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 38,
+          "cur": 42,
           "prev": 1,
-          "pct": 37.0
+          "pct": 41.0
         },
         "unworkedPastSla": {
-          "cur": 38,
+          "cur": 42,
           "prev": 1,
-          "pct": 37.0
+          "pct": 41.0
         },
         "speedToLeadMedianMin": {
           "cur": 631.0,
@@ -1494,7 +1560,7 @@
           "pct": 1.139
         },
         "dayOneCoverage": {
-          "cur": 0.7562,
+          "cur": 0.7378,
           "prev": 0.0,
           "pct": null
         },
@@ -1559,14 +1625,14 @@
       "dateRange": "25 Jun 2026 to 25 Jul 2026",
       "windowDays": 30,
       "floor": {
-        "leadsToday": 1,
-        "leadsInRange": 162,
+        "leadsToday": 5,
+        "leadsInRange": 166,
         "introsBookedToday": 2,
         "introsBookedInRange": 174,
-        "unworkedNow": 39,
-        "unworkedPastSla": 39,
+        "unworkedNow": 43,
+        "unworkedPastSla": 43,
         "speedToLeadMedianMin": 614.5,
-        "dayOneCoverage": 0.7469,
+        "dayOneCoverage": 0.7289,
         "formCompliance": 0.0,
         "dialsLogged": 6081,
         "attemptsDialed": 1659,
@@ -1582,8 +1648,8 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 25,
-          "p2": 40,
-          "p3": 61,
+          "p2": 43,
+          "p3": 62,
           "p4": 0
         },
         "onFloorNow": null
@@ -1638,14 +1704,14 @@
           "label": "AHC",
           "market": null,
           "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
           "booked": 9,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 1.0,
+          "bookRate": 0.9,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -1660,14 +1726,14 @@
           "label": "ACL",
           "market": null,
           "active": true,
-          "leads": 8,
-          "worked": 8,
-          "contacted": 8,
+          "leads": 9,
+          "worked": 9,
+          "contacted": 9,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.375,
+          "bookRate": 0.3333,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -1682,14 +1748,14 @@
           "label": "BCF",
           "market": null,
           "active": true,
-          "leads": 7,
-          "worked": 7,
-          "contacted": 7,
+          "leads": 8,
+          "worked": 8,
+          "contacted": 8,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.4286,
+          "bookRate": 0.375,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -1964,6 +2030,28 @@
           }
         },
         {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 1.0,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 273.9,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "ALM",
           "label": "ALM",
           "market": null,
@@ -2048,28 +2136,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 0.0,
             "connectToBooked": 150.5,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALB",
-          "label": "ALB",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 1,
-          "booked": 1,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 1.0,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 273.9,
             "bookedToHeld": null
           }
         },
@@ -2620,7 +2686,7 @@
           28,
           35,
           30,
-          1
+          5
         ],
         "worked": [
           0,
@@ -2889,22 +2955,22 @@
         },
         {
           "severity": "alert",
-          "headline": "39 leads unworked past the SLA",
+          "headline": "43 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 39,
+          "leadsAtRisk": 43,
           "rank": 4
         }
       ],
       "prevDateRange": "26 May 2026 to 25 Jun 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 1,
+          "cur": 5,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 162,
+          "cur": 166,
           "prev": 0,
           "pct": null
         },
@@ -2914,12 +2980,12 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
@@ -2929,7 +2995,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.7469,
+          "cur": 0.7289,
           "prev": null,
           "pct": null
         },
@@ -2992,16 +3058,16 @@
     },
     "MTD": {
       "dateRange": "01 Jul 2026 to 25 Jul 2026",
-      "windowDays": 24,
+      "windowDays": 25,
       "floor": {
-        "leadsToday": 1,
-        "leadsInRange": 162,
+        "leadsToday": 5,
+        "leadsInRange": 166,
         "introsBookedToday": 2,
         "introsBookedInRange": 152,
-        "unworkedNow": 39,
-        "unworkedPastSla": 39,
+        "unworkedNow": 43,
+        "unworkedPastSla": 43,
         "speedToLeadMedianMin": 614.5,
-        "dayOneCoverage": 0.7469,
+        "dayOneCoverage": 0.7289,
         "formCompliance": 0.0,
         "dialsLogged": 5114,
         "attemptsDialed": 1430,
@@ -3017,8 +3083,8 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 25,
-          "p2": 40,
-          "p3": 61,
+          "p2": 43,
+          "p3": 62,
           "p4": 0
         },
         "onFloorNow": null
@@ -3073,14 +3139,14 @@
           "label": "AHC",
           "market": null,
           "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
           "booked": 9,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 1.0,
+          "bookRate": 0.9,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -3095,14 +3161,14 @@
           "label": "ACL",
           "market": null,
           "active": true,
-          "leads": 8,
-          "worked": 8,
-          "contacted": 8,
+          "leads": 9,
+          "worked": 9,
+          "contacted": 9,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.375,
+          "bookRate": 0.3333,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -3117,14 +3183,14 @@
           "label": "BCF",
           "market": null,
           "active": true,
-          "leads": 7,
-          "worked": 7,
-          "contacted": 7,
+          "leads": 8,
+          "worked": 8,
+          "contacted": 8,
           "booked": 2,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.2857,
+          "bookRate": 0.25,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -3399,6 +3465,28 @@
           }
         },
         {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 1.0,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 273.9,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "ALM",
           "label": "ALM",
           "market": null,
@@ -3483,28 +3571,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 0.0,
             "connectToBooked": 150.5,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALB",
-          "label": "ALB",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 1,
-          "booked": 1,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 1.0,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 273.9,
             "bookedToHeld": null
           }
         },
@@ -4040,7 +4106,7 @@
           28,
           35,
           30,
-          1
+          5
         ],
         "worked": [
           0,
@@ -4274,22 +4340,22 @@
         },
         {
           "severity": "alert",
-          "headline": "39 leads unworked past the SLA",
+          "headline": "43 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 39,
+          "leadsAtRisk": 43,
           "rank": 4
         }
       ],
       "prevDateRange": "01 Jun 2026 to 25 Jun 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 1,
+          "cur": 5,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 162,
+          "cur": 166,
           "prev": 0,
           "pct": null
         },
@@ -4299,12 +4365,12 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
@@ -4314,7 +4380,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.7469,
+          "cur": 0.7289,
           "prev": null,
           "pct": null
         },
@@ -4377,16 +4443,16 @@
     },
     "QTD": {
       "dateRange": "01 Jul 2026 to 25 Jul 2026",
-      "windowDays": 24,
+      "windowDays": 25,
       "floor": {
-        "leadsToday": 1,
-        "leadsInRange": 162,
+        "leadsToday": 5,
+        "leadsInRange": 166,
         "introsBookedToday": 2,
         "introsBookedInRange": 152,
-        "unworkedNow": 39,
-        "unworkedPastSla": 39,
+        "unworkedNow": 43,
+        "unworkedPastSla": 43,
         "speedToLeadMedianMin": 614.5,
-        "dayOneCoverage": 0.7469,
+        "dayOneCoverage": 0.7289,
         "formCompliance": 0.0,
         "dialsLogged": 5114,
         "attemptsDialed": 1430,
@@ -4402,8 +4468,8 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 25,
-          "p2": 40,
-          "p3": 61,
+          "p2": 43,
+          "p3": 62,
           "p4": 0
         },
         "onFloorNow": null
@@ -4458,14 +4524,14 @@
           "label": "AHC",
           "market": null,
           "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
           "booked": 9,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 1.0,
+          "bookRate": 0.9,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -4480,14 +4546,14 @@
           "label": "ACL",
           "market": null,
           "active": true,
-          "leads": 8,
-          "worked": 8,
-          "contacted": 8,
+          "leads": 9,
+          "worked": 9,
+          "contacted": 9,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.375,
+          "bookRate": 0.3333,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -4502,14 +4568,14 @@
           "label": "BCF",
           "market": null,
           "active": true,
-          "leads": 7,
-          "worked": 7,
-          "contacted": 7,
+          "leads": 8,
+          "worked": 8,
+          "contacted": 8,
           "booked": 2,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.2857,
+          "bookRate": 0.25,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -4784,6 +4850,28 @@
           }
         },
         {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 1.0,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 273.9,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "ALM",
           "label": "ALM",
           "market": null,
@@ -4868,28 +4956,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 0.0,
             "connectToBooked": 150.5,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALB",
-          "label": "ALB",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 1,
-          "booked": 1,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 1.0,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 273.9,
             "bookedToHeld": null
           }
         },
@@ -5425,7 +5491,7 @@
           28,
           35,
           30,
-          1
+          5
         ],
         "worked": [
           0,
@@ -5659,22 +5725,22 @@
         },
         {
           "severity": "alert",
-          "headline": "39 leads unworked past the SLA",
+          "headline": "43 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 39,
+          "leadsAtRisk": 43,
           "rank": 4
         }
       ],
       "prevDateRange": "01 Apr 2026 to 25 Apr 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 1,
+          "cur": 5,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 162,
+          "cur": 166,
           "prev": 0,
           "pct": null
         },
@@ -5684,12 +5750,12 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
@@ -5699,7 +5765,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.7469,
+          "cur": 0.7289,
           "prev": null,
           "pct": null
         },
@@ -5762,16 +5828,16 @@
     },
     "YTD": {
       "dateRange": "01 Jan 2026 to 25 Jul 2026",
-      "windowDays": 205,
+      "windowDays": 206,
       "floor": {
-        "leadsToday": 1,
-        "leadsInRange": 162,
+        "leadsToday": 5,
+        "leadsInRange": 166,
         "introsBookedToday": 2,
         "introsBookedInRange": 203,
-        "unworkedNow": 39,
-        "unworkedPastSla": 39,
+        "unworkedNow": 43,
+        "unworkedPastSla": 43,
         "speedToLeadMedianMin": 614.5,
-        "dayOneCoverage": 0.7469,
+        "dayOneCoverage": 0.7289,
         "formCompliance": 0.0,
         "dialsLogged": 7442,
         "attemptsDialed": 1676,
@@ -5787,8 +5853,8 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 25,
-          "p2": 40,
-          "p3": 61,
+          "p2": 43,
+          "p3": 62,
           "p4": 0
         },
         "onFloorNow": null
@@ -5843,10 +5909,10 @@
           "label": "AHC",
           "market": null,
           "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
-          "booked": 9,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
+          "booked": 10,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
@@ -5865,14 +5931,14 @@
           "label": "ACL",
           "market": null,
           "active": true,
-          "leads": 8,
-          "worked": 8,
-          "contacted": 8,
+          "leads": 9,
+          "worked": 9,
+          "contacted": 9,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.375,
+          "bookRate": 0.3333,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -5887,14 +5953,14 @@
           "label": "BCF",
           "market": null,
           "active": true,
-          "leads": 7,
-          "worked": 7,
-          "contacted": 7,
+          "leads": 8,
+          "worked": 8,
+          "contacted": 8,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.4286,
+          "bookRate": 0.375,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -6169,6 +6235,28 @@
           }
         },
         {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 1.0,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 273.9,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "ALM",
           "label": "ALM",
           "market": null,
@@ -6253,28 +6341,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 0.0,
             "connectToBooked": 150.5,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALB",
-          "label": "ALB",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 1,
-          "booked": 1,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 1.0,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 273.9,
             "bookedToHeld": null
           }
         },
@@ -6825,7 +6891,7 @@
           28,
           35,
           30,
-          1
+          5
         ],
         "worked": [
           0,
@@ -7094,22 +7160,22 @@
         },
         {
           "severity": "alert",
-          "headline": "39 leads unworked past the SLA",
+          "headline": "43 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 39,
+          "leadsAtRisk": 43,
           "rank": 4
         }
       ],
       "prevDateRange": "01 Jan 2025 to 25 Jul 2025",
       "deltas": {
         "leadsToday": {
-          "cur": 1,
+          "cur": 5,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 162,
+          "cur": 166,
           "prev": 0,
           "pct": null
         },
@@ -7119,12 +7185,12 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 39,
+          "cur": 43,
           "prev": 0,
           "pct": null
         },
@@ -7134,7 +7200,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.7469,
+          "cur": 0.7289,
           "prev": null,
           "pct": null
         },
@@ -7197,16 +7263,16 @@
     },
     "All": {
       "dateRange": "01 Jan 2000 to 25 Jul 2026",
-      "windowDays": 9702,
+      "windowDays": 9703,
       "floor": {
-        "leadsToday": 1,
-        "leadsInRange": 162,
+        "leadsToday": 5,
+        "leadsInRange": 166,
         "introsBookedToday": 2,
         "introsBookedInRange": 203,
-        "unworkedNow": 39,
-        "unworkedPastSla": 39,
+        "unworkedNow": 43,
+        "unworkedPastSla": 43,
         "speedToLeadMedianMin": 614.5,
-        "dayOneCoverage": 0.7469,
+        "dayOneCoverage": 0.7289,
         "formCompliance": 0.0,
         "dialsLogged": 7445,
         "attemptsDialed": 1676,
@@ -7222,8 +7288,8 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 25,
-          "p2": 40,
-          "p3": 61,
+          "p2": 43,
+          "p3": 62,
           "p4": 0
         },
         "onFloorNow": null
@@ -7278,10 +7344,10 @@
           "label": "AHC",
           "market": null,
           "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
-          "booked": 9,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
+          "booked": 10,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
@@ -7300,14 +7366,14 @@
           "label": "ACL",
           "market": null,
           "active": true,
-          "leads": 8,
-          "worked": 8,
-          "contacted": 8,
+          "leads": 9,
+          "worked": 9,
+          "contacted": 9,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.375,
+          "bookRate": 0.3333,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -7322,14 +7388,14 @@
           "label": "BCF",
           "market": null,
           "active": true,
-          "leads": 7,
-          "worked": 7,
-          "contacted": 7,
+          "leads": 8,
+          "worked": 8,
+          "contacted": 8,
           "booked": 3,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.4286,
+          "bookRate": 0.375,
           "showRate": 0.0,
           "speedToLeadMedianMin": 0.0,
           "lags": {
@@ -7604,6 +7670,28 @@
           }
         },
         {
+          "key": "ALB",
+          "label": "ALB",
+          "market": null,
+          "active": true,
+          "leads": 2,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 1.0,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 720.0,
+          "lags": {
+            "leadToFirstAttempt": 24.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 273.9,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "ALM",
           "label": "ALM",
           "market": null,
@@ -7688,28 +7776,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 0.0,
             "connectToBooked": 150.5,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALB",
-          "label": "ALB",
-          "market": null,
-          "active": true,
-          "leads": 1,
-          "worked": 1,
-          "contacted": 1,
-          "booked": 1,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 1.0,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 720.0,
-          "lags": {
-            "leadToFirstAttempt": 24.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 273.9,
             "bookedToHeld": null
           }
         },
@@ -8265,7 +8331,7 @@
           28,
           35,
           30,
-          1
+          5
         ],
         "worked": [
           0,
@@ -8534,10 +8600,10 @@
         },
         {
           "severity": "alert",
-          "headline": "39 leads unworked past the SLA",
+          "headline": "43 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 39,
+          "leadsAtRisk": 43,
           "rank": 4
         }
       ],
