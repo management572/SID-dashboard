@@ -56,13 +56,40 @@ ARR is used rather than MRR so the ratio reads as annual value per unit of diale
 
 ## Benchmarks
 
-Cheap is good, so these bands run in reverse of the usual goal bands. They live in the `benchmarks`
+These are **revenue earned per unit of dialer effort, so higher is better**. A client returning
+$1,211 of annual value per dial is a better use of the floor than one returning $80 — this is not a
+cost per acquisition, and reading it as one inverts the ranking. The bands live in the `benchmarks`
 block of `data/client-revenue.json` and can be retuned there without touching code.
 
 | Metric | Green | Amber | Red |
 |---|---|---|---|
-| $/Dial | under $200 | $200–$600 | over $600 |
-| $/Lead | under $150 | $150–$500 | over $500 |
+| $/Dial | $600 and above | $200–$600 | under $200 |
+| $/Lead | $500 and above | $150–$500 | under $150 |
+
+Set `higherIsBetter: false` on a benchmark to flip a metric back to cost semantics.
+
+## Deal Won and the two efficiency charts
+
+The client drawer's funnel runs Lead In → Worked → Contacted → Booked → Held → **Deal Won**, where
+Deal Won is `dealCount` from the revenue snapshot. Because deals carry no date, that last bar is
+lifetime while the stages before it are period-scoped, so it is drawn in green and tagged
+`lifetime`. The drawer's panel breaks the money out further: deals won, average deal MRR, MRR, ARR.
+
+The Revenue tab carries two different readings of "efficiency", and they point opposite ways on
+purpose:
+
+- **Revenue per dial** — money returned per unit of effort. Higher is better.
+- **Dial efficiency** — median minutes from lead in to first dial. Lower is better, banded on
+  `goals.speedToLeadBandsMin` (green under 5, red over 30).
+
+A client whose median speed to lead is exactly 0.0 min is held out of the time chart rather than
+drawn green. That value means the first-dial timestamp never resolved, not that the floor called
+back instantly, and a wall of green would read as an achievement instead of a gap in the feed. The
+count of held-out clients is printed under the chart.
+
+Per-client speed to lead is computed from the **call feed** (`first_outbound_by_contact`), the same
+basis as the floor tile and the setter column. The `firstAttempt` custom field lands equal to the
+lead date, which collapsed every client's median to 0.0.
 
 ## Timeframes: read this before comparing columns
 

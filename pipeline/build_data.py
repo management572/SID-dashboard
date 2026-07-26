@@ -206,10 +206,13 @@ def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min
     divisions = [d for d in ghl.get("divisions", []) if d.get("active", True)]
     goals = dash.get("goals", {})
 
+    # Same first-dial basis as the floor and the setter table: the firstAttempt field is unreliable
+    # (it lands equal to the lead date, so per-client speed to lead collapsed to 0.0 minutes).
+    first_dial = first_outbound_by_contact(calls)
     clients = []
     for div in divisions:
         rows = [f for f in facts if f["acronym"] == div.get("acronym")]
-        client = build_client(div, rows, since, until)
+        client = build_client(div, rows, since, until, first_dial)
         if client["leads"] or client["worked"] or client["booked"]:   # active = activity in window
             clients.append(client)
     clients.sort(key=lambda c: -(c.get("leads") or 0))
@@ -413,7 +416,7 @@ def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val, ba
     }
 
 
-def build_client(div, rows, since, until):
+def build_client(div, rows, since, until, first_dial=None):
     leads = sum(1 for f in rows if in_window(f["leadDate"], since, until))
     worked = sum(1 for f in rows if in_window(f["firstAttempt"], since, until))
     contacted = sum(1 for f in rows if in_window(f["connect"], since, until))
@@ -424,7 +427,20 @@ def build_client(div, rows, since, until):
     contacted = min(contacted, worked) if worked else contacted
     booked = min(booked, contacted) if contacted else booked
     shows = min(shows, booked) if booked else shows
-    stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in rows if f["leadDate"] and f["firstAttempt"]]
+    # Speed to lead: lead-in to the first real outbound dial from the call feed, windowed by that
+    # dial. Falls back to the firstAttempt field only when there is no call feed to read.
+    fd = first_dial or {}
+    if fd:
+        stl = []
+        for f in rows:
+            hit = fd.get(f.get("id"))
+            if not hit or not f["leadDate"]:
+                continue
+            ts = hit[0]
+            if in_window(ts, since, until):
+                stl.append(sla_minutes(f["leadDate"], ts))
+    else:
+        stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in rows if f["leadDate"] and f["firstAttempt"]]
     return {
         "key": div.get("key"), "label": div.get("label", div.get("key")),
         "market": div.get("market"), "active": True,

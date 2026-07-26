@@ -268,9 +268,12 @@
   .cpill.warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); }
   .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
   .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
+  .cwon { display:inline-block; min-width:22px; padding:1px 7px; border-radius:999px; font-weight:700; font-size:12.5px;
+          color:var(--good); background:color-mix(in srgb, var(--good) 15%, transparent); }
+  .fstage.won .bar { background:linear-gradient(180deg, var(--good), color-mix(in srgb, var(--good) 72%, black)); }
   .sdrbox { margin-top:16px; padding:13px 15px; border:1px solid var(--hair); border-left:3px solid var(--accent); border-radius:var(--r); background:var(--ink2); max-width:640px; }
   .sdr-h { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneDim); margin-bottom:10px; }
-  .sdrgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(84px,1fr)); gap:12px 18px; }
+  .sdrgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(104px,1fr)); gap:12px 18px; }
   .sdr-l { font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--boneFaint); }
   .sdr-v { font-family:var(--head); font-weight:700; font-size:17px; margin-top:3px; }
   .cdrawer td { padding:0 14px; border-bottom:1px solid var(--hair); background:var(--inkDeep); }
@@ -440,9 +443,14 @@
           <div id="revByClient"></div>
         </div>
         <div class="card">
+          <h2>Revenue per dial</h2>
+          <div class="sub">Annual value returned per dial, for the clients we dial most. Higher is better: green at $600+, red under $200.</div>
+          <div id="revPerDial"></div>
+        </div>
+        <div class="card">
           <h2>Dial efficiency</h2>
-          <div class="sub">Annual value per dial, for the clients we dial most. Lower is better: green under $200, red over $600.</div>
-          <div id="revEff"></div>
+          <div class="sub">Median time from lead in to first dial, per client. The longer a lead waits, the worse: green under 5 min, red over 30.</div>
+          <div id="revSpeed"></div>
         </div>
       </div>
     </section>
@@ -1172,7 +1180,8 @@ function renderClientRevenue() {
   if (note) note.textContent = m.mrr ? Math.round(m.mrr).toLocaleString("en-US") : "0";
   renderRevenueTiles(cfg, m);
   renderRevenueByClient();
-  renderDialEfficiency();
+  renderRevenuePerDial();
+  renderSpeedEfficiency();
 }
 
 /* Top clients by MRR. Real book, no modelling. */
@@ -1190,25 +1199,59 @@ function renderRevenueByClient() {
   })), "revByClient");
 }
 
-/* $/dial for the clients we dial most, coloured against the efficiency benchmark. */
-function renderDialEfficiency() {
-  const host = document.getElementById("revEff");
+/* Revenue returned per dial. Higher is better: more annual value for the same floor effort. */
+function renderRevenuePerDial() {
+  const host = document.getElementById("revPerDial");
   if (!host) return;
-  const b = ((REV && REV.benchmarks) || {}).perDial || {};
   const rows = clientRows().filter(r => !isNil(r.perDial) && (r.dials || 0) > 0)
-    .sort((a, b2) => b2.dials - a.dials).slice(0, 12).sort((a, b2) => a.perDial - b2.perDial);
+    .sort((a, b) => b.dials - a.dials).slice(0, 12).sort((a, b) => b.perDial - a.perDial);
   if (!rows.length) { host.innerHTML = '<div class="empty">No dial data yet.</div>'; return; }
+  const col = { cellgood:"var(--good)", cellwarn:"var(--warn)", cellalert:"var(--alert)" };
   host.innerHTML = revBarChart(rows.map(r => ({
     label: r.key, value: r.perDial,
-    fill: isNil(b.good) ? "var(--accent)"
-      : r.perDial < b.good ? "var(--good)" : r.perDial <= (b.warn || b.good) ? "var(--warn)" : "var(--alert)",
+    fill: col[revBand(r.perDial, "perDial")] || "var(--accent)",
     tip: '<span class="tip-k">' + esc(r.label || r.key) + '</span>' + fmtMoney(r.perDial)
-       + ' / dial &middot; ' + fmtCount(r.dials) + ' dials'
-  })), "revEff");
+       + ' per dial &middot; ' + fmtCount(r.dials) + ' dials'
+  })), "revPerDial");
+}
+
+/* Dial efficiency measured in TIME: median speed to lead per client. The longer a lead waits for
+   its first dial, the worse - so these bands run the other way from the revenue charts. */
+function renderSpeedEfficiency() {
+  const host = document.getElementById("revSpeed");
+  if (!host) return;
+  const g = CFG.dash.goals || {};
+  const bands = g.speedToLeadBandsMin || [5, 15, 30];
+  const all = clientRows()
+    .filter(r => !isNil(r.speedToLeadMedianMin) && ((r.floorLeads || 0) > 0 || (r.worked || 0) > 0));
+  if (!all.length) { host.innerHTML = '<div class="empty">No speed-to-lead data in this window.</div>'; return; }
+  // A 0.0 median is not a sub-second callback, it is a first-dial timestamp that never resolved.
+  // Charting those as green would read as a perfect floor, so they are held out and counted instead.
+  const unresolved = all.filter(r => !(r.speedToLeadMedianMin > 0)).length;
+  const rows = all.filter(r => r.speedToLeadMedianMin > 0)
+    .sort((a, b) => a.speedToLeadMedianMin - b.speedToLeadMedianMin).slice(0, 12);
+  if (!rows.length) {
+    host.innerHTML = '<div class="empty">Speed to lead is not resolving yet: all ' + all.length
+      + ' clients read 0.0 min, which means first-dial timestamps did not come through on this run.</div>';
+    return;
+  }
+  const note = unresolved
+    ? '<div class="muted" style="margin-top:10px;font-size:11.5px">' + unresolved
+      + ' more client' + (unresolved === 1 ? '' : 's') + ' held out: their median reads 0.0 min, which is an '
+      + 'unresolved first-dial timestamp rather than an instant callback.</div>'
+    : "";
+  host.innerHTML = revBarChart(rows.map(r => {
+    const v = r.speedToLeadMedianMin;
+    const fill = v <= bands[0] ? "var(--good)" : v <= bands[1] ? "var(--warn)"
+      : v <= (bands[2] || bands[1]) ? "var(--warn)" : "var(--alert)";
+    return { label: r.key, value: v, fill: fill,
+      tip: '<span class="tip-k">' + esc(r.label || r.key) + '</span>' + fmtMin(v) + ' min to first dial' };
+  }), "revSpeed", v => String(Math.round(v))) + note;
 }
 
 /* Shared vertical bar chart for the revenue cards. */
-function revBarChart(items, hostId) {
+function revBarChart(items, hostId, axisFmt) {
+  const fmtAxis = axisFmt || revShort;
   const n = items.length, maxV = Math.max(1, ...items.map(i => i.value)) * 1.1;
   const W = 560, H = 240, padL = 46, padR = 12, padT = 14, padB = 40;
   const plotH = H - padT - padB, plotW = W - padL - padR;
@@ -1218,7 +1261,7 @@ function revBarChart(items, hostId) {
   for (let g = 0; g <= 4; g++) {
     const yy = padT + g * plotH / 4;
     grid += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--hair)" />'
-      + '<text x="' + (padL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + revShort(Math.round(maxV * (1 - g / 4))) + '</text>';
+      + '<text x="' + (padL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + fmtAxis(Math.round(maxV * (1 - g / 4))) + '</text>';
   }
   let bars = "", xl = "";
   items.forEach((it, i) => {
@@ -1374,18 +1417,19 @@ function renderClients() {
       + '<td class="num cdim">' + fmtCount(r.leads) + '</td>'
       + '<td class="num cdim">' + fmtCount(r.dials) + '</td>'
       + costCell(r.perDial, "perDial") + costCell(r.perLead, "perLead")
+      + '<td class="num">' + (r.won ? '<span class="cwon">' + fmtCount(r.won) + '</span>' : dash()) + '</td>'
       + '<td class="num crate">' + (r.mrr ? fmtMoney(r.mrr) : dash()) + '</td>'
       + '<td class="num"><span class="cpill ' + st.cls + '">' + st.label + '</span></td>'
       + '</tr>'
-      + '<tr class="cdrawer" id="cdrawer-' + idx + '" hidden><td colspan="7"><div class="inner">'
+      + '<tr class="cdrawer" id="cdrawer-' + idx + '" hidden><td colspan="8"><div class="inner">'
         + clientDrill(r) + '</div></td></tr>';
   });
 
   wrap.innerHTML = summary
     + '<table class="ctable"><thead><tr>'
     + '<th>Client</th><th class="num">Leads</th><th class="num">Dials</th>'
-    + '<th class="num">$/Dial</th><th class="num">$/Lead</th><th class="num">MRR</th>'
-    + '<th class="num">Status</th>'
+    + '<th class="num">$/Dial</th><th class="num">$/Lead</th><th class="num">Deals Won</th>'
+    + '<th class="num">MRR</th><th class="num">Status</th>'
     + '</tr></thead><tbody>' + body + '</tbody></table>';
 
   wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
@@ -1422,6 +1466,8 @@ function clientRows() {
       contacts: Math.max(lv.contacts || 0, rv.contacts || 0),
       mrr: rv.mrr || 0,
       arr: arr,
+      won: rv.dealCount || 0,                                    // closed deals = the Deal Won stage
+      avgDealMrr: (rv.dealCount ? (rv.mrr || 0) / rv.dealCount : null),
       perDial: (arr && dials) ? arr / dials : null,
       perLead: (arr && leads) ? arr / leads : null
     }));
@@ -1434,12 +1480,16 @@ function clientTotals(rows) {
   return { mrr: sum("mrr"), dials: dials, perDial: dials ? arr / dials : null,
            withDials: rows.filter(r => (r.dials || 0) > 0).length };
 }
-/* $/dial and $/lead against the efficiency benchmarks: cheap is good, so the bands run in reverse. */
+/* $/dial and $/lead are revenue EARNED per unit of dialer effort, so higher is better. */
+function revBand(v, kind) {
+  const b = ((REV && REV.benchmarks) || {})[kind] || {};
+  if (isNil(v) || isNil(b.good)) return "";
+  if (b.higherIsBetter === false) return v < b.good ? "cellgood" : v <= (b.warn || b.good) ? "cellwarn" : "cellalert";
+  return v >= b.good ? "cellgood" : v >= (b.warn || 0) ? "cellwarn" : "cellalert";
+}
 function costCell(v, kind) {
   if (isNil(v)) return '<td class="num cdim">' + dash() + '</td>';
-  const b = ((REV && REV.benchmarks) || {})[kind] || {};
-  const cls = isNil(b.good) ? "" : v < b.good ? " cellgood" : v <= (b.warn || b.good) ? " cellwarn" : " cellalert";
-  return '<td class="num"><span class="' + cls.trim() + '">' + fmtMoney(v) + '</span></td>';
+  return '<td class="num"><span class="' + revBand(v, kind) + '">' + fmtMoney(v) + '</span></td>';
 }
 function fmtMoney(v) {
   if (isNil(v)) return dash();
@@ -1481,16 +1531,20 @@ function buildRollup(rows) {
 function clientDrill(row) {
   // The funnel is the SID floor story, so it uses this period's lead count, not the ad-platform total.
   const r = Object.assign({}, row, { leads: isNil(row.floorLeads) ? row.leads : row.floorLeads });
-  const stages = CFG.dash.funnelStages || [];
+  // The floor stages end at Held; closed deals carry the funnel the rest of the way to Deal Won.
+  // Deals have no date in the snapshot, so that last bar is lifetime and is marked as such.
+  const stages = (CFG.dash.funnelStages || []).concat(
+    REV ? [{ key:"won", label:"Deal Won", lifetime:true }] : []);
   const max = Math.max(1, ...stages.map(s => r[s.key] || 0));
-  let bars = '<div class="funnel" style="max-width:520px">';
+  let bars = '<div class="funnel" style="max-width:600px">';
   stages.forEach((s, i) => {
     const v = r[s.key] || 0, h = 24 + (v / max) * 90;
     let conv = "";
-    if (i > 0) { const p = r[stages[i - 1].key] || 0; conv = p ? Math.round(v / p * 100) + "%" : ""; }
-    bars += '<div class="fstage">' + (conv ? '<div class="conv">' + conv + '</div>' : "")
+    if (i > 0 && !s.lifetime) { const p = r[stages[i - 1].key] || 0; conv = p ? Math.round(v / p * 100) + "%" : ""; }
+    bars += '<div class="fstage' + (s.lifetime ? " won" : "") + '">' + (conv ? '<div class="conv">' + conv + '</div>' : "")
       + '<div class="bar" style="height:' + h + 'px"><span class="fcount">' + fmtCount(v) + '</span></div>'
-      + '<div class="flabel">' + esc(s.label) + '</div></div>';
+      + '<div class="flabel">' + esc(s.label)
+      + (s.lifetime ? '<br><span class="faint" style="font-size:9.5px">lifetime</span>' : "") + '</div></div>';
   });
   bars += "</div>";
   const lg = r.lags || {};
@@ -1512,17 +1566,17 @@ function sdrPanel(r) {
   if (!REV) return "";
   const cell = (label, val, cls) => '<div><div class="sdr-l">' + esc(label) + '</div>'
     + '<div class="sdr-v' + (cls ? " " + cls : "") + '">' + val + '</div></div>';
-  const b = (REV.benchmarks || {});
-  const band = (v, k) => { const x = b[k] || {}; return isNil(v) || isNil(x.good) ? ""
-    : v < x.good ? "cellgood" : v <= (x.warn || x.good) ? "cellwarn" : "cellalert"; };
-  return '<div class="sdrbox"><div class="sdr-h">SDR performance <span class="faint">lifetime</span></div>'
+  return '<div class="sdrbox"><div class="sdr-h">SDR performance &amp; deals <span class="faint">lifetime</span></div>'
     + '<div class="sdrgrid">'
       + cell("Ad leads", fmtCount(r.leads))
       + cell("Contacts", fmtCount(r.contacts))
       + cell("Dials", fmtCount(r.dials))
-      + cell("$ / Dial", isNil(r.perDial) ? dash() : fmtMoney(r.perDial), band(r.perDial, "perDial"))
-      + cell("$ / Lead", isNil(r.perLead) ? dash() : fmtMoney(r.perLead), band(r.perLead, "perLead"))
+      + cell("$ / Dial", isNil(r.perDial) ? dash() : fmtMoney(r.perDial), revBand(r.perDial, "perDial"))
+      + cell("$ / Lead", isNil(r.perLead) ? dash() : fmtMoney(r.perLead), revBand(r.perLead, "perLead"))
+      + cell("Deals won", fmtCount(r.won))
+      + cell("Avg deal", isNil(r.avgDealMrr) ? dash() : fmtMoney(r.avgDealMrr) + "/mo")
       + cell("MRR", r.mrr ? fmtMoney(r.mrr) : dash())
+      + cell("ARR", r.arr ? fmtMoney(r.arr) : dash())
     + '</div></div>';
 }
 
