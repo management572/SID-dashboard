@@ -268,6 +268,11 @@
   .cpill.warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); }
   .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
   .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
+  .sdrbox { margin-top:16px; padding:13px 15px; border:1px solid var(--hair); border-left:3px solid var(--accent); border-radius:var(--r); background:var(--ink2); max-width:640px; }
+  .sdr-h { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneDim); margin-bottom:10px; }
+  .sdrgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(84px,1fr)); gap:12px 18px; }
+  .sdr-l { font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--boneFaint); }
+  .sdr-v { font-family:var(--head); font-weight:700; font-size:17px; margin-top:3px; }
   .cdrawer td { padding:0 14px; border-bottom:1px solid var(--hair); background:var(--inkDeep); }
   .cdrawer .inner { padding:16px 4px 20px; overflow-x:auto; }
   .cexp { color:var(--boneFaint); font-size:12px; transition:transform .12s; display:inline-block; }
@@ -461,7 +466,7 @@
     <section class="tab" id="tab-clients">
       <div class="card">
         <h2>Clients</h2>
-        <div class="sub">One row per home-care agency, sorted by volume. Status is book rate against the 15% target. Tap a row for its funnel and the median lag between stages.</div>
+        <div class="sub">One row per client, sorted by MRR. Leads, dials and dollar figures are lifetime totals; Status is book rate for the selected period against the 15% target. Tap a row for its funnel, stage lags and SDR economics.</div>
         <div id="clientsTableWrap"></div>
       </div>
     </section>
@@ -480,6 +485,7 @@
  * ------------------------------------------------------------------ */
 const CFG = { brand:null, dash:null };
 let DATA = null;
+let REV = null;   // data/client-revenue.json: per-client MRR/ARR and ad-lead totals
 let P = null;   // the active period bundle: { floor, clients, setters, timeseries, insights, deltas }
 let STATE = { tab:null, period:null, client:"__all__", compare:true, sort:{ key:"bookRate", dir:-1 } };
 
@@ -515,6 +521,9 @@ async function boot() {
     CFG.brand = await getJSON(["config/brand.json"]);
     CFG.dash  = await getJSON(["config/dashboard-config.json"]);
     DATA      = await getJSON(["data/dashboard-data.json", "data/dashboard-data.sample.json"]);
+    // Revenue and ad-lead totals live in a committed snapshot, not the GHL pipeline. Optional:
+    // the board still renders (without the money columns) when it is absent.
+    try { REV = await getJSON(["data/client-revenue.json"]); } catch (e) { REV = null; }
   } catch (e) {
     const el = document.getElementById("loadError");
     el.hidden = false;
@@ -1395,20 +1404,19 @@ function covBar(v, tgt) {
 /* ---------------------------- CLIENTS ---------------------------- */
 function renderClients() {
   const wrap = document.getElementById("clientsTableWrap");
-  let rows = (P.clients || []).slice().filter(c => c.active !== false);
+  const bTgt = (CFG.dash.goals || {}).bookRateTarget;
+  let rows = clientRows();
   if (STATE.client !== "__all__") rows = rows.filter(c => c.key === STATE.client);
   if (!rows.length) { wrap.innerHTML = '<div class="empty">No client activity in this window.</div>'; return; }
-  rows.sort((a, b) => (b.leads || 0) - (a.leads || 0));
-  const bTgt = (CFG.dash.goals || {}).bookRateTarget;
+  // Money view: the clients worth the most sit at the top, then the ones we are dialling hardest.
+  rows.sort((a, b) => (b.mrr || 0) - (a.mrr || 0) || (b.dials || 0) - (a.dials || 0) || (b.leads || 0) - (a.leads || 0));
 
-  // One quiet headline strip across the clients in view.
-  const roll = buildRollup(rows);
+  const t = clientTotals(rows);
   const summary = '<div class="csummary">'
-    + csum("Clients", fmtCount(rows.length)) + csum("Leads In", fmtCount(roll.leads))
-    + csum("Booked", fmtCount(roll.booked)) + csum("Book rate", fmtPct(roll.bookRate))
+    + csum("Total MRR", fmtMoney(t.mrr)) + csum("Overall $/Dial", fmtMoney(t.perDial))
+    + csum("Total Dials", fmtCount(t.dials)) + csum("Clients with Dials", fmtCount(t.withDials))
     + '</div>';
 
-  // High-level status table: one row per client, book rate as the metric, a status pill for the on-track read.
   let body = '';
   rows.forEach((r, idx) => {
     const st = clientStatus(r, bTgt);
@@ -1416,16 +1424,20 @@ function renderClients() {
       + '<td><span class="cexp">&#9656;</span> <span class="cname">' + esc(r.label)
         + (r.market ? '<span class="mkt">' + esc(r.market) + '</span>' : '') + '</span></td>'
       + '<td class="num cdim">' + fmtCount(r.leads) + '</td>'
-      + '<td class="num crate">' + fmtPct(r.bookRate) + '</td>'
+      + '<td class="num cdim">' + fmtCount(r.dials) + '</td>'
+      + costCell(r.perDial, "perDial") + costCell(r.perLead, "perLead")
+      + '<td class="num crate">' + (r.mrr ? fmtMoney(r.mrr) : dash()) + '</td>'
       + '<td class="num"><span class="cpill ' + st.cls + '">' + st.label + '</span></td>'
       + '</tr>'
-      + '<tr class="cdrawer" id="cdrawer-' + idx + '" hidden><td colspan="4"><div class="inner">'
+      + '<tr class="cdrawer" id="cdrawer-' + idx + '" hidden><td colspan="7"><div class="inner">'
         + clientDrill(r) + '</div></td></tr>';
   });
 
   wrap.innerHTML = summary
     + '<table class="ctable"><thead><tr>'
-    + '<th>Client</th><th class="num">Leads</th><th class="num">Book rate</th><th class="num">Status</th>'
+    + '<th>Client</th><th class="num">Leads</th><th class="num">Dials</th>'
+    + '<th class="num">$/Dial</th><th class="num">$/Lead</th><th class="num">MRR</th>'
+    + '<th class="num">Status</th>'
     + '</tr></thead><tbody>' + body + '</tbody></table>';
 
   wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
@@ -1433,9 +1445,65 @@ function renderClients() {
     if (d) { d.hidden = !d.hidden; row.classList.toggle("open", !d.hidden); }
   }));
 }
+
+/* Merge the three sources into one row per client: floor activity for the selected period (SID),
+   revenue and ad leads from the committed snapshot, and dials from the live pipeline when present.
+   Clients that carry revenue but had no floor activity this window still get a row. */
+function clientRows() {
+  const floor = {};
+  (P.clients || []).filter(c => c.active !== false).forEach(c => { floor[String(c.key).toUpperCase()] = c; });
+  const rev = (REV && REV.clients) || {};
+  const live = DATA.clientDials || {};
+  const keys = new Set([...Object.keys(floor), ...Object.keys(rev)]);
+  const out = [];
+  keys.forEach(k => {
+    const f = floor[k] || { key:k, label:k, market:null, leads:0, worked:0, contacted:0, booked:0, shows:0 };
+    const rv = rev[k] || {};
+    // Live dials win over the snapshot baseline, but only when the pipeline actually returned some.
+    // times_attempted has a history of coming back empty, and a silent drop to zero would read as
+    // "we stopped dialling this client" rather than "the field did not populate".
+    const lv = live[k] || {};
+    const dials = Math.max(lv.dials || 0, rv.dials || 0);
+    const leads = rv.leads || 0, arr = rv.arr || 0;
+    out.push(Object.assign({}, f, {
+      key: k,
+      label: f.label || k,
+      leads: leads,
+      floorLeads: f.leads || 0,
+      dials: dials,
+      contacts: Math.max(lv.contacts || 0, rv.contacts || 0),
+      mrr: rv.mrr || 0,
+      arr: arr,
+      perDial: (arr && dials) ? arr / dials : null,
+      perLead: (arr && leads) ? arr / leads : null
+    }));
+  });
+  return out;
+}
+function clientTotals(rows) {
+  const sum = k => rows.reduce((a, r) => a + (r[k] || 0), 0);
+  const arr = sum("arr"), dials = sum("dials");
+  return { mrr: sum("mrr"), dials: dials, perDial: dials ? arr / dials : null,
+           withDials: rows.filter(r => (r.dials || 0) > 0).length };
+}
+/* $/dial and $/lead against the efficiency benchmarks: cheap is good, so the bands run in reverse. */
+function costCell(v, kind) {
+  if (isNil(v)) return '<td class="num cdim">' + dash() + '</td>';
+  const b = ((REV && REV.benchmarks) || {})[kind] || {};
+  const cls = isNil(b.good) ? "" : v < b.good ? " cellgood" : v <= (b.warn || b.good) ? " cellwarn" : " cellalert";
+  return '<td class="num"><span class="' + cls.trim() + '">' + fmtMoney(v) + '</span></td>';
+}
+function fmtMoney(v) {
+  if (isNil(v)) return dash();
+  const n = Number(v);
+  if (Math.abs(n) >= 1000) return "$" + Math.round(n).toLocaleString("en-US");
+  return "$" + (n < 10 ? n.toFixed(2) : Math.round(n).toLocaleString("en-US"));
+}
 // On-track read against the book-rate target. Clients with no leads this window are shown neutral, not "behind".
 function clientStatus(r, tgt) {
-  if (isNil(tgt) || !r.leads) return { cls:"faint", label:"No activity" };
+  // Any floor movement counts as active, not just new leads: a client can book from last week's leads.
+  const active = (isNil(r.floorLeads) ? r.leads : r.floorLeads) || r.worked || r.contacted || r.booked;
+  if (isNil(tgt) || !active) return { cls:"faint", label:"No activity" };
   const rate = r.bookRate || 0;
   if (rate >= tgt) return { cls:"good", label:"On track" };
   if (rate >= tgt * 0.6) return { cls:"warn", label:"Watch" };
@@ -1462,7 +1530,9 @@ function buildRollup(rows) {
     showRate: booked ? shows / booked : null
   };
 }
-function clientDrill(r) {
+function clientDrill(row) {
+  // The funnel is the SID floor story, so it uses this period's lead count, not the ad-platform total.
+  const r = Object.assign({}, row, { leads: isNil(row.floorLeads) ? row.leads : row.floorLeads });
   const stages = CFG.dash.funnelStages || [];
   const max = Math.max(1, ...stages.map(s => r[s.key] || 0));
   let bars = '<div class="funnel" style="max-width:520px">';
@@ -1486,7 +1556,26 @@ function clientDrill(r) {
     + '</div>';
   const speed = isNil(r.speedToLeadMedianMin) ? "" :
     '<div style="margin-top:12px" class="muted">Median speed to lead: <span class="mono">' + fmtMin(r.speedToLeadMedianMin) + ' min</span></div>';
-  return '<div class="muted" style="margin-bottom:10px">Where ' + esc(r.label) + "'s leads stall, not just how many.</div>" + bars + lags + speed;
+  return '<div class="muted" style="margin-bottom:10px">Where ' + esc(r.label) + "'s leads stall, not just how many.</div>"
+    + bars + lags + speed + sdrPanel(row);
+}
+/* Lifetime SDR economics for one client: what we spent the dialer on and what it returned. */
+function sdrPanel(r) {
+  if (!REV) return "";
+  const cell = (label, val, cls) => '<div><div class="sdr-l">' + esc(label) + '</div>'
+    + '<div class="sdr-v' + (cls ? " " + cls : "") + '">' + val + '</div></div>';
+  const b = (REV.benchmarks || {});
+  const band = (v, k) => { const x = b[k] || {}; return isNil(v) || isNil(x.good) ? ""
+    : v < x.good ? "cellgood" : v <= (x.warn || x.good) ? "cellwarn" : "cellalert"; };
+  return '<div class="sdrbox"><div class="sdr-h">SDR performance <span class="faint">lifetime</span></div>'
+    + '<div class="sdrgrid">'
+      + cell("Ad leads", fmtCount(r.leads))
+      + cell("Contacts", fmtCount(r.contacts))
+      + cell("Dials", fmtCount(r.dials))
+      + cell("$ / Dial", isNil(r.perDial) ? dash() : fmtMoney(r.perDial), band(r.perDial, "perDial"))
+      + cell("$ / Lead", isNil(r.perLead) ? dash() : fmtMoney(r.perLead), band(r.perLead, "perLead"))
+      + cell("MRR", r.mrr ? fmtMoney(r.mrr) : dash())
+    + '</div></div>';
 }
 
 /* ---------------------------- FOOTER ---------------------------- */

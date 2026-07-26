@@ -1,0 +1,680 @@
+{
+  "_note": "Per-client revenue and lead totals. Revenue comes from closed deals posted in the #2-wins Slack channel and lead counts from the Supabase facebook_leads table; neither source is reachable from the GHL pipeline, so this file is a committed snapshot that is replaced when a fresh export is dropped in. Dials here are a baseline only: when the pipeline emits live clientDials (summed contact.times_attempted per partner_acronym), the live number wins. See docs/dial-metrics.md.",
+  "updated": "2026-07-24",
+  "currency": "USD",
+  "benchmarks": {
+    "perDial": {
+      "good": 200,
+      "warn": 600
+    },
+    "perLead": {
+      "good": 150,
+      "warn": 500
+    }
+  },
+  "totals": {
+    "mrr": 251460.06,
+    "arr": 3017520.72,
+    "leads": 8895,
+    "dials": 7188,
+    "clients": 82
+  },
+  "clients": {
+    "2FC": {
+      "mrr": 1320.0,
+      "arr": 15840.0,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 0,
+      "dials": 0
+    },
+    "2FG": {
+      "mrr": 3920.0,
+      "arr": 47040.0,
+      "dealCount": 2,
+      "leads": 0,
+      "contacts": 0,
+      "dials": 0
+    },
+    "365": {
+      "mrr": 2379.0,
+      "arr": 28548.0,
+      "dealCount": 2,
+      "leads": 1108,
+      "contacts": 0,
+      "dials": 0
+    },
+    "ABC": {
+      "mrr": 5900.0,
+      "arr": 70800.0,
+      "dealCount": 1,
+      "leads": 81,
+      "contacts": 46,
+      "dials": 199
+    },
+    "ABH": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 20,
+      "dials": 4
+    },
+    "ABS": {
+      "mrr": 1680.0,
+      "arr": 20160.0,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 0,
+      "dials": 0
+    },
+    "ACL": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 191,
+      "contacts": 58,
+      "dials": 170
+    },
+    "ACS": {
+      "mrr": 9688.0,
+      "arr": 116256.0,
+      "dealCount": 3,
+      "leads": 79,
+      "contacts": 23,
+      "dials": 100
+    },
+    "AHA": {
+      "mrr": 1238.0,
+      "arr": 14856.0,
+      "dealCount": 1,
+      "leads": 148,
+      "contacts": 21,
+      "dials": 112
+    },
+    "AHC": {
+      "mrr": 4800.0,
+      "arr": 57600.0,
+      "dealCount": 1,
+      "leads": 813,
+      "contacts": 170,
+      "dials": 574
+    },
+    "AHS": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 104,
+      "contacts": 11,
+      "dials": 39
+    },
+    "ALB": {
+      "mrr": 1255.0,
+      "arr": 15060.0,
+      "dealCount": 3,
+      "leads": 0,
+      "contacts": 99,
+      "dials": 188
+    },
+    "ALM": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 57,
+      "dials": 88
+    },
+    "ALP": {
+      "mrr": 2431.0,
+      "arr": 29172.0,
+      "dealCount": 4,
+      "leads": 212,
+      "contacts": 78,
+      "dials": 166
+    },
+    "AMB": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 139,
+      "contacts": 0,
+      "dials": 0
+    },
+    "APA": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 65,
+      "contacts": 27,
+      "dials": 94
+    },
+    "APN": {
+      "mrr": 2656.0,
+      "arr": 31872.0,
+      "dealCount": 2,
+      "leads": 105,
+      "contacts": 9,
+      "dials": 35
+    },
+    "AUR": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 10,
+      "dials": 0
+    },
+    "AVA": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 14,
+      "contacts": 14,
+      "dials": 43
+    },
+    "BCF": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 198,
+      "contacts": 122,
+      "dials": 373
+    },
+    "CBH": {
+      "mrr": 540.0,
+      "arr": 6480.0,
+      "dealCount": 1,
+      "leads": 219,
+      "contacts": 22,
+      "dials": 51
+    },
+    "CCC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 19,
+      "contacts": 18,
+      "dials": 71
+    },
+    "CCG": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 232,
+      "contacts": 0,
+      "dials": 0
+    },
+    "CHC": {
+      "mrr": 3885.0,
+      "arr": 46620.0,
+      "dealCount": 2,
+      "leads": 188,
+      "contacts": 10,
+      "dials": 0
+    },
+    "CJP": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 10,
+      "dials": 0
+    },
+    "CPH": {
+      "mrr": 4018.0,
+      "arr": 48216.0,
+      "dealCount": 2,
+      "leads": 0,
+      "contacts": 34,
+      "dials": 0
+    },
+    "CWS": {
+      "mrr": 766.0,
+      "arr": 9192.0,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 0,
+      "dials": 0
+    },
+    "EDV": {
+      "mrr": 5520.0,
+      "arr": 66240.0,
+      "dealCount": 2,
+      "leads": 0,
+      "contacts": 2,
+      "dials": 0
+    },
+    "EGN": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 23,
+      "dials": 0
+    },
+    "ENC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 148,
+      "contacts": 127,
+      "dials": 471
+    },
+    "EVC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 48,
+      "contacts": 40,
+      "dials": 161
+    },
+    "EVG": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 61,
+      "contacts": 61,
+      "dials": 118
+    },
+    "FDH": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 43,
+      "contacts": 17,
+      "dials": 64
+    },
+    "GCA": {
+      "mrr": 1920.0,
+      "arr": 23040.0,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 0,
+      "dials": 0
+    },
+    "GEN": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 2,
+      "dials": 0
+    },
+    "GHC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 129,
+      "contacts": 35,
+      "dials": 77
+    },
+    "GPC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 799,
+      "contacts": 6,
+      "dials": 23
+    },
+    "GSH": {
+      "mrr": 3360.0,
+      "arr": 40320.0,
+      "dealCount": 2,
+      "leads": 0,
+      "contacts": 2,
+      "dials": 0
+    },
+    "GXY": {
+      "mrr": 9352.0,
+      "arr": 112224.0,
+      "dealCount": 2,
+      "leads": 190,
+      "contacts": 77,
+      "dials": 262
+    },
+    "GYH": {
+      "mrr": 2560.0,
+      "arr": 30720.0,
+      "dealCount": 2,
+      "leads": 0,
+      "contacts": 1,
+      "dials": 0
+    },
+    "HAC": {
+      "mrr": 2800.0,
+      "arr": 33600.0,
+      "dealCount": 1,
+      "leads": 135,
+      "contacts": 0,
+      "dials": 0
+    },
+    "HCL": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 71,
+      "contacts": 4,
+      "dials": 18
+    },
+    "HCO": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 1,
+      "dials": 0
+    },
+    "HHA": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 15,
+      "contacts": 16,
+      "dials": 77
+    },
+    "HHC": {
+      "mrr": 16985.0,
+      "arr": 203820.0,
+      "dealCount": 10,
+      "leads": 248,
+      "contacts": 107,
+      "dials": 336
+    },
+    "HHM": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 7,
+      "dials": 0
+    },
+    "HMC": {
+      "mrr": 1088.0,
+      "arr": 13056.0,
+      "dealCount": 1,
+      "leads": 137,
+      "contacts": 30,
+      "dials": 144
+    },
+    "HOA": {
+      "mrr": 1280.0,
+      "arr": 15360.0,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 0,
+      "dials": 0
+    },
+    "HPH": {
+      "mrr": 8960.0,
+      "arr": 107520.0,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 43,
+      "dials": 170
+    },
+    "HPI": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 35,
+      "dials": 148
+    },
+    "HSE": {
+      "mrr": 6392.0,
+      "arr": 76704.0,
+      "dealCount": 3,
+      "leads": 256,
+      "contacts": 31,
+      "dials": 103
+    },
+    "HWAZ": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 3,
+      "contacts": 4,
+      "dials": 5
+    },
+    "HWC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 16,
+      "contacts": 15,
+      "dials": 45
+    },
+    "HWS": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 1,
+      "contacts": 1,
+      "dials": 1
+    },
+    "IHC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 296,
+      "contacts": 0,
+      "dials": 0
+    },
+    "JHC": {
+      "mrr": 4800.0,
+      "arr": 57600.0,
+      "dealCount": 2,
+      "leads": 236,
+      "contacts": 55,
+      "dials": 82
+    },
+    "JOY": {
+      "mrr": 2160.0,
+      "arr": 25920.0,
+      "dealCount": 1,
+      "leads": 115,
+      "contacts": 42,
+      "dials": 185
+    },
+    "KTY": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 32,
+      "contacts": 30,
+      "dials": 124
+    },
+    "LPC": {
+      "mrr": 60754.0,
+      "arr": 729048.0,
+      "dealCount": 4,
+      "leads": 299,
+      "contacts": 267,
+      "dials": 602
+    },
+    "OCC": {
+      "mrr": 27800.0,
+      "arr": 333600.0,
+      "dealCount": 3,
+      "leads": 0,
+      "contacts": 15,
+      "dials": 0
+    },
+    "OYL": {
+      "mrr": 8942.0,
+      "arr": 107304.0,
+      "dealCount": 4,
+      "leads": 76,
+      "contacts": 52,
+      "dials": 159
+    },
+    "OYV": {
+      "mrr": 7440.0,
+      "arr": 89280.0,
+      "dealCount": 2,
+      "leads": 28,
+      "contacts": 28,
+      "dials": 78
+    },
+    "PCA": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 141,
+      "contacts": 56,
+      "dials": 209
+    },
+    "PCH": {
+      "mrr": 50.0,
+      "arr": 600.0,
+      "dealCount": 1,
+      "leads": 16,
+      "contacts": 16,
+      "dials": 44
+    },
+    "PHC": {
+      "mrr": 5167.0,
+      "arr": 62004.0,
+      "dealCount": 4,
+      "leads": 26,
+      "contacts": 36,
+      "dials": 18
+    },
+    "PJG": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 82,
+      "contacts": 10,
+      "dials": 69
+    },
+    "PMC": {
+      "mrr": 1390.73,
+      "arr": 16688.76,
+      "dealCount": 1,
+      "leads": 104,
+      "contacts": 3,
+      "dials": 0
+    },
+    "PPC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 0,
+      "contacts": 4,
+      "dials": 0
+    },
+    "RAH": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 19,
+      "contacts": 10,
+      "dials": 10
+    },
+    "RHC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 92,
+      "contacts": 17,
+      "dials": 51
+    },
+    "RHS": {
+      "mrr": 3630.0,
+      "arr": 43560.0,
+      "dealCount": 2,
+      "leads": 183,
+      "contacts": 0,
+      "dials": 0
+    },
+    "RHW": {
+      "mrr": 7200.0,
+      "arr": 86400.0,
+      "dealCount": 1,
+      "leads": 7,
+      "contacts": 7,
+      "dials": 14
+    },
+    "ROC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 23,
+      "contacts": 19,
+      "dials": 152
+    },
+    "SCS": {
+      "mrr": 1733.33,
+      "arr": 20799.96,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 8,
+      "dials": 0
+    },
+    "SHA": {
+      "mrr": 11288.0,
+      "arr": 135456.0,
+      "dealCount": 7,
+      "leads": 279,
+      "contacts": 42,
+      "dials": 164
+    },
+    "SHE": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 98,
+      "contacts": 46,
+      "dials": 92
+    },
+    "SHI": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 232,
+      "contacts": 40,
+      "dials": 172
+    },
+    "SHS": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 11,
+      "contacts": 11,
+      "dials": 39
+    },
+    "SIE": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 96,
+      "contacts": 49,
+      "dials": 136
+    },
+    "TGS": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 31,
+      "contacts": 0,
+      "dials": 0
+    },
+    "THC": {
+      "mrr": 0,
+      "arr": 0,
+      "dealCount": 0,
+      "leads": 158,
+      "contacts": 66,
+      "dials": 258
+    },
+    "VAC": {
+      "mrr": 2412.0,
+      "arr": 28944.0,
+      "dealCount": 1,
+      "leads": 0,
+      "contacts": 0,
+      "dials": 0
+    }
+  }
+}

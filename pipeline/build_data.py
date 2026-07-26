@@ -348,9 +348,27 @@ def build_from_raw(ghl, dash):
         "generatedAt": now.replace(microsecond=0).isoformat(),
         "freshnessMin": freshness_min(meta),
         "periods": periods,
+        "clientDials": build_client_dials(facts),
         "dataQuality": build_data_quality(periods.get(default) or next(iter(periods.values())),
                                           contacts, ghl, goals, calls, meta),
     }
+
+
+def build_client_dials(facts):
+    """Lifetime contacts and dials per client acronym, summed from the Times Attempted counter.
+
+    This is deliberately not windowed: times_attempted is a running total on the contact, so slicing
+    it by a date window would understate it. The client board pairs these with revenue to get $/dial.
+    """
+    agg = {}
+    for f in facts:
+        acr = (f.get("acronym") or "").strip().upper()
+        if not acr:
+            continue
+        row = agg.setdefault(acr, {"contacts": 0, "dials": 0})
+        row["contacts"] += 1
+        row["dials"] += f.get("timesAttempted") or 0
+    return dict(sorted(agg.items()))
 
 
 def is_yes(value, yes_set):
@@ -387,6 +405,9 @@ def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val, ba
                     if field_value(c, "contact.partner_acronym") else None),
         "leadDate": lead_d, "firstAttempt": first_a, "connect": connect_d, "bookedDate": booked_d,
         "booked": booked, "bookedBy": booked_by, "held": held, "attempts": attempts, "assignedTo": assigned_to,
+        # Times Attempted is the dial counter the belt actually increments (sid_attempt_count is stuck),
+        # so it is the source for per-client dial totals on the client board.
+        "timesAttempted": to_int(field_value(c, "contact.times_attempted")),
         "lastCallSec": to_int(field_value(c, "contact.sid_last_call_duration_sec")),
         "tags": [t.lower() for t in c.get("tags", [])],
     }
