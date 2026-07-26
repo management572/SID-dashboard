@@ -96,12 +96,12 @@
     { "key": "talkTimeSec", "label": "Talk Time", "format": "duration" },
     { "key": "booked", "label": "Booked" },
     { "key": "bookRate", "label": "Book %", "format": "pct", "target": "bookRateTarget" },
-    { "key": "shows", "label": "Held" },
-    { "key": "showRate", "label": "Held %", "format": "pct", "target": "showRateTarget" },
+    { "key": "dealsWon", "label": "Deals Won" },
+    { "key": "bookToClosePct", "label": "Book → Close %", "format": "pct" },
     { "key": "speedToLeadMedianMin", "label": "Speed to Lead", "format": "min", "invert": true },
     { "key": "formCompliance", "label": "Form %", "format": "pct", "target": "formSubmissionComplianceTarget" }
   ],
-  "_setterNote": "This table IS the Priority-#1 deliverable. Sortable on every column, default sort by bookRate descending. Attempts and dials are separate columns on purpose: the gap between them is how you see the attempt definition working correctly.",
+  "_setterNote": "This table IS the Priority-#1 deliverable. Sortable on every column, default sort by bookRate descending. Attempts and dials are separate columns on purpose: the gap between them is how you see the attempt definition working correctly. Deals Won and Book -> Close carry the setter through to revenue, and they need a `deals` array in data/client-revenue.json with a setter on each deal: the #2-wins feed records the client but not who set the appointment, so until that lands these two columns read as a dash rather than a zero. See docs/dial-metrics.md.",
 
   "clientColumns": [
     { "key": "label", "label": "Client Agency" },

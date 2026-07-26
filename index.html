@@ -429,6 +429,13 @@
           <div id="trend"></div>
         </div>
       </div>
+      <div class="grid cols2" style="margin-top:20px;">
+        <div class="card">
+          <h2>Dial efficiency</h2>
+          <div class="sub">Median time from lead in to first dial, per client. The longer a lead waits, the worse: green under 5 min, red over 30.</div>
+          <div id="revSpeed"></div>
+        </div>
+      </div>
     </section>
 
     <!-- REVENUE -->
@@ -446,11 +453,6 @@
           <h2>Revenue per dial</h2>
           <div class="sub">Annual value returned per dial, for the clients we dial most. Higher is better: green at $600+, red under $200.</div>
           <div id="revPerDial"></div>
-        </div>
-        <div class="card">
-          <h2>Dial efficiency</h2>
-          <div class="sub">Median time from lead in to first dial, per client. The longer a lead waits, the worse: green under 5 min, red over 30.</div>
-          <div id="revSpeed"></div>
         </div>
       </div>
     </section>
@@ -752,13 +754,27 @@ function renderControls() {
 }
 
 const DQ_RANK = { alert: 3, warn: 2, info: 1 };
+/* Gaps the board can see for itself, that the pipeline cannot report because they live in the
+   revenue snapshot rather than in GHL. */
+function clientSideFlags() {
+  const out = [];
+  if (REV && !Array.isArray(REV.deals)) {
+    out.push({ severity:"info", title:"Deals are not attributed to a setter",
+      detail: "The revenue snapshot records the client on each deal but not who set the appointment, "
+        + "so Deals Won and Book → Close read as a dash on the setter table. Add a `deals` array to "
+        + "data/client-revenue.json with a setter (and a date) on each deal to light both columns up." });
+  }
+  return out;
+}
+
 function renderDataQuality() {
   initBell();
   const list = document.getElementById("dqList");
   const badge = document.getElementById("bellBadge");
   const count = document.getElementById("bellCount");
   const btn = document.getElementById("bellBtn");
-  const dq = (DATA.dataQuality || []).slice().sort((a, b) => (DQ_RANK[b.severity] || 0) - (DQ_RANK[a.severity] || 0));
+  const dq = (DATA.dataQuality || []).concat(clientSideFlags())
+    .sort((a, b) => (DQ_RANK[b.severity] || 0) - (DQ_RANK[a.severity] || 0));
   list.innerHTML = "";
   if (!dq.length) {
     list.innerHTML = '<div class="bell-empty">All clear — no data-quality alerts.</div>';
@@ -826,6 +842,7 @@ function showTab(t) {
 function renderFloor() {
   renderTiles();
   renderDialer();
+  renderSpeedEfficiency();   // dialer-tab chart: it reads floor timings, not revenue
   renderClientRevenue();
   renderInsights();
   renderLanes();
@@ -1181,7 +1198,6 @@ function renderClientRevenue() {
   renderRevenueTiles(cfg, m);
   renderRevenueByClient();
   renderRevenuePerDial();
-  renderSpeedEfficiency();
 }
 
 /* Top clients by MRR. Real book, no modelling. */
@@ -1303,10 +1319,36 @@ function defaultSort() {
   const cols = CFG.dash.setterColumns || [];
   return cols.some(c => c.key === "bookRate") ? { key:"bookRate", dir:-1 } : null;
 }
+/* Deals won per setter, from an optional per-deal list on the revenue snapshot. The #2-wins feed
+   records the client on each deal but not who set the appointment, so without that list there is
+   no honest way to attribute a close to a setter - the columns stay blank rather than guess. */
+function dealsBySetter() {
+  const deals = (REV && REV.deals) || null;
+  if (!Array.isArray(deals) || !deals.length) return null;
+  const map = {};
+  deals.forEach(d => {
+    const who = String(d.setter || d.bookedBy || "").trim().toLowerCase();
+    if (!who) return;
+    const row = map[who] || (map[who] = { count: 0, mrr: 0 });
+    row.count += 1;
+    row.mrr += Number(d.mrr) || 0;
+  });
+  return map;
+}
+
 function renderSetters() {
   const wrap = document.getElementById("settersTableWrap");
   const cols = CFG.dash.setterColumns || [];
-  const rows = (P.setters || []).slice();
+  const byS = dealsBySetter();
+  const rows = (P.setters || []).slice().map(s => {
+    const hit = byS ? byS[String(s.name || "").trim().toLowerCase()] : null;
+    const won = byS ? (hit ? hit.count : 0) : null;
+    return Object.assign({}, s, {
+      dealsWon: won,
+      dealMrr: hit ? hit.mrr : (byS ? 0 : null),
+      bookToClosePct: (isNil(won) || !s.booked) ? null : won / s.booked
+    });
+  });
   if (!rows.length) {
     wrap.innerHTML = '<div class="empty">No setter rows in this window. The Intro Call Form has no submissions yet, '
       + 'so per-rep numbers cannot be attributed. This is expected before the CRM build (prompt 02).</div>';
@@ -1446,16 +1488,17 @@ function clientRows() {
   (P.clients || []).filter(c => c.active !== false).forEach(c => { floor[String(c.key).toUpperCase()] = c; });
   const rev = (REV && REV.clients) || {};
   const live = DATA.clientDials || {};
+  const hasLive = Object.keys(live).length > 0;
   const keys = new Set([...Object.keys(floor), ...Object.keys(rev)]);
   const out = [];
   keys.forEach(k => {
     const f = floor[k] || { key:k, label:k, market:null, leads:0, worked:0, contacted:0, booked:0, shows:0 };
     const rv = rev[k] || {};
-    // Live dials win over the snapshot baseline, but only when the pipeline actually returned some.
-    // times_attempted has a history of coming back empty, and a silent drop to zero would read as
-    // "we stopped dialling this client" rather than "the field did not populate".
+    // Live dials win outright once the pipeline emits a clientDials block: the first run returned
+    // 7,191 against the snapshot's 7,188, so times_attempted is populating and a per-client zero is
+    // now a real zero rather than a missing field. Snapshot values are the fallback until then.
     const lv = live[k] || {};
-    const dials = Math.max(lv.dials || 0, rv.dials || 0);
+    const dials = hasLive ? (lv.dials || 0) : (rv.dials || 0);
     const leads = rv.leads || 0, arr = rv.arr || 0;
     out.push(Object.assign({}, f, {
       key: k,
@@ -1463,7 +1506,7 @@ function clientRows() {
       leads: leads,
       floorLeads: f.leads || 0,
       dials: dials,
-      contacts: Math.max(lv.contacts || 0, rv.contacts || 0),
+      contacts: hasLive ? (lv.contacts || 0) : (rv.contacts || 0),
       mrr: rv.mrr || 0,
       arr: arr,
       won: rv.dealCount || 0,                                    // closed deals = the Deal Won stage
