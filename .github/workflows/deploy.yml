@@ -66,6 +66,11 @@ jobs:
             cp data/dashboard-data.json dist/data/dashboard-data.json
           fi
           cp data/dashboard-data.sample.json dist/data/dashboard-data.sample.json
+          # Per-client revenue and ad-lead snapshot (aggregate totals only, no PHI). Without this the
+          # client board loses its money columns, so it ships with the data file.
+          if [ -f data/client-revenue.json ]; then
+            cp data/client-revenue.json dist/data/client-revenue.json
+          fi
           # Assets (logo) if present.
           if [ -d assets ]; then cp -r assets/. dist/assets/ 2>/dev/null || true; fi
           echo "Deploying these files:" && find dist -type f

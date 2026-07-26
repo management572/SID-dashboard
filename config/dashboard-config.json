@@ -71,11 +71,9 @@
 
   "clientRevenue": {
     "enabled": true,
-    "sample": true,
+    "sample": false,
     "currency": "USD",
-    "_note": "Backend client revenue is not mapped to a real source yet, so the board renders SAMPLE revenue (clearly labeled) to showcase the layout. The $/unit tiles divide that revenue by the REAL dialer activity (dials, attempts, connects, bookings, floor hours), so they become fully live the moment a revenue source is mapped and the pipeline emits a per-period `revenue` block.",
-    "sampleMonthlyRevenue": 48000,
-    "sampleYoYGrowth": 0.18,
+    "_note": "Revenue is real: MRR and ARR come from closed deals in data/client-revenue.json, and the $/unit tiles divide the window's share of MRR by the REAL dialer activity (dials, attempts, connects, bookings, floor hours). That snapshot carries no deal dates, so the board shows the revenue distribution across clients rather than a revenue trend over time. Adding a date to each deal in the export is what would make a week-over-week or year-over-year revenue chart possible. See docs/dial-metrics.md.",
     "floorHoursPerDay": 12,
     "costTiles": [
       { "key": "perDial", "label": "$ / Dial" },
