@@ -41,10 +41,9 @@ per contact, so it is the right basis for a per-client lifetime total.
 top level of `data/dashboard-data.json`. It is deliberately **not** windowed by period: the field is a
 running total on the contact, so slicing it by date would undercount.
 
-The dashboard prefers live outright whenever a `clientDials` block is present. The first run to carry
-it returned **7,191 dials across 69 clients** against the snapshot's 7,188, so `times_attempted` is
-confirmed to populate and a per-client zero can be read as a real zero. Until a run emits the block,
-the snapshot values stand in.
+The dashboard takes `max(live, snapshot)` rather than preferring live outright. If `times_attempted`
+comes back empty the way its `sid_*` predecessor did, a silent drop to zero would read as "we stopped
+dialling this client" instead of "the field did not populate".
 
 ## Calculations
 
@@ -76,12 +75,12 @@ Deal Won is `dealCount` from the revenue snapshot. Because deals carry no date, 
 lifetime while the stages before it are period-scoped, so it is drawn in green and tagged
 `lifetime`. The drawer's panel breaks the money out further: deals won, average deal MRR, MRR, ARR.
 
-There are two different readings of "efficiency" and they point opposite ways on purpose, so they
-live on different tabs:
+The Revenue tab carries two different readings of "efficiency", and they point opposite ways on
+purpose:
 
-- **Revenue per dial** (Revenue tab) — money returned per unit of effort. Higher is better.
-- **Dial efficiency** (Dialer tab) — median minutes from lead in to first dial. Lower is better,
-  banded on `goals.speedToLeadBandsMin` (green under 5, red over 30).
+- **Revenue per dial** — money returned per unit of effort. Higher is better.
+- **Dial efficiency** — median minutes from lead in to first dial. Lower is better, banded on
+  `goals.speedToLeadBandsMin` (green under 5, red over 30).
 
 A client whose median speed to lead is exactly 0.0 min is held out of the time chart rather than
 drawn green. That value means the first-dial timestamp never resolved, not that the floor called
@@ -90,28 +89,7 @@ count of held-out clients is printed under the chart.
 
 Per-client speed to lead is computed from the **call feed** (`first_outbound_by_contact`), the same
 basis as the floor tile and the setter column. The `firstAttempt` custom field lands equal to the
-lead date, which collapsed every client's median to 0.0 — 25 of 30 clients read zero before the fix.
-With it, medians land between roughly 250 and 2,000 minutes, so every client is currently past the
-30-minute SLA.
-
-## Deals Won and Book → Close on the setter table
-
-These two columns replace Held and Held %. They need a `deals` array on `data/client-revenue.json`:
-
-```json
-"deals": [
-  { "client": "AHC", "setter": "Sarah", "mrr": 4800, "date": "2026-07-14" }
-]
-```
-
-The `#2-wins` feed records the client on each deal but not who set the appointment, and SID's own
-opportunities do not carry wins (they live downstream in client sub-accounts). So there is no way to
-attribute a close to a setter today, and both columns render as a dash rather than a zero — a zero
-would read as "this setter closed nothing", which is a claim the data cannot support. A
-data-quality note in the bell explains the gap while it persists.
-
-Adding `date` to the same rows is what also unlocks a real revenue trend and a period-accurate Deal
-Won stage, so one export change closes three gaps at once.
+lead date, which collapsed every client's median to 0.0.
 
 ## Timeframes: read this before comparing columns
 
