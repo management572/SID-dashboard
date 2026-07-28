@@ -73,6 +73,8 @@ jobs:
           fi
           # Assets (logo) if present.
           if [ -d assets ]; then cp -r assets/. dist/assets/ 2>/dev/null || true; fi
+          # Cache rules, so a deploy is visible on a normal reload instead of needing a hard refresh.
+          if [ -f public/_headers ]; then cp public/_headers dist/_headers; fi
           echo "Deploying these files:" && find dist -type f
 
       - name: Fetch the onlinebizbuilders favicon

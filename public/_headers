@@ -1,0 +1,19 @@
+# Cloudflare Pages header rules.
+#
+# The board is a single index.html plus three JSON files, all of them small and all of them
+# rewritten on every deploy or data refresh. Browsers were holding on to the previous copy, so a
+# shipped change looked like it had not shipped until someone hard-reloaded. no-cache does not mean
+# "never store" - it means revalidate with the origin before reuse - so this keeps the payload
+# cheap while making a refresh enough to pick up new code and new numbers.
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/
+  Cache-Control: no-cache, must-revalidate
+
+/data/*
+  Cache-Control: no-cache, must-revalidate
+
+/config/*
+  Cache-Control: no-cache, must-revalidate
