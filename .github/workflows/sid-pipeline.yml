@@ -87,31 +87,47 @@ jobs:
         run: |
           git config user.name  "sid-pipeline[bot]"
           git config user.email "sid-pipeline@users.noreply.github.com"
-          if [ "${{ github.event.inputs.mode }}" = "discover" ]; then
-            git add -f config/sid-discovery.json || true
-          elif [ "${{ github.event.inputs.mode }}" = "probe" ]; then
-            git add -f config/sid-call-probe.json || true
-          else
+          MODE="${{ github.event.inputs.mode || 'refresh' }}"
+          case "$MODE" in
+            discover) OUT="config/sid-discovery.json" ;;
+            probe)    OUT="config/sid-call-probe.json" ;;
             # data/dashboard-data.json is gitignored to prevent accidental local commits;
             # force-add the generated aggregate file (no PHI) so the board always has fresh data.
-            git add -f data/dashboard-data.json || true
-          fi
+            *)        OUT="data/dashboard-data.json" ;;
+          esac
+          if [ ! -f "$OUT" ]; then echo "No $OUT produced; nothing to commit."; exit 0; fi
+          # Keep the generated file outside the work tree. A rejected push is resolved by taking the
+          # remote tree wholesale and re-applying ONLY this file, so a code push that landed while
+          # this run was working is never clobbered.
+          KEEP="${RUNNER_TEMP:-/tmp}/$(basename "$OUT")"
+          cp "$OUT" "$KEEP"
+          git add -f "$OUT" || true
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "chore(data): automated SID ${{ github.event.inputs.mode || 'refresh' }} [skip ci]"
+          git commit -m "chore(data): automated SID $MODE [skip ci]"
           # The branch can advance between checkout and push (concurrent runs, manual commits), which
-          # rejects a plain push. This job only writes one generated file, so on rejection re-base our
-          # commit onto the latest remote tip (keeping our fresh file) and retry.
+          # rejects a plain push. This job only owns one generated file, so on rejection reset HARD to
+          # the latest remote tip and re-apply just that file.
+          #
+          # This used to be `git reset --soft`, which was silently destructive: a soft reset leaves
+          # this run's stale checkout staged, so the retry commit carried the whole old tree and
+          # reverted every file pushed in between. It wiped a shipped dashboard change once.
           for i in 1 2 3 4 5; do
             if git push origin HEAD:${GITHUB_REF_NAME}; then
               echo "pushed on attempt $i"; exit 0
             fi
-            echo "push rejected; syncing with remote (attempt $i)"
+            echo "push rejected; re-basing onto the latest remote tip (attempt $i)"
             git fetch origin ${GITHUB_REF_NAME}
-            git reset --soft "origin/${GITHUB_REF_NAME}"
-            git commit -m "chore(data): automated SID ${{ github.event.inputs.mode || 'refresh' }} [skip ci]" || echo "nothing new to commit"
+            git reset --hard "origin/${GITHUB_REF_NAME}"
+            mkdir -p "$(dirname "$OUT")"
+            cp "$KEEP" "$OUT"
+            git add -f "$OUT" || true
+            if git diff --cached --quiet; then
+              echo "remote already carries this data; nothing to push."; exit 0
+            fi
+            git commit -m "chore(data): automated SID $MODE [skip ci]"
             sleep $((i * 3))
           done
           echo "::error::could not push refreshed data after 5 attempts"
