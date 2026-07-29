@@ -29,6 +29,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -192,6 +193,35 @@ def _conv_cursor(cv):
     return s
 
 
+def e164(value):
+    """Normalise a phone value to +1XXXXXXXXXX, or None if it is not a usable NANP number."""
+    digits = re.sub(r"\D", "", str(value or ""))
+    if len(digits) == 11 and digits.startswith("1"):
+        digits = digits[1:]
+    if len(digits) != 10 or digits[0] in "01":
+        return None
+    return "+1" + digits
+
+
+def our_number(m, call):
+    """The SID-side number on a call: the 'from' when we dialled out, the 'to' when they rang in.
+
+    Only this side is ever kept. The other side identifies the lead, and no lead phone number
+    belongs in an aggregate board file. GHL is inconsistent about where it hangs the numbers, so
+    each side is probed in a few known shapes before giving up.
+    """
+    outbound = str(m.get("direction") or call.get("direction") or "").lower().startswith("out")
+    ours_keys = ("from", "fromNumber") if outbound else ("to", "toNumber")
+    for src in (call, m, m.get("meta") if isinstance(m.get("meta"), dict) else {}):
+        if not isinstance(src, dict):
+            continue
+        for k in ours_keys:
+            hit = e164(src.get(k))
+            if hit:
+                return hit
+    return None
+
+
 def pull_conv_calls(cfg, token, conv_id, since_ms, max_pages):
     """Pull the call messages of one conversation (newest first), stopping once past the window."""
     out = []
@@ -224,6 +254,9 @@ def pull_conv_calls(cfg, token, conv_id, since_ms, max_pages):
                 "duration": dur if isinstance(dur, (int, float)) else None,
                 "messageType": mt,
                 "dateAdded": m.get("dateAdded"),
+                # OUR caller ID only. The far end of the call is the lead's personal number and
+                # must never reach the data file; see docs/compliance.md.
+                "ourNumber": our_number(m, call),
             })
         if oldest is not None and oldest < since_ms:
             break

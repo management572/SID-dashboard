@@ -1,74 +1,163 @@
 {
   "title": "OBB: Setter Floor Dashboard",
   "subtitle": "SID fulfillment engine",
-  "tabs": ["floor", "dialer", "revenue", "setters", "clients"],
+  "tabs": [
+    "floor",
+    "dialer",
+    "numbers",
+    "revenue",
+    "setters",
+    "clients"
+  ],
   "defaultTab": "floor",
-  "_tabsNote": "v1 is the fulfillment engine only. The front-end acquisition tabs (overview, ad spend, ROAS) are a separate board in v2. Do not merge them.",
-
+  "_tabsNote": "v1 is the fulfillment engine only. The front-end acquisition tabs (overview, ad spend, ROAS) are a separate board in v2. Do not merge them. Numbers is the dialing-number health board: which numbers are in use, on which client accounts, and whether carriers have started filtering them.",
   "defaultPeriod": "7d",
-  "periods": ["Today", "7d", "30d", "MTD", "QTD", "YTD", "All"],
+  "periods": [
+    "Today",
+    "7d",
+    "30d",
+    "MTD",
+    "QTD",
+    "YTD",
+    "All"
+  ],
   "_periodNote": "A setter floor is a daily-rhythm system, so the default window is short. Longer windows are for trend, not for management.",
-
   "divisions": [
-    { "key": "TODO_client_slug", "label": "TODO Client Agency Name" }
+    {
+      "key": "TODO_client_slug",
+      "label": "TODO Client Agency Name"
+    }
   ],
   "showAllClientsRollup": true,
-
   "funnelStages": [
-    { "key": "leads", "label": "Lead In" },
-    { "key": "worked", "label": "Worked" },
-    { "key": "contacted", "label": "Contacted" },
-    { "key": "booked", "label": "Booked" },
-    { "key": "shows", "label": "Held" }
+    {
+      "key": "leads",
+      "label": "Lead In"
+    },
+    {
+      "key": "worked",
+      "label": "Worked"
+    },
+    {
+      "key": "contacted",
+      "label": "Contacted"
+    },
+    {
+      "key": "booked",
+      "label": "Booked"
+    },
+    {
+      "key": "shows",
+      "label": "Held"
+    }
   ],
   "_funnelNote": "Ends at Held. Won/Signed is not tracked in SID (it lives downstream in client sub-accounts), so it is intentionally omitted rather than shown as an empty column.",
-
   "goals": {
     "speedToLeadTargetMin": 5,
     "speedToLeadSlaMin": 30,
     "_speedNote": "Green under 5 min, yellow 5-15, orange 15-30, red over 30. The monitor agent alerts at the SLA.",
-    "speedToLeadBandsMin": [5, 15, 30],
-
+    "speedToLeadBandsMin": [
+      5,
+      15,
+      30
+    ],
     "attemptsPerLeadTarget": 7,
-    "dayOneCoverageTarget": 0.90,
+    "dayOneCoverageTarget": 0.9,
     "_dayOneNote": "Percent of new leads that receive attempt 1 inside 24 hours. This is the single best predictor of book rate on this floor.",
-
     "formSubmissionComplianceTarget": 0.95,
     "_formNote": "Percent of worked leads with an Intro Call Form on file. Below this the per-rep numbers cannot be trusted, so the board flags it before it flags anything else.",
-
     "connectRateTarget": 0.25,
     "bookRateTarget": 0.15,
-    "showRateTarget": 0.70,
+    "showRateTarget": 0.7,
     "dialsPerSetterPerDay": 150,
-
     "rampDays": 30,
     "_rampNote": "Setters inside rampDays of their start date get a NEW badge and are excluded from the below-SLA warning."
   },
-
   "floorTiles": [
-    { "key": "leadsToday", "label": "Leads In (today)" },
-    { "key": "introsBookedToday", "label": "Intros Booked (today)" },
-    { "key": "unworkedNow", "label": "Unworked Right Now", "invert": true, "hero": true },
-    { "key": "speedToLeadMedianMin", "label": "Speed to Lead (median min)", "invert": true, "bands": "speedToLeadBandsMin", "target": "speedToLeadTargetMin" },
-    { "key": "dayOneCoverage", "label": "Day-One Coverage", "format": "pct", "target": "dayOneCoverageTarget" },
-    { "key": "formCompliance", "label": "Form Compliance", "format": "pct", "target": "formSubmissionComplianceTarget" },
-    { "key": "p1QueueDepth", "label": "P1 Queue", "invert": true }
+    {
+      "key": "leadsToday",
+      "label": "Leads In (today)"
+    },
+    {
+      "key": "introsBookedToday",
+      "label": "Intros Booked (today)"
+    },
+    {
+      "key": "unworkedNow",
+      "label": "Unworked Right Now",
+      "invert": true,
+      "hero": true
+    },
+    {
+      "key": "speedToLeadMedianMin",
+      "label": "Speed to Lead (median min)",
+      "invert": true,
+      "bands": "speedToLeadBandsMin",
+      "target": "speedToLeadTargetMin"
+    },
+    {
+      "key": "dayOneCoverage",
+      "label": "Day-One Coverage",
+      "format": "pct",
+      "target": "dayOneCoverageTarget"
+    },
+    {
+      "key": "formCompliance",
+      "label": "Form Compliance",
+      "format": "pct",
+      "target": "formSubmissionComplianceTarget"
+    },
+    {
+      "key": "p1QueueDepth",
+      "label": "P1 Queue",
+      "invert": true
+    }
   ],
   "_floorTilesNote": "Row 1 = 'is the floor healthy right now'. invert = lower is better (goal bands reverse). hero = rendered larger.",
-
   "dialerTiles": [
-    { "key": "dialsLogged", "label": "Dials" },
-    { "key": "attemptsDialed", "label": "Attempts" },
-    { "key": "connectsInRange", "label": "Connects" },
-    { "key": "bookings", "label": "Bookings" },
-    { "key": "leadToConnectPct", "label": "Lead → Connect %", "format": "pct" },
-    { "key": "droppedCalls", "label": "Dropped Calls", "invert": true },
-    { "key": "talkTimeSec", "label": "Talk Time", "format": "duration" },
-    { "key": "avgDialDurationSec", "label": "Avg Dial Duration", "format": "duration" },
-    { "key": "avgConnectDurationSec", "label": "Avg Connect Duration", "format": "duration" }
+    {
+      "key": "dialsLogged",
+      "label": "Dials"
+    },
+    {
+      "key": "attemptsDialed",
+      "label": "Attempts"
+    },
+    {
+      "key": "connectsInRange",
+      "label": "Connects"
+    },
+    {
+      "key": "bookings",
+      "label": "Bookings"
+    },
+    {
+      "key": "leadToConnectPct",
+      "label": "Lead \u2192 Connect %",
+      "format": "pct"
+    },
+    {
+      "key": "droppedCalls",
+      "label": "Dropped Calls",
+      "invert": true
+    },
+    {
+      "key": "talkTimeSec",
+      "label": "Talk Time",
+      "format": "duration"
+    },
+    {
+      "key": "avgDialDurationSec",
+      "label": "Avg Dial Duration",
+      "format": "duration"
+    },
+    {
+      "key": "avgConnectDurationSec",
+      "label": "Avg Connect Duration",
+      "format": "duration"
+    }
   ],
   "_dialerTilesNote": "Row 2 = dialer performance, all read live from the GHL call feed. Dials = outbound calls; Attempts = distinct leads dialed; Connects = completed calls at/over connectMinSec; Dropped = calls in a failure status; durations are averaged over calls that report a duration.",
-
   "clientRevenue": {
     "enabled": true,
     "sample": false,
@@ -76,63 +165,174 @@
     "_note": "Revenue is real: MRR and ARR come from closed deals in data/client-revenue.json, and the $/unit tiles divide the window's share of MRR by the REAL dialer activity (dials, attempts, connects, bookings, floor hours). That snapshot carries no deal dates, so the board shows the revenue distribution across clients rather than a revenue trend over time. Adding a date to each deal in the export is what would make a week-over-week or year-over-year revenue chart possible. See docs/dial-metrics.md.",
     "floorHoursPerDay": 12,
     "costTiles": [
-      { "key": "perDial", "label": "$ / Dial" },
-      { "key": "perAttempt", "label": "$ / Attempt" },
-      { "key": "perConnect", "label": "$ / Connect" },
-      { "key": "perBooked", "label": "$ / Booked Appt" },
-      { "key": "perHour", "label": "$ / Hour" },
-      { "key": "perDay", "label": "$ / Day" },
-      { "key": "perWeek", "label": "$ / Week" }
+      {
+        "key": "perDial",
+        "label": "$ / Dial"
+      },
+      {
+        "key": "perAttempt",
+        "label": "$ / Attempt"
+      },
+      {
+        "key": "perConnect",
+        "label": "$ / Connect"
+      },
+      {
+        "key": "perBooked",
+        "label": "$ / Booked Appt"
+      },
+      {
+        "key": "perHour",
+        "label": "$ / Hour"
+      },
+      {
+        "key": "perDay",
+        "label": "$ / Day"
+      },
+      {
+        "key": "perWeek",
+        "label": "$ / Week"
+      }
     ]
   },
-
   "setterColumns": [
-    { "key": "name", "label": "Setter" },
-    { "key": "assigned", "label": "Assigned" },
-    { "key": "attempts", "label": "Attempts" },
-    { "key": "dials", "label": "Dials" },
-    { "key": "connects", "label": "Connects" },
-    { "key": "connectRate", "label": "Connect %", "format": "pct", "target": "connectRateTarget" },
-    { "key": "talkTimeSec", "label": "Talk Time", "format": "duration" },
-    { "key": "booked", "label": "Booked" },
-    { "key": "bookRate", "label": "Book %", "format": "pct", "target": "bookRateTarget" },
-    { "key": "dealsWon", "label": "Deals Won" },
-    { "key": "bookToClosePct", "label": "Book → Close %", "format": "pct" },
-    { "key": "speedToLeadMedianMin", "label": "Speed to Lead", "format": "min", "invert": true },
-    { "key": "formCompliance", "label": "Form %", "format": "pct", "target": "formSubmissionComplianceTarget" }
+    {
+      "key": "name",
+      "label": "Setter"
+    },
+    {
+      "key": "assigned",
+      "label": "Assigned"
+    },
+    {
+      "key": "attempts",
+      "label": "Attempts"
+    },
+    {
+      "key": "dials",
+      "label": "Dials"
+    },
+    {
+      "key": "connects",
+      "label": "Connects"
+    },
+    {
+      "key": "connectRate",
+      "label": "Connect %",
+      "format": "pct",
+      "target": "connectRateTarget"
+    },
+    {
+      "key": "talkTimeSec",
+      "label": "Talk Time",
+      "format": "duration"
+    },
+    {
+      "key": "booked",
+      "label": "Booked"
+    },
+    {
+      "key": "bookRate",
+      "label": "Book %",
+      "format": "pct",
+      "target": "bookRateTarget"
+    },
+    {
+      "key": "dealsWon",
+      "label": "Deals Won"
+    },
+    {
+      "key": "bookToClosePct",
+      "label": "Book \u2192 Close %",
+      "format": "pct"
+    },
+    {
+      "key": "speedToLeadMedianMin",
+      "label": "Speed to Lead",
+      "format": "min",
+      "invert": true
+    },
+    {
+      "key": "formCompliance",
+      "label": "Form %",
+      "format": "pct",
+      "target": "formSubmissionComplianceTarget"
+    }
   ],
   "_setterNote": "This table IS the Priority-#1 deliverable. Sortable on every column, default sort by bookRate descending. Attempts and dials are separate columns on purpose: the gap between them is how you see the attempt definition working correctly. Deals Won and Book -> Close carry the setter through to revenue, and they need a `deals` array in data/client-revenue.json with a setter on each deal: the #2-wins feed records the client but not who set the appointment, so until that lands these two columns read as a dash rather than a zero. See docs/dial-metrics.md.",
-
   "clientColumns": [
-    { "key": "label", "label": "Client Agency" },
-    { "key": "market", "label": "Market" },
-    { "key": "leads", "label": "Leads In" },
-    { "key": "worked", "label": "Worked" },
-    { "key": "workedPct", "label": "Worked %", "format": "pct" },
-    { "key": "booked", "label": "Booked" },
-    { "key": "bookRate", "label": "Book %", "format": "pct", "target": "bookRateTarget" },
-    { "key": "shows", "label": "Held" },
-    { "key": "costPerBooked", "label": "Cost / Booked", "optional": true }
+    {
+      "key": "label",
+      "label": "Client Agency"
+    },
+    {
+      "key": "market",
+      "label": "Market"
+    },
+    {
+      "key": "leads",
+      "label": "Leads In"
+    },
+    {
+      "key": "worked",
+      "label": "Worked"
+    },
+    {
+      "key": "workedPct",
+      "label": "Worked %",
+      "format": "pct"
+    },
+    {
+      "key": "booked",
+      "label": "Booked"
+    },
+    {
+      "key": "bookRate",
+      "label": "Book %",
+      "format": "pct",
+      "target": "bookRateTarget"
+    },
+    {
+      "key": "shows",
+      "label": "Held"
+    },
+    {
+      "key": "costPerBooked",
+      "label": "Cost / Booked",
+      "optional": true
+    }
   ],
-
   "priorityLanes": [
-    { "key": "p1", "label": "P1: engaged, last 24h", "tone": "alert" },
-    { "key": "p2", "label": "P2: engaged 7d, or fresh + unworked", "tone": "warn" },
-    { "key": "p3", "label": "P3: no engagement, in 48H sweep", "tone": "neutral" },
-    { "key": "p4", "label": "P4: long-term nurture", "tone": "faint" }
+    {
+      "key": "p1",
+      "label": "P1: engaged, last 24h",
+      "tone": "alert"
+    },
+    {
+      "key": "p2",
+      "label": "P2: engaged 7d, or fresh + unworked",
+      "tone": "warn"
+    },
+    {
+      "key": "p3",
+      "label": "P3: no engagement, in 48H sweep",
+      "tone": "neutral"
+    },
+    {
+      "key": "p4",
+      "label": "P4: long-term nurture",
+      "tone": "faint"
+    }
   ],
-
   "insights": {
     "enabled": true,
     "_note": "A ranked priority list generated from the biggest gaps against goals, written as plain instructions to the floor lead, not as statistics. Example: 'Michelle has 14 P1 leads unworked past 30 minutes.' Ranked by leads at risk, not by percentage gap."
   },
-
   "privacy": {
     "showContactNames": false,
     "nameFormat": "first-last-initial",
     "_note": "The board is aggregate by default. Drill-downs show first name and last initial plus a SID deep link, never a full record. No diagnoses, addresses, dates of birth, or free-text notes ever reach this file. See docs/compliance.md."
   },
-
   "footer": {
     "dataSourceLine": "Source: SID (GoHighLevel). Counts are cumulative by event date, not current pipeline stage.",
     "disclaimer": "Internal operating report. Access restricted. Do not export or forward."

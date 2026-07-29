@@ -268,6 +268,14 @@
   .cpill.warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); }
   .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
   .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
+  /* Number drill: connect rate per client for one dialing number */
+  .ngrid { display:grid; gap:8px; max-width:640px; }
+  .nrow { display:grid; grid-template-columns:52px 1fr 52px 78px; align-items:center; gap:10px; }
+  .nk { font-size:12px; font-weight:600; }
+  .nbar { height:8px; background:var(--inkDeep); border-radius:4px; overflow:hidden; }
+  .nfill { display:block; height:100%; background:var(--accent); border-radius:4px; }
+  .nv { font-size:12px; font-weight:600; text-align:right; }
+  .nd { font-size:11px; color:var(--boneFaint); text-align:right; }
   .cwon { display:inline-block; min-width:22px; padding:1px 7px; border-radius:999px; font-weight:700; font-size:12.5px;
           color:var(--good); background:color-mix(in srgb, var(--good) 15%, transparent); }
   .fstage.won .bar { background:linear-gradient(180deg, var(--good), color-mix(in srgb, var(--good) 72%, black)); }
@@ -433,6 +441,28 @@
           <div class="sub">Leads, worked and booked, with median speed to lead on the right axis.</div>
           <div id="trend"></div>
         </div>
+      </div>
+    </section>
+
+    <!-- NUMBER HEALTH -->
+    <section class="tab" id="tab-numbers">
+      <div class="tiles" id="numTiles"></div>
+      <div class="grid cols2" style="margin-bottom:20px;">
+        <div class="card">
+          <h2>Connect rate by number</h2>
+          <div class="sub">Every number we dial from, worst first. A number that keeps dialing but stops connecting is the signature of carrier filtering.</div>
+          <div id="numRateChart"></div>
+        </div>
+        <div class="card">
+          <h2>Dials by state</h2>
+          <div class="sub">Where our numbers are registered, by volume. Area code is where the number was issued, not where the lead lives.</div>
+          <div id="numStateChart"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Number health</h2>
+        <div class="sub">One row per dialing number. Tap a row for which clients it is being used on and how it connects for each. Rates are withheld until a number has enough dials to judge.</div>
+        <div id="numbersTableWrap"></div>
       </div>
     </section>
 
@@ -823,7 +853,7 @@ function initBell() {
 function renderTabs() {
   const nav = document.getElementById("tabs");
   nav.innerHTML = "";
-  const labels = { floor:"Floor", dialer:"Dialer", revenue:"Revenue", setters:"Setters", clients:"Clients" };
+  const labels = { floor:"Floor", dialer:"Dialer", numbers:"Numbers", revenue:"Revenue", setters:"Setters", clients:"Clients" };
   (CFG.dash.tabs || []).forEach(t => {
     const b = document.createElement("button");
     b.textContent = labels[t] || t;
@@ -841,6 +871,7 @@ function renderFloor() {
   renderTiles();
   renderDialer();
   renderSpeedEfficiency();   // dialer-tab chart: it reads floor timings, not revenue
+  renderNumbers();
   renderClientRevenue();
   renderInsights();
   renderLanes();
@@ -1430,6 +1461,140 @@ function covBar(v, tgt) {
   return '<div class="bar2"><div class="f" style="width:' + Math.min(100, v * 100) + '%;background:' + color + '"></div>'
     + (isNil(tgt) ? "" : '<div class="tgt" style="left:' + Math.min(100, tgt * 100) + '%"></div>')
     + '</div>';
+}
+
+/* ------------------------- NUMBER HEALTH ------------------------- */
+/* Which numbers we dial from, and whether they are still landing. Volume alone hides carrier
+   filtering: a filtered number keeps dialing and stops connecting, so the connect rate is the tell. */
+function renderNumbers() {
+  const rows = (P.numbers || []).slice();
+  renderNumberTiles(rows);
+  renderNumberCharts(rows);
+  renderNumbersTable(rows);
+}
+
+function renderNumberTiles(rows) {
+  const host = document.getElementById("numTiles");
+  if (!host) return;
+  const dials = rows.reduce((a, r) => a + (r.dials || 0), 0);
+  const conn = rows.reduce((a, r) => a + (r.connects || 0), 0);
+  const failed = rows.reduce((a, r) => a + (r.failed || 0), 0);
+  const band = b => rows.filter(r => (r.health || {}).band === b).length;
+  const flagged = band("alert"), watch = band("warn");
+  const tile = (label, val, sub, cls) => '<div class="tile"><div class="tlabel">' + esc(label) + '</div>'
+    + '<div class="tval' + (cls ? " " + cls : "") + '">' + val + '</div>'
+    + '<div class="tsub">' + esc(sub || "") + '</div></div>';
+  host.innerHTML =
+      tile("Numbers in Use", fmtCount(rows.length), rows.length ? "dialed this window" : "")
+    + tile("Likely Flagged", fmtCount(flagged), "connect rate below floor", flagged ? "cellalert" : "")
+    + tile("Watch", fmtCount(watch), "connect rate slipping", watch ? "cellwarn" : "")
+    + tile("Healthy", fmtCount(rows.length - flagged - watch - band("unrated")), "connecting normally", "cellgood")
+    + tile("Connect Rate", fmtPct(dials ? conn / dials : null), fmtCount(conn) + " of " + fmtCount(dials) + " dials")
+    + tile("Failed Calls", fmtCount(failed), dials ? fmtPct(failed / dials) + " of dials" : "");
+}
+
+function renderNumberCharts(rows) {
+  const rateHost = document.getElementById("numRateChart");
+  const stateHost = document.getElementById("numStateChart");
+  if (!rateHost || !stateHost) return;
+  const col = { good:"var(--good)", warn:"var(--warn)", alert:"var(--alert)", unrated:"var(--boneDim)" };
+
+  // Worst connect rate first: this chart exists to surface the numbers to retire.
+  const rated = rows.filter(r => !isNil(r.connectRate))
+    .sort((a, b) => a.connectRate - b.connectRate).slice(0, 12);
+  rateHost.innerHTML = rated.length
+    ? revBarChart(rated.map(r => ({
+        label: numShort(r.number), value: (r.connectRate || 0) * 100,
+        fill: col[(r.health || {}).band] || "var(--accent)",
+        tip: '<span class="tip-k">' + esc(fmtPhone(r.number)) + '</span>' + fmtPct(r.connectRate)
+           + ' connect &middot; ' + fmtCount(r.dials) + ' dials'
+      })), "numRateChart", v => Math.round(v) + "%")
+    : '<div class="empty">No numbers with enough dials to rate in this window.</div>';
+
+  const byState = {};
+  rows.forEach(r => {
+    const k = r.state || "Unknown";
+    const s = byState[k] || (byState[k] = { dials: 0, connects: 0, numbers: 0 });
+    s.dials += r.dials || 0; s.connects += r.connects || 0; s.numbers += 1;
+  });
+  const states = Object.keys(byState).map(k => Object.assign({ state: k }, byState[k]))
+    .sort((a, b) => b.dials - a.dials).slice(0, 12);
+  stateHost.innerHTML = states.length
+    ? revBarChart(states.map(s => ({
+        label: s.state, value: s.dials, fill: "var(--accent)",
+        tip: '<span class="tip-k">' + esc(s.state) + '</span>' + fmtCount(s.dials) + ' dials &middot; '
+           + fmtCount(s.numbers) + (s.numbers === 1 ? ' number' : ' numbers') + ' &middot; '
+           + fmtPct(s.dials ? s.connects / s.dials : null) + ' connect'
+      })), "numStateChart", v => v >= 1000 ? (v / 1000).toFixed(1) + "k" : String(Math.round(v)))
+    : '<div class="empty">No numbers in this window.</div>';
+}
+
+function renderNumbersTable(rows) {
+  const wrap = document.getElementById("numbersTableWrap");
+  if (!wrap) return;
+  if (!rows.length) {
+    wrap.innerHTML = '<div class="empty">No dialing numbers in this window. The call feed only started '
+      + 'recording which number placed each call on the run after this feature shipped, so this fills '
+      + 'in once a refresh completes.</div>';
+    return;
+  }
+  let body = "";
+  rows.forEach((r, i) => {
+    const h = r.health || {};
+    const cls = h.band === "good" ? "good" : h.band === "warn" ? "warn" : h.band === "alert" ? "alert" : "faint";
+    body += '<tr class="crow" data-i="' + i + '">'
+      + '<td><span class="cexp">&#9656;</span> <span class="cname mono">' + esc(fmtPhone(r.number)) + '</span></td>'
+      + '<td class="cdim">' + (r.state ? esc(r.state) : dash()) + '</td>'
+      + '<td class="num cdim">' + fmtCount(r.dials) + '</td>'
+      + '<td class="num cdim">' + fmtCount(r.connects) + '</td>'
+      + '<td class="num crate">' + (isNil(r.connectRate) ? dash() : fmtPct(r.connectRate)) + '</td>'
+      + '<td class="num">' + (isNil(r.failRate) ? dash()
+          : '<span class="' + (r.failRate >= 0.35 ? "cellalert" : "") + '">' + fmtPct(r.failRate) + '</span>') + '</td>'
+      + '<td class="num cdim">' + (isNil(r.avgDurationSec) ? dash() : fmtDuration(r.avgDurationSec)) + '</td>'
+      + '<td class="num cdim">' + (r.clientCount ? fmtCount(r.clientCount) : dash()) + '</td>'
+      + '<td class="num"><span class="cpill ' + cls + '">' + esc(h.label || "—") + '</span></td>'
+      + '</tr>'
+      + '<tr class="cdrawer" id="ndrawer-' + i + '" hidden><td colspan="9"><div class="inner">'
+        + numberDrill(r) + '</div></td></tr>';
+  });
+  wrap.innerHTML = '<table class="ctable"><thead><tr>'
+    + '<th>Number</th><th>State</th><th class="num">Dials</th><th class="num">Connects</th>'
+    + '<th class="num">Connect %</th><th class="num">Fail %</th><th class="num">Avg Call</th>'
+    + '<th class="num">Clients</th><th class="num">Health</th>'
+    + '</tr></thead><tbody>' + body + '</tbody></table>';
+  wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
+    const d = wrap.querySelector("#ndrawer-" + row.dataset.i);
+    if (d) { d.hidden = !d.hidden; row.classList.toggle("open", !d.hidden); }
+  }));
+}
+
+/* Per-number drill: which client accounts the number is being used on, and how it connects on each.
+   A number that connects fine for one client and not another is usually a list problem, not a
+   carrier problem, so the split is the useful view. */
+function numberDrill(r) {
+  const cl = r.clients || [];
+  const head = '<div class="muted" style="margin-bottom:10px">Connection by client for '
+    + esc(fmtPhone(r.number)) + (r.state ? ' &middot; registered in ' + esc(r.state) : "")
+    + (r.setters ? ' &middot; used by ' + fmtCount(r.setters) + (r.setters === 1 ? ' setter' : ' setters') : "")
+    + '</div>';
+  if (!cl.length) return head + '<div class="empty">No client could be resolved for these calls.</div>';
+  const bars = cl.map(c => {
+    const pct = Math.min(100, (c.connectRate || 0) * 100);
+    return '<div class="nrow"><span class="nk mono">' + esc(c.key) + '</span>'
+      + '<span class="nbar"><span class="nfill" style="width:' + pct.toFixed(1) + '%"></span></span>'
+      + '<span class="nv">' + (isNil(c.connectRate) ? dash() : fmtPct(c.connectRate)) + '</span>'
+      + '<span class="nd">' + fmtCount(c.connects) + ' / ' + fmtCount(c.dials) + '</span></div>';
+  }).join("");
+  const extra = (r.inbound ? '<div class="muted" style="margin-top:12px;font-size:11.5px">'
+    + fmtCount(r.inbound) + ' inbound call' + (r.inbound === 1 ? '' : 's') + ' returned to this number.</div>' : "");
+  return head + '<div class="ngrid">' + bars + '</div>' + extra;
+}
+
+function numShort(n) { const d = String(n || "").replace(/\D/g, ""); return d.length >= 10 ? d.slice(-10, -7) + "-" + d.slice(-4) : String(n || ""); }
+function fmtPhone(n) {
+  const d = String(n || "").replace(/\D/g, "");
+  const t = d.length === 11 && d[0] === "1" ? d.slice(1) : d;
+  return t.length === 10 ? "(" + t.slice(0, 3) + ") " + t.slice(3, 6) + "-" + t.slice(6) : String(n || "");
 }
 
 /* ---------------------------- CLIENTS ---------------------------- */

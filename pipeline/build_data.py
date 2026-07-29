@@ -30,6 +30,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import statistics
 import sys
 
@@ -232,6 +233,8 @@ def build_bundle(facts, submissions, calls, ghl, dash, since, until, connect_min
         "otherDialers": other_dialers,
         "timeseries": build_timeseries(facts, since, until),
         "dialer": build_dialer(calls, since, until, connect_min, dropped_statuses, floor.get("bookings") or 0),
+        "numbers": build_numbers(calls, facts, since, until, connect_min, dropped_statuses,
+                                 ghl.get("numberHealth") or {}),
         "insights": build_insights(floor, clients, setters, goals),
     }
 
@@ -357,6 +360,120 @@ def build_from_raw(ghl, dash):
     }
 
 
+def build_numbers(calls, facts, since, until, connect_min, dropped_statuses, nh):
+    """Per-dialing-number health for one window.
+
+    The question this answers is whether a number is still landing calls. A number that is being
+    filtered by carriers keeps dialing at the usual rate but stops connecting, so volume alone looks
+    healthy - it is the connect rate, and the share of calls that fail outright, that give it away.
+
+    Only SID's own numbers appear here. The lead side of every call is dropped at fetch time.
+    """
+    acr_by_contact = {f["id"]: f.get("acronym") for f in facts if f.get("id")}
+    dropped = {str(s).lower() for s in (dropped_statuses or [])}
+    agg = {}
+    for c in calls:
+        num = c.get("ourNumber")
+        if not num or not in_window(c.get("ts"), since, until):
+            continue
+        row = agg.get(num)
+        if row is None:
+            row = agg[num] = {"number": num, "dials": 0, "connects": 0, "failed": 0, "inbound": 0,
+                              "talkSec": 0, "durations": [], "contacts": set(), "clients": {},
+                              "users": set(), "lastUsed": None}
+        ts = c.get("ts")
+        if ts and (row["lastUsed"] is None or ts > row["lastUsed"]):
+            row["lastUsed"] = ts
+        outbound = str(c.get("direction") or "").lower().startswith("out")
+        status = str(c.get("status") or "").lower()
+        dur = c.get("duration") or 0
+        if not outbound:
+            row["inbound"] += 1
+            continue
+        row["dials"] += 1
+        if c.get("contactId"):
+            row["contacts"].add(c["contactId"])
+        if c.get("userId"):
+            row["users"].add(c["userId"])
+        if status in dropped:
+            row["failed"] += 1
+        connected = status == "completed" and dur >= connect_min
+        if connected:
+            row["connects"] += 1
+            row["talkSec"] += int(dur)
+        if dur:
+            row["durations"].append(dur)
+        acr = (acr_by_contact.get(c.get("contactId")) or "").strip().upper()
+        if acr:
+            cl = row["clients"].setdefault(acr, {"dials": 0, "connects": 0})
+            cl["dials"] += 1
+            if connected:
+                cl["connects"] += 1
+
+    min_dials = int((nh or {}).get("minDialsToRate") or 25)
+    out = []
+    for row in agg.values():
+        dials = row["dials"]
+        rate = ratio(row["connects"], dials)
+        fail = ratio(row["failed"], dials)
+        clients = sorted(
+            ({"key": k, "dials": v["dials"], "connects": v["connects"],
+              "connectRate": ratio(v["connects"], v["dials"])} for k, v in row["clients"].items()),
+            key=lambda x: -x["dials"])
+        out.append({
+            "number": row["number"],
+            "state": area_state(row["number"]),
+            "dials": dials,
+            "attempts": len(row["contacts"]),
+            "connects": row["connects"],
+            "connectRate": rate,
+            "failed": row["failed"],
+            "failRate": fail,
+            "inbound": row["inbound"],
+            "talkTimeSec": row["talkSec"],
+            "avgDurationSec": (sum(row["durations"]) / len(row["durations"])) if row["durations"] else None,
+            "setters": len(row["users"]),
+            "clientCount": len(clients),
+            "topClient": clients[0]["key"] if clients else None,
+            "clients": clients[:12],
+            "lastUsed": row["lastUsed"].isoformat() if row["lastUsed"] else None,
+            # Rated only once a number has enough dials for the rate to mean anything; below that
+            # the board says "too few dials" rather than branding a new number as spam.
+            "health": number_health(dials, rate, fail, min_dials, nh or {}),
+        })
+    out.sort(key=lambda r: -(r["dials"] or 0))
+    return out
+
+
+AREA_CODES = None
+
+
+def area_state(number):
+    """State (or Toll-free) for a +1 number, from its area code."""
+    global AREA_CODES
+    if AREA_CODES is None:
+        path = os.path.join(ROOT, "config", "area-codes.json")
+        AREA_CODES = (load_json(path, {}) or {}).get("codes") or {}
+    digits = re.sub(r"\D", "", str(number or ""))
+    if len(digits) == 11 and digits.startswith("1"):
+        digits = digits[1:]
+    return AREA_CODES.get(digits[:3]) if len(digits) == 10 else None
+
+
+def number_health(dials, rate, fail, min_dials, nh):
+    """Classify a number: healthy, watch, or likely filtered by carriers."""
+    if dials < min_dials:
+        return {"band": "unrated", "label": "Too few dials"}
+    warn = float(nh.get("connectRateWarn") or 0.15)
+    bad = float(nh.get("connectRateBad") or 0.08)
+    fail_bad = float(nh.get("failRateBad") or 0.35)
+    if (rate is not None and rate < bad) or (fail is not None and fail >= fail_bad):
+        return {"band": "alert", "label": "Likely flagged"}
+    if rate is not None and rate < warn:
+        return {"band": "warn", "label": "Watch"}
+    return {"band": "good", "label": "Healthy"}
+
+
 def build_client_dials(facts):
     """Lifetime contacts and dials per client acronym, summed from the Times Attempted counter.
 
@@ -472,6 +589,7 @@ def parse_calls(raw):
             "direction": (c.get("direction") or "").lower(),
             "status": (c.get("status") or "").lower(),
             "duration": int(dur) if isinstance(dur, (int, float)) else None,
+            "ourNumber": c.get("ourNumber"),
             "ts": ts,
         })
     return out
