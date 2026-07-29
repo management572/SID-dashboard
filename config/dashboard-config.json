@@ -54,8 +54,8 @@
   "_funnelNote": "Ends at Held. Won/Signed is not tracked in SID (it lives downstream in client sub-accounts), so it is intentionally omitted rather than shown as an empty column.",
   "goals": {
     "speedToLeadTargetMin": 5,
-    "speedToLeadSlaMin": 30,
-    "_speedNote": "Green under 5 min, yellow 5-15, orange 15-30, red over 30. The monitor agent alerts at the SLA.",
+    "speedToLeadSlaMin": 5,
+    "_speedNote": "Green under 5 min, yellow 5-15, orange 15-30, red over 30. The monitor agent alerts at the SLA. Speed to lead = lead created to first dial ATTEMPT (any duration); time to connect = lead created to first call over connectMinSeconds. Both clocks run only inside floor hours (10:00-22:00 ET, 7 days a week).",
     "speedToLeadBandsMin": [
       5,
       15,
@@ -94,6 +94,12 @@
       "invert": true,
       "bands": "speedToLeadBandsMin",
       "target": "speedToLeadTargetMin"
+    },
+    {
+      "key": "timeToConnectMedianMin",
+      "label": "Avg Time to Connect (median min)",
+      "invert": true,
+      "format": "min"
     },
     {
       "key": "dayOneCoverage",
