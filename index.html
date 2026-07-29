@@ -268,6 +268,13 @@
   .cpill.warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); }
   .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
   .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
+  /* State grid map */
+  .mapwrap { max-width:520px; margin-top:6px; }
+  .maplegend { display:flex; align-items:center; gap:5px; margin-top:12px; flex-wrap:wrap; }
+  .maplegend .ml-l { font-size:11px; color:var(--boneFaint); }
+  .maplegend .ml-sw { width:22px; height:11px; border-radius:3px; border:1px solid var(--hair); display:inline-block; }
+  .maplegend .ml-sep { width:12px; }
+
   /* Number drill: connect rate per client for one dialing number */
   .ngrid { display:grid; gap:8px; max-width:640px; }
   .nrow { display:grid; grid-template-columns:52px 1fr 52px 78px; align-items:center; gap:10px; }
@@ -458,6 +465,11 @@
           <div class="sub">Where our numbers are registered, by volume. Area code is where the number was issued, not where the lead lives.</div>
           <div id="numStateChart"></div>
         </div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <h2>Where we are dialing from</h2>
+        <div class="sub">Every state we hold numbers in, shaded by dial volume. Each state is one tile, so a small state counts as loudly as a large one. Hover a state for its numbers and connect rate.</div>
+        <div id="numStateMap"></div>
       </div>
       <div class="card">
         <h2>Number health</h2>
@@ -1470,7 +1482,97 @@ function renderNumbers() {
   const rows = (P.numbers || []).slice();
   renderNumberTiles(rows);
   renderNumberCharts(rows);
+  renderStateMap(rows);
   renderNumbersTable(rows);
+}
+
+/* A grid cartogram of the lower 48 plus AK/HI/DC: one tile per state, laid out in roughly the
+   shape of the country. Deliberately not a geographic map - on a real map Rhode Island and DC are
+   too small to see and Montana dominates, which would rank our numbers by land area instead of by
+   dials. Equal tiles keep the comparison honest. */
+const STATE_GRID = [
+  ["AK", "",   "",   "",   "",   "",   "",   "",   "",   "",   "ME"],
+  ["",   "",   "",   "",   "",   "",   "",   "",   "",   "VT", "NH"],
+  ["WA", "ID", "MT", "ND", "MN", "IL", "WI", "MI", "NY", "RI", "MA"],
+  ["OR", "NV", "WY", "SD", "IA", "IN", "OH", "PA", "NJ", "CT", ""  ],
+  ["CA", "UT", "CO", "NE", "MO", "KY", "WV", "VA", "MD", "DE", ""  ],
+  ["",   "AZ", "NM", "KS", "AR", "TN", "NC", "SC", "DC", "",   ""  ],
+  ["",   "",   "",   "OK", "LA", "MS", "AL", "GA", "",   "",   ""  ],
+  ["HI", "",   "",   "TX", "",   "",   "",   "",   "FL", "",   ""  ],
+];
+
+function renderStateMap(rows) {
+  const host = document.getElementById("numStateMap");
+  if (!host) return;
+  const byState = {};
+  let offGrid = [];
+  rows.forEach(r => {
+    const k = r.state;
+    if (!k) return;
+    const s = byState[k] || (byState[k] = { dials: 0, connects: 0, numbers: 0 });
+    s.dials += r.dials || 0; s.connects += r.connects || 0; s.numbers += 1;
+  });
+  const onGrid = new Set(STATE_GRID.flat().filter(Boolean));
+  offGrid = Object.keys(byState).filter(k => !onGrid.has(k));   // Toll-free, PR, unknown
+  const used = Object.keys(byState).filter(k => onGrid.has(k));
+  if (!used.length && !offGrid.length) {
+    host.innerHTML = '<div class="empty">No numbers with a resolved state in this window.</div>';
+    return;
+  }
+
+  // Sequential single-hue ramp, light to dark, in five quantile steps. Quantiles rather than equal
+  // intervals because dial volume is heavily skewed - one busy state would otherwise flatten the
+  // rest into a single shade.
+  const vals = used.map(k => byState[k].dials).filter(v => v > 0).sort((a, b) => a - b);
+  const cuts = [0.2, 0.4, 0.6, 0.8].map(q => vals[Math.floor(q * (vals.length - 1))] || 0);
+  const MIX = [16, 34, 55, 78, 100];
+  const stepOf = v => { let i = 0; while (i < cuts.length && v > cuts[i]) i++; return i; };
+  const fillFor = v => v > 0
+    ? "color-mix(in srgb, var(--accent) " + MIX[stepOf(v)] + "%, var(--ink2))"
+    : "var(--inkDeep)";
+
+  const T = 34, G = 5, COLS = 11, ROWS = STATE_GRID.length;
+  const W = COLS * (T + G) - G, H = ROWS * (T + G) - G;
+  let cells = "";
+  STATE_GRID.forEach((row, ri) => row.forEach((st, ci) => {
+    if (!st) return;
+    const d = byState[st];
+    const x = ci * (T + G), y = ri * (T + G);
+    const v = d ? d.dials : 0;
+    const tip = d
+      ? '<span class="tip-k">' + st + '</span>' + fmtCount(d.dials) + ' dials &middot; '
+        + fmtCount(d.numbers) + (d.numbers === 1 ? ' number' : ' numbers') + ' &middot; '
+        + fmtPct(d.dials ? d.connects / d.dials : null) + ' connect'
+      : '<span class="tip-k">' + st + '</span>no numbers here';
+    cells += '<g><rect x="' + x + '" y="' + y + '" width="' + T + '" height="' + T + '" rx="5" '
+      + 'fill="' + fillFor(v) + '" stroke="var(--hair)" data-tip="' + esc(tip) + '"></rect>'
+      + '<text x="' + (x + T / 2) + '" y="' + (y + T / 2 + 3.5) + '" text-anchor="middle" '
+      + 'style="font-size:10.5px;font-weight:600;pointer-events:none" '
+      + 'fill="' + (v > 0 && stepOf(v) >= 3 ? "#fff" : "var(--boneDim)") + '">' + st + '</text></g>';
+  }));
+
+  // Legend: the ramp is meaningless without the values it stands for.
+  const hi = vals.length ? vals[vals.length - 1] : 0;
+  const bounds = [1].concat(cuts.map(c => c + 1));
+  let legend = '<div class="maplegend"><span class="ml-l">Fewer dials</span>';
+  MIX.forEach((m, i) => {
+    const lo = bounds[i], up = i < cuts.length ? cuts[i + 1] || hi : hi;
+    legend += '<span class="ml-sw" style="background:color-mix(in srgb, var(--accent) ' + m + '%, var(--ink2))" '
+      + 'title="' + esc(fmtCount(lo) + (up > lo ? "–" + fmtCount(up) : "") + " dials") + '"></span>';
+  });
+  legend += '<span class="ml-l">More</span>'
+    + '<span class="ml-sep"></span><span class="ml-sw" style="background:var(--inkDeep)"></span>'
+    + '<span class="ml-l">No numbers</span></div>';
+
+  const off = offGrid.length
+    ? '<div class="muted" style="margin-top:10px;font-size:11.5px">Not on the map: '
+      + offGrid.map(k => esc(k) + " (" + fmtCount(byState[k].dials) + " dials)").join(", ")
+      + '.</div>'
+    : "";
+
+  host.innerHTML = '<div class="mapwrap"><svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" '
+    + 'preserveAspectRatio="xMidYMid meet">' + cells + '</svg></div>' + legend + off;
+  wireBarTips("numStateMap");
 }
 
 function renderNumberTiles(rows) {
