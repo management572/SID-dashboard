@@ -1,0 +1,28 @@
+{
+  "_note": "Sign-in list for the board. Passwords are never stored: each entry keeps a random salt and a PBKDF2-HMAC-SHA256 derivation of the password at 210000 iterations, which is what the browser recomputes to check a sign-in. READ THIS BEFORE RELYING ON IT: this file is served to the browser, because the board is a static site. The gate keeps the dashboard from opening for someone who lands on the URL, and it is not a security boundary - /data/dashboard-data.json and the other JSON files can still be fetched directly by anyone who has the link, sign-in or not. Cloudflare Access is the control that actually protects them. See docs/access.md.",
+  "iterations": 210000,
+  "sessionHours": 12,
+  "users": [
+    {
+      "email": "management@onlinebizbuilders.com",
+      "name": "Management",
+      "role": "admin",
+      "salt": "jeDVu8FTrlJH1YXjFegBHA==",
+      "hash": "Z++AhVf9PuOkL87uGKkAo5ta1O+95a3ULsesPMtdgiU="
+    },
+    {
+      "email": "emonies@onlinebizbuilders.com",
+      "name": "E. Monies",
+      "role": "admin",
+      "salt": "OwOdohTbDV6DqXbEHSPIxg==",
+      "hash": "LwzS21W9a+kaAUuYIMLapdp/X/LZJzfU3EpFmn8CWX4="
+    },
+    {
+      "email": "john@fincialsalesinsider.com",
+      "name": "John",
+      "role": "viewer",
+      "salt": "O4CN0bS1Bth3Gy8fhWQhPA==",
+      "hash": "BUhPjD6c1F+2hvkkuayXkQcEXUPJih4xZkNWUsTJcKk="
+    }
+  ]
+}

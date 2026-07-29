@@ -61,6 +61,9 @@ jobs:
           cp index.html dist/index.html
           cp config/brand.json dist/config/brand.json
           cp config/dashboard-config.json dist/config/dashboard-config.json
+          # Sign-in list: salts and PBKDF2 hashes only, never a password. The board fails closed
+          # without it, so a missing file locks everyone out rather than letting everyone in.
+          cp config/access.json dist/config/access.json
           # Ship the aggregate data file (no PHI). Fall back to the sample if a live pull has not run.
           if [ -f data/dashboard-data.json ]; then
             cp data/dashboard-data.json dist/data/dashboard-data.json

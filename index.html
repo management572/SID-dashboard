@@ -268,6 +268,38 @@
   .cpill.warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); }
   .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
   .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
+  /* Sign in */
+  #signin { position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+            background:var(--ink); padding:24px; z-index:60; }
+  .signin-card { width:100%; max-width:380px; background:var(--ink2); border:1px solid var(--hair);
+                 border-radius:14px; padding:30px 30px 24px; }
+  .signin-brand { font-family:var(--head); font-weight:800; font-size:22px; letter-spacing:-0.5px; color:var(--accent); }
+  .signin-card h1 { font-family:var(--head); font-size:20px; font-weight:700; margin:14px 0 6px; }
+  .signin-sub { font-size:12.5px; color:var(--boneDim); margin:0 0 22px; line-height:1.5; }
+  .signin-card label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.5px;
+                       color:var(--boneFaint); margin-bottom:6px; }
+  .signin-card input { width:100%; background:var(--inkDeep); border:1px solid var(--hair2);
+                       border-radius:8px; padding:11px 12px; color:var(--bone); font-size:14px;
+                       font-family:inherit; margin-bottom:16px; }
+  .signin-card input:focus { outline:none; border-color:var(--accent); }
+  .signin-card button { width:100%; background:var(--accent); color:#fff; border:0; border-radius:8px;
+                        padding:12px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; }
+  .signin-card button:disabled { opacity:.6; cursor:default; }
+  .signin-err { margin-top:14px; font-size:12.5px; color:var(--alert); }
+  .signin-foot { margin-top:18px; font-size:11px; color:var(--boneFaint); }
+  .who { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--boneDim); }
+  .who .role { font-size:10px; text-transform:uppercase; letter-spacing:.4px; padding:1px 6px;
+               border-radius:999px; background:var(--inkDeep); border:1px solid var(--hair); }
+  .who button { background:none; border:0; color:var(--boneFaint); font:inherit; font-size:11.5px;
+                cursor:pointer; text-decoration:underline; padding:0; }
+
+  /* Admin */
+  .adminbox { border:1px solid var(--hair); border-radius:var(--r); padding:15px 17px; background:var(--ink2); margin-bottom:14px; }
+  .adminbox.warn { border-left:3px solid var(--warn); }
+  .adminbox h3 { font-family:var(--head); font-size:14px; margin:0 0 8px; }
+  .adminbox p { margin:0 0 8px; font-size:12.5px; color:var(--boneDim); line-height:1.6; }
+  .adminbox code { background:var(--inkDeep); padding:1px 5px; border-radius:4px; font-size:11.5px; }
+
   /* State grid map */
   .mapwrap { max-width:520px; margin-top:6px; }
   .maplegend { display:flex; align-items:center; gap:5px; margin-top:12px; flex-wrap:wrap; }
@@ -372,6 +404,7 @@
     </div>
     <span class="board-title" id="boardTitle">Setter Floor Dashboard</span>
     <div class="mast-right">
+      <span class="who" id="whoAmI" hidden></span>
       <span class="chip sample" id="sampleTag" hidden>SAMPLE DATA</span>
       <span class="chip" id="freshBadge">fresh</span>
       <span class="stamp" id="stamp"></span>
@@ -390,6 +423,22 @@
   </header>
 
   <div id="loadError" class="empty" hidden></div>
+
+  <!-- Sign in. A gate, not a security boundary: see docs/access.md. -->
+  <div id="signin" hidden>
+    <form class="signin-card" id="signinForm" autocomplete="on">
+      <div class="signin-brand" id="signinBrand">OBB</div>
+      <h1>Setter Floor Dashboard</h1>
+      <p class="signin-sub">Internal operating report. Access is restricted to named accounts.</p>
+      <label for="siEmail">Email</label>
+      <input id="siEmail" type="email" autocomplete="username" required spellcheck="false" placeholder="you@onlinebizbuilders.com">
+      <label for="siPass">Password</label>
+      <input id="siPass" type="password" autocomplete="current-password" required placeholder="••••••••••••">
+      <button type="submit" id="siBtn">Sign in</button>
+      <div class="signin-err" id="siErr" hidden></div>
+      <div class="signin-foot">Sessions last 12 hours on this device.</div>
+    </form>
+  </div>
 
   <div id="app" hidden>
     <div class="controls">
@@ -448,6 +497,27 @@
           <div class="sub">Leads, worked and booked, with median speed to lead on the right axis.</div>
           <div id="trend"></div>
         </div>
+      </div>
+    </section>
+
+    <!-- ADMIN (admins only) -->
+    <section class="tab" id="tab-admin">
+      <div class="grid cols2" style="margin-bottom:20px;">
+        <div class="card">
+          <h2>Who can sign in</h2>
+          <div class="sub">Named accounts on this board. Adding or removing one is a change to <code>config/access.json</code> and a redeploy.</div>
+          <div id="adminUsers"></div>
+        </div>
+        <div class="card">
+          <h2>Data health</h2>
+          <div class="sub">Where the board's numbers came from and how fresh they are.</div>
+          <div id="adminData"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Security</h2>
+        <div class="sub">What this sign-in does and does not protect.</div>
+        <div id="adminSecurity"></div>
       </div>
     </section>
 
@@ -535,6 +605,7 @@
 const CFG = { brand:null, dash:null };
 let DATA = null;
 let REV = null;   // data/client-revenue.json: per-client MRR/ARR and ad-lead totals
+let USER = null;  // signed-in account: {email, name, role}
 let P = null;   // the active period bundle: { floor, clients, setters, timeseries, insights, deltas }
 let STATE = { tab:null, period:null, client:"__all__", compare:true, sort:{ key:"bookRate", dir:-1 } };
 
@@ -565,7 +636,99 @@ async function getJSON(paths) {
   throw new Error("could not load any of: " + paths.join(", "));
 }
 
+/* ---------------------------- SIGN IN ----------------------------
+   A gate, not a security boundary. This is a static site, so config/access.json and every data file
+   under /data are fetchable directly by anyone holding the URL, signed in or not. What this stops is
+   the board opening for whoever lands on the link. Cloudflare Access is the control that actually
+   restricts the files; see docs/access.md. Passwords are never stored - only a per-user salt and a
+   PBKDF2-HMAC-SHA256 derivation, recomputed here and compared in constant time. */
+const SESSION_KEY = "obb-session";
+
+async function pbkdf2(password, saltB64, iterations) {
+  const enc = new TextEncoder();
+  const salt = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name:"PBKDF2", salt, iterations, hash:"SHA-256" }, key, 256);
+  return btoa(String.fromCharCode(...new Uint8Array(bits)));
+}
+/* Compare without leaking where two strings diverge. */
+function sameSecret(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+function readSession(acc) {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+    if (!s || !s.email || !s.expires || Date.now() > s.expires) return null;
+    const u = (acc.users || []).find(x => x.email.toLowerCase() === String(s.email).toLowerCase());
+    return u ? { email:u.email, name:u.name, role:u.role, since:s.since } : null;
+  } catch (e) { return null; }
+}
+function startSession(u, hours) {
+  const now = Date.now();
+  localStorage.setItem(SESSION_KEY, JSON.stringify(
+    { email:u.email, since:now, expires: now + (hours || 12) * 3600 * 1000 }));
+}
+function signOut() { localStorage.removeItem(SESSION_KEY); location.reload(); }
+
+function showSignIn(acc, resolve) {
+  const pane = document.getElementById("signin");
+  const form = document.getElementById("signinForm");
+  const err = document.getElementById("siErr");
+  const btn = document.getElementById("siBtn");
+  pane.hidden = false;
+  form.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    err.hidden = true;
+    btn.disabled = true; btn.textContent = "Checking…";
+    const email = document.getElementById("siEmail").value.trim().toLowerCase();
+    const pass = document.getElementById("siPass").value;
+    const u = (acc.users || []).find(x => x.email.toLowerCase() === email);
+    let ok = false;
+    if (u) {
+      try { ok = sameSecret(await pbkdf2(pass, u.salt, acc.iterations || 210000), u.hash); }
+      catch (e) { ok = false; }
+    } else {
+      // Spend the same work on an unknown address so the form cannot be used to enumerate accounts.
+      try { await pbkdf2(pass, "AAAAAAAAAAAAAAAAAAAAAA==", acc.iterations || 210000); } catch (e) {}
+    }
+    btn.disabled = false; btn.textContent = "Sign in";
+    if (!ok) {
+      err.textContent = "That email and password do not match an account on this board.";
+      err.hidden = false;
+      document.getElementById("siPass").value = "";
+      return;
+    }
+    startSession(u, acc.sessionHours);
+    pane.hidden = true;
+    resolve({ email:u.email, name:u.name, role:u.role, since:Date.now() });
+  });
+}
+
+/* Resolve once the visitor is known. */
+function authenticate() {
+  return new Promise(async resolve => {
+    let acc = null;
+    try { acc = await getJSON(["config/access.json"]); } catch (e) { acc = null; }
+    if (!acc || !Array.isArray(acc.users) || !acc.users.length) {
+      // Fail closed: a missing or empty access list means nobody is named, not everybody is welcome.
+      const el = document.getElementById("loadError");
+      el.hidden = false;
+      el.textContent = "Sign-in list unavailable, so the board did not open. If this persists the "
+        + "deploy is missing config/access.json.";
+      return;
+    }
+    const existing = readSession(acc);
+    if (existing) return resolve(existing);
+    showSignIn(acc, resolve);
+  });
+}
+
 async function boot() {
+  USER = await authenticate();
   try {
     CFG.brand = await getJSON(["config/brand.json"]);
     CFG.dash  = await getJSON(["config/dashboard-config.json"]);
@@ -573,6 +736,7 @@ async function boot() {
     // Revenue and ad-lead totals live in a committed snapshot, not the GHL pipeline. Optional:
     // the board still renders (without the money columns) when it is absent.
     try { REV = await getJSON(["data/client-revenue.json"]); } catch (e) { REV = null; }
+    try { CFG.access = await getJSON(["config/access.json"]); } catch (e) { CFG.access = null; }
   } catch (e) {
     const el = document.getElementById("loadError");
     el.hidden = false;
@@ -583,6 +747,7 @@ async function boot() {
   }
   applyBrand(CFG.brand);
   initTheme();
+  renderWhoAmI();
   normalizeData();
   STATE.period = (DATA.periods[DATA.defaultPeriod] ? DATA.defaultPeriod : periodKeys()[0]);
   STATE.tab = CFG.dash.defaultTab || CFG.dash.tabs[0];
@@ -865,8 +1030,11 @@ function initBell() {
 function renderTabs() {
   const nav = document.getElementById("tabs");
   nav.innerHTML = "";
-  const labels = { floor:"Floor", dialer:"Dialer", numbers:"Numbers", revenue:"Revenue", setters:"Setters", clients:"Clients" };
-  (CFG.dash.tabs || []).forEach(t => {
+  const labels = { floor:"Floor", dialer:"Dialer", numbers:"Numbers", revenue:"Revenue", setters:"Setters", clients:"Clients", admin:"Admin" };
+  // Admin is appended for admins rather than listed in config, so a viewer never renders the button.
+  const tabs = (CFG.dash.tabs || []).slice();
+  if (USER && USER.role === "admin" && !tabs.includes("admin")) tabs.push("admin");
+  tabs.forEach(t => {
     const b = document.createElement("button");
     b.textContent = labels[t] || t;
     b.className = (t === STATE.tab) ? "on" : "";
@@ -884,6 +1052,7 @@ function renderFloor() {
   renderDialer();
   renderSpeedEfficiency();   // dialer-tab chart: it reads floor timings, not revenue
   renderNumbers();
+  renderAdmin();
   renderClientRevenue();
   renderInsights();
   renderLanes();
@@ -1473,6 +1642,77 @@ function covBar(v, tgt) {
   return '<div class="bar2"><div class="f" style="width:' + Math.min(100, v * 100) + '%;background:' + color + '"></div>'
     + (isNil(tgt) ? "" : '<div class="tgt" style="left:' + Math.min(100, tgt * 100) + '%"></div>')
     + '</div>';
+}
+
+/* ---------------------------- ADMIN ----------------------------- */
+function renderWhoAmI() {
+  const el = document.getElementById("whoAmI");
+  if (!el || !USER) return;
+  el.hidden = false;
+  el.innerHTML = '<span>' + esc(USER.name || USER.email) + '</span>'
+    + '<span class="role">' + esc(USER.role) + '</span>'
+    + '<button type="button" id="signOutBtn">Sign out</button>';
+  const b = document.getElementById("signOutBtn");
+  if (b) b.onclick = signOut;
+}
+
+function renderAdmin() {
+  if (!USER || USER.role !== "admin") return;
+  const acc = CFG.access || {};
+  const users = document.getElementById("adminUsers");
+  if (users) {
+    users.innerHTML = '<table class="ctable"><thead><tr><th>Account</th><th>Name</th>'
+      + '<th class="num">Role</th></tr></thead><tbody>'
+      + (acc.users || []).map(u => '<tr><td class="mono" style="font-size:12.5px">' + esc(u.email) + '</td>'
+        + '<td>' + esc(u.name || "") + '</td>'
+        + '<td class="num"><span class="cpill ' + (u.role === "admin" ? "good" : "faint") + '">'
+        + esc(u.role) + '</span></td></tr>').join("")
+      + '</tbody></table>'
+      + '<div class="muted" style="margin-top:12px;font-size:11.5px">Admins see this tab. Viewers see '
+      + 'every other tab and not this one. Passwords are not stored anywhere, here or in the repo: the '
+      + 'file holds a salt and a PBKDF2 derivation, so a forgotten password is reset by issuing a new '
+      + 'one, never by looking the old one up.</div>';
+  }
+
+  const dataEl = document.getElementById("adminData");
+  if (dataEl) {
+    const gen = DATA.generatedAt ? new Date(DATA.generatedAt).toLocaleString("en-US",
+      { dateStyle:"medium", timeStyle:"short" }) : "unknown";
+    const n = (P.numbers || []).length, cl = (P.clients || []).length, st = (P.setters || []).length;
+    const row = (k, v) => '<div class="nrow" style="grid-template-columns:150px 1fr"><span class="nk">'
+      + esc(k) + '</span><span style="font-size:12.5px">' + v + '</span></div>';
+    dataEl.innerHTML = '<div class="ngrid" style="max-width:none">'
+      + row("Source", esc(DATA.source || "SID"))
+      + row("Built", esc(gen))
+      + row("Freshness", isNil(DATA.freshnessMin) ? dash() : fmtCount(DATA.freshnessMin) + " min old")
+      + row("Window", esc(P.dateRange || ""))
+      + row("Clients", fmtCount(cl) + " active this window")
+      + row("Setters", fmtCount(st))
+      + row("Dialing numbers", fmtCount(n))
+      + row("Revenue snapshot", REV ? esc(REV.updated || "loaded") + " &middot; "
+          + fmtCount(Object.keys(REV.clients || {}).length) + " clients" : "not loaded")
+      + row("Open data flags", fmtCount((DATA.dataQuality || []).length + clientSideFlags().length))
+      + '</div>';
+  }
+
+  const sec = document.getElementById("adminSecurity");
+  if (sec) {
+    sec.innerHTML =
+      '<div class="adminbox warn"><h3>This sign-in is a gate, not a lock</h3>'
+      + '<p>The board is a static site. The sign-in stops the dashboard opening for someone who lands '
+      + 'on the URL, but it runs in the browser, so it cannot protect the underlying files. Anyone with '
+      + 'the link can still request <code>/data/dashboard-data.json</code>, <code>/data/client-revenue.json</code> '
+      + 'or <code>/config/access.json</code> directly and read them, signed in or not.</p>'
+      + '<p>That matters here because those files carry the client roster, per-client revenue and the '
+      + 'whole floor’s performance.</p></div>'
+      + '<div class="adminbox"><h3>Cloudflare Access is the actual control</h3>'
+      + '<p>Access sits in front of the site at the network edge, so an unauthenticated request never '
+      + 'reaches a file at all. It is an email allowlist with a one-time PIN, no password to manage, '
+      + 'and it is what <code>docs/compliance.md</code> already requires: “the board is never on a '
+      + 'public URL… no unlisted URL as a security model, ever.”</p>'
+      + '<p>Setup takes about two minutes in the Cloudflare dashboard and the steps are in '
+      + '<code>docs/access.md</code>. Until it is on, treat this URL as public and do not forward it.</p></div>';
+  }
 }
 
 /* ------------------------- NUMBER HEALTH ------------------------- */
