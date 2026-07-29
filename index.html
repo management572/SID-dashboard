@@ -1116,7 +1116,18 @@ function tileSub(t, f) {
   if (t.key === "p1QueueDepth") { const q = f.queue || {}; return isNil(q.p2) ? null : fmtCount(q.p2) + " in P2"; }
   if (t.key === "unworkedNow" && !isNil(f.unworkedPastSla)) return f.unworkedPastSla + " past SLA";
   if (t.key === "leadsToday" && !isNil(f.leadsInRange)) return fmtCount(f.leadsInRange) + " in range";
-  if (t.key === "speedToLeadMedianMin") return "median, target " + (goals().speedToLeadTargetMin || 5) + " min";
+  if (t.key === "speedToLeadMedianMin") {
+    // Lead created -> first dial attempt. The headline the floor is judged on is the hit rate against
+    // the SLA, so show it under the median rather than only the median.
+    const pct = f.speedToLeadWithinSlaPct, sla = goals().speedToLeadSlaMin || 5;
+    if (!isNil(pct)) return fmtPct(pct) + " under " + sla + " min" + (isNil(f.speedToLeadMeasured) ? "" : " of " + fmtCount(f.speedToLeadMeasured));
+    return "median, target " + (goals().speedToLeadTargetMin || 5) + " min";
+  }
+  if (t.key === "timeToConnectMedianMin") {
+    // Lead created -> first call long enough to be a conversation. Leads that never connect are not
+    // in this median at all; they live in the connect rate.
+    return isNil(f.timeToConnectMeasured) ? "first connected call" : "of " + fmtCount(f.timeToConnectMeasured) + " connected leads";
+  }
   if (t.key === "introsBookedToday") { const n = f.introsBookedInRange; return isNil(n) ? null : fmtCount(n) + " in range"; }
   if (t.key === "talkTimeSec") return "connected-call time, this window";
   if (t.key === "leadToConnectPct") return "connects / dials";

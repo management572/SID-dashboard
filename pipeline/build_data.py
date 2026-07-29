@@ -33,6 +33,7 @@ import os
 import re
 import statistics
 import sys
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_DIR = os.path.join(ROOT, "config")
@@ -40,7 +41,8 @@ RAW_DIR = os.path.join(ROOT, "data", "raw")
 OUT_PATH = os.path.join(ROOT, "data", "dashboard-data.json")
 SAMPLE_PATH = os.path.join(ROOT, "data", "dashboard-data.sample.json")
 
-FLOOR_HOURS = (10, 22)                    # EST 10:00-22:00, for the SLA clock (rule 6)
+FLOOR_HOURS = (10, 22)                    # 10:00-22:00 America/New_York, for the SLA clock (rule 6)
+FLOOR_TZ = ZoneInfo("America/New_York")   # the floor clock is ET, not UTC
 DAY_SECONDS = 86400
 
 
@@ -112,17 +114,43 @@ def first_name(name):
 
 
 def sla_minutes(created, first_attempt):
-    """Minutes from lead creation to first attempt, clock paused outside floor hours (rule 6)."""
+    """Minutes from lead creation to first attempt, clock paused outside floor hours (rule 6).
+
+    Floor hours are 10:00-22:00 America/New_York, 7 days a week. Call timestamps arrive in UTC, so
+    the clock must be evaluated in floor-local time -- comparing raw UTC hours shifted the window to
+    06:00-18:00 ET and mis-scored every overnight and evening lead.
+    """
     if not created or not first_attempt or first_attempt < created:
         return None
-    minutes, cur, guard = 0.0, created, 0
+    seconds, cur, guard = 0.0, created, 0
     step = dt.timedelta(minutes=1)
     while cur < first_attempt and guard < 60 * 24 * 14:
-        if FLOOR_HOURS[0] <= cur.hour < FLOOR_HOURS[1]:
-            minutes += 1
-        cur += step
+        nxt = min(cur + step, first_attempt)
+        if FLOOR_HOURS[0] <= cur.astimezone(FLOOR_TZ).hour < FLOOR_HOURS[1]:
+            seconds += (nxt - cur).total_seconds()
+        cur = nxt
         guard += 1
-    return round(minutes, 1) if minutes else round((first_attempt - created).total_seconds() / 60, 1)
+    # A lead that arrived after the floor closed and was dialed before it reopened waited zero floor
+    # minutes; that is a real 0.0, not a missing value.
+    return round(seconds / 60, 1)
+
+
+def first_connect_by_contact(calls, connect_min):
+    """Earliest outbound call per contact that lasted at least connect_min seconds -> ts.
+
+    Speed to lead measures the first dial *attempt*; time to connect measures the first real
+    conversation. They are different questions and the board shows them as separate tiles.
+    """
+    m = {}
+    for c in calls:
+        if c["direction"] != "outbound" or not c["contactId"]:
+            continue
+        if (c.get("duration") or 0) < connect_min or c.get("status") != "completed":
+            continue
+        cur = m.get(c["contactId"])
+        if cur is None or c["ts"] < cur:
+            m[c["contactId"]] = c["ts"]
+    return m
 
 
 def now_utc():
@@ -182,7 +210,8 @@ def period_windows(now):
 
 # Floor metrics that carry a period-over-period delta on the board.
 DELTA_KEYS = ["leadsToday", "leadsInRange", "introsBookedToday", "unworkedNow", "unworkedPastSla",
-              "speedToLeadMedianMin", "dayOneCoverage", "formCompliance", "attemptsLogged",
+              "speedToLeadMedianMin", "speedToLeadWithinSlaPct", "timeToConnectMedianMin",
+              "dayOneCoverage", "formCompliance", "attemptsLogged",
               "dialsLogged", "attemptsDialed", "connectsInRange", "bookings", "leadToConnectPct",
               "droppedCalls", "talkTimeSec", "avgDialDurationSec", "avgConnectDurationSec"]
 
@@ -739,6 +768,20 @@ def build_floor(facts, calls, since, until, goals, lane_map, connect_min, droppe
             m = sla_minutes(ld, ts)
             if m is not None:
                 stl.append(m)
+    # Time to connect is the second half of the story: lead-in to the first outbound call that lasted
+    # long enough to be a conversation. Leads that never connect are excluded from the minutes and
+    # counted in the connect rate instead -- they must never be scored as a very large wait.
+    ttc = []
+    for cid, ts in first_connect_by_contact(calls, connect_min).items():
+        if not in_window(ts, since, until):
+            continue
+        ld = lead_map.get(cid)
+        if ld:
+            m = sla_minutes(ld, ts)
+            if m is not None:
+                ttc.append(m)
+    sla_min = goals.get("speedToLeadSlaMin", 5)
+    stl_within = sum(1 for m in stl if m <= sla_min)
     # Dials, connects and talk time come from the real GHL call feed (conversation call messages),
     # because the sid_* mirror fields (sid_assigned_at, sid_last_call_duration_sec) are not written.
     # Connect = an outbound completed call at/over connect_min seconds -- the same definition SID uses.
@@ -753,6 +796,10 @@ def build_floor(facts, calls, since, until, goals, lane_map, connect_min, droppe
         "introsBookedToday": intros_today, "introsBookedInRange": intros_range,
         "unworkedNow": unworked, "unworkedPastSla": unworked_sla,
         "speedToLeadMedianMin": median_or_none(stl),
+        "speedToLeadWithinSlaPct": ratio(stl_within, len(stl)),
+        "speedToLeadMeasured": len(stl) or None,
+        "timeToConnectMedianMin": median_or_none(ttc),
+        "timeToConnectMeasured": len(ttc) or None,
         "dayOneCoverage": ratio(day_one_hits, day_one_elig),
         "formCompliance": None,           # set from setters/connects in build_from_raw
         # --- dialer row (all from the real GHL call feed) ---
