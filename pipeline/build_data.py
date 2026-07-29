@@ -371,6 +371,20 @@ def build_numbers(calls, facts, since, until, connect_min, dropped_statuses, nh)
     """
     acr_by_contact = {f["id"]: f.get("acronym") for f in facts if f.get("id")}
     dropped = {str(s).lower() for s in (dropped_statuses or [])}
+
+    # Which number earned each contact's conversation: the first outbound call that actually
+    # connected. A booking is credited to that number rather than to whichever number happened to
+    # dial last, because the connect is the call that did the work.
+    connector = {}
+    for c in sorted(calls, key=lambda x: x.get("ts") or dt.datetime.min.replace(tzinfo=dt.timezone.utc)):
+        cid, num = c.get("contactId"), c.get("ourNumber")
+        if not cid or not num or cid in connector:
+            continue
+        if (str(c.get("direction") or "").lower().startswith("out")
+                and str(c.get("status") or "").lower() == "completed"
+                and (c.get("duration") or 0) >= connect_min):
+            connector[cid] = num
+
     agg = {}
     for c in calls:
         num = c.get("ourNumber")
@@ -379,8 +393,8 @@ def build_numbers(calls, facts, since, until, connect_min, dropped_statuses, nh)
         row = agg.get(num)
         if row is None:
             row = agg[num] = {"number": num, "dials": 0, "connects": 0, "failed": 0, "inbound": 0,
-                              "talkSec": 0, "durations": [], "contacts": set(), "clients": {},
-                              "users": set(), "lastUsed": None}
+                              "bookings": 0, "talkSec": 0, "durations": [], "contacts": set(),
+                              "clients": {}, "users": set(), "lastUsed": None}
         ts = c.get("ts")
         if ts and (row["lastUsed"] is None or ts > row["lastUsed"]):
             row["lastUsed"] = ts
@@ -405,10 +419,27 @@ def build_numbers(calls, facts, since, until, connect_min, dropped_statuses, nh)
             row["durations"].append(dur)
         acr = (acr_by_contact.get(c.get("contactId")) or "").strip().upper()
         if acr:
-            cl = row["clients"].setdefault(acr, {"dials": 0, "connects": 0})
+            cl = row["clients"].setdefault(acr, {"dials": 0, "connects": 0, "bookings": 0})
             cl["dials"] += 1
             if connected:
                 cl["connects"] += 1
+
+    # Bookings, windowed the same way the client funnel windows them, credited to the connecting
+    # number. Only numbers that actually dialed in this window can be credited, so a booking whose
+    # connect predates the window is left uncounted rather than attached to an idle number.
+    for f in facts:
+        if not f.get("booked"):
+            continue
+        if not (in_window(f.get("bookedDate"), since, until) or in_window(f.get("connect"), since, until)):
+            continue
+        num = connector.get(f.get("id"))
+        row = agg.get(num) if num else None
+        if not row:
+            continue
+        row["bookings"] += 1
+        acr = (f.get("acronym") or "").strip().upper()
+        if acr and acr in row["clients"]:
+            row["clients"][acr]["bookings"] += 1
 
     min_dials = int((nh or {}).get("minDialsToRate") or 25)
     out = []
@@ -417,7 +448,7 @@ def build_numbers(calls, facts, since, until, connect_min, dropped_statuses, nh)
         rate = ratio(row["connects"], dials)
         fail = ratio(row["failed"], dials)
         clients = sorted(
-            ({"key": k, "dials": v["dials"], "connects": v["connects"],
+            ({"key": k, "dials": v["dials"], "connects": v["connects"], "bookings": v["bookings"],
               "connectRate": ratio(v["connects"], v["dials"])} for k, v in row["clients"].items()),
             key=lambda x: -x["dials"])
         out.append({
@@ -427,6 +458,8 @@ def build_numbers(calls, facts, since, until, connect_min, dropped_statuses, nh)
             "attempts": len(row["contacts"]),
             "connects": row["connects"],
             "connectRate": rate,
+            "bookings": row["bookings"],
+            "bookRate": ratio(row["bookings"], row["connects"]),
             "failed": row["failed"],
             "failRate": fail,
             "inbound": row["inbound"],

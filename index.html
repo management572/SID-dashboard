@@ -1581,6 +1581,7 @@ function renderNumberTiles(rows) {
   const dials = rows.reduce((a, r) => a + (r.dials || 0), 0);
   const conn = rows.reduce((a, r) => a + (r.connects || 0), 0);
   const failed = rows.reduce((a, r) => a + (r.failed || 0), 0);
+  const booked = rows.reduce((a, r) => a + (r.bookings || 0), 0);
   const band = b => rows.filter(r => (r.health || {}).band === b).length;
   const flagged = band("alert"), watch = band("warn");
   const tile = (label, val, sub, cls) => '<div class="tile"><div class="tlabel">' + esc(label) + '</div>'
@@ -1592,6 +1593,7 @@ function renderNumberTiles(rows) {
     + tile("Watch", fmtCount(watch), "connect rate slipping", watch ? "cellwarn" : "")
     + tile("Healthy", fmtCount(rows.length - flagged - watch - band("unrated")), "connecting normally", "cellgood")
     + tile("Connect Rate", fmtPct(dials ? conn / dials : null), fmtCount(conn) + " of " + fmtCount(dials) + " dials")
+    + tile("Booked", fmtCount(booked), conn ? fmtPct(booked / conn) + " of connects" : "")
     + tile("Failed Calls", fmtCount(failed), dials ? fmtPct(failed / dials) + " of dials" : "");
 }
 
@@ -1648,20 +1650,23 @@ function renderNumbersTable(rows) {
       + '<td><span class="cexp">&#9656;</span> <span class="cname mono">' + esc(fmtPhone(r.number)) + '</span></td>'
       + '<td class="cdim">' + (r.state ? esc(r.state) : dash()) + '</td>'
       + '<td class="num cdim">' + fmtCount(r.dials) + '</td>'
+      + '<td class="num cdim">' + fmtCount(r.attempts) + '</td>'
       + '<td class="num cdim">' + fmtCount(r.connects) + '</td>'
       + '<td class="num crate">' + (isNil(r.connectRate) ? dash() : fmtPct(r.connectRate)) + '</td>'
+      + '<td class="num">' + (r.bookings ? '<span class="cwon">' + fmtCount(r.bookings) + '</span>' : dash()) + '</td>'
+      + '<td class="num cdim">' + (isNil(r.bookRate) ? dash() : fmtPct(r.bookRate)) + '</td>'
       + '<td class="num">' + (isNil(r.failRate) ? dash()
           : '<span class="' + (r.failRate >= 0.35 ? "cellalert" : "") + '">' + fmtPct(r.failRate) + '</span>') + '</td>'
-      + '<td class="num cdim">' + (isNil(r.avgDurationSec) ? dash() : fmtDuration(r.avgDurationSec)) + '</td>'
       + '<td class="num cdim">' + (r.clientCount ? fmtCount(r.clientCount) : dash()) + '</td>'
       + '<td class="num"><span class="cpill ' + cls + '">' + esc(h.label || "—") + '</span></td>'
       + '</tr>'
-      + '<tr class="cdrawer" id="ndrawer-' + i + '" hidden><td colspan="9"><div class="inner">'
+      + '<tr class="cdrawer" id="ndrawer-' + i + '" hidden><td colspan="10"><div class="inner">'
         + numberDrill(r) + '</div></td></tr>';
   });
   wrap.innerHTML = '<table class="ctable"><thead><tr>'
-    + '<th>Number</th><th>State</th><th class="num">Dials</th><th class="num">Connects</th>'
-    + '<th class="num">Connect %</th><th class="num">Fail %</th><th class="num">Avg Call</th>'
+    + '<th>Number</th><th>State</th><th class="num">Dials</th><th class="num">Attempts</th>'
+    + '<th class="num">Connects</th><th class="num">Connect %</th><th class="num">Booked</th>'
+    + '<th class="num">Book %</th><th class="num">Fail %</th>'
     + '<th class="num">Clients</th><th class="num">Health</th>'
     + '</tr></thead><tbody>' + body + '</tbody></table>';
   wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
@@ -1685,11 +1690,22 @@ function numberDrill(r) {
     return '<div class="nrow"><span class="nk mono">' + esc(c.key) + '</span>'
       + '<span class="nbar"><span class="nfill" style="width:' + pct.toFixed(1) + '%"></span></span>'
       + '<span class="nv">' + (isNil(c.connectRate) ? dash() : fmtPct(c.connectRate)) + '</span>'
-      + '<span class="nd">' + fmtCount(c.connects) + ' / ' + fmtCount(c.dials) + '</span></div>';
+      + '<span class="nd">' + fmtCount(c.connects) + ' / ' + fmtCount(c.dials)
+      + (c.bookings ? ' &middot; ' + fmtCount(c.bookings) + ' booked' : "") + '</span></div>';
   }).join("");
-  const extra = (r.inbound ? '<div class="muted" style="margin-top:12px;font-size:11.5px">'
-    + fmtCount(r.inbound) + ' inbound call' + (r.inbound === 1 ? '' : 's') + ' returned to this number.</div>' : "");
-  return head + '<div class="ngrid">' + bars + '</div>' + extra;
+  const stat = (l, v) => '<div><div class="sdr-l">' + esc(l) + '</div><div class="sdr-v">' + v + '</div></div>';
+  const box = '<div class="sdrbox" style="margin-top:16px"><div class="sdr-h">This number, this window</div>'
+    + '<div class="sdrgrid">'
+      + stat("Dials", fmtCount(r.dials))
+      + stat("Attempts", fmtCount(r.attempts))
+      + stat("Connects", fmtCount(r.connects))
+      + stat("Booked", fmtCount(r.bookings))
+      + stat("Book %", isNil(r.bookRate) ? dash() : fmtPct(r.bookRate))
+      + stat("Avg call", isNil(r.avgDurationSec) ? dash() : fmtDuration(r.avgDurationSec))
+      + stat("Talk time", fmtDuration(r.talkTimeSec))
+      + stat("Inbound", fmtCount(r.inbound))
+    + '</div></div>';
+  return head + '<div class="ngrid">' + bars + '</div>' + box;
 }
 
 function numShort(n) { const d = String(n || "").replace(/\D/g, ""); return d.length >= 10 ? d.slice(-10, -7) + "-" + d.slice(-4) : String(n || ""); }
