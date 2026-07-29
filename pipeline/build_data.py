@@ -296,6 +296,24 @@ def build_data_quality(bundle, contacts, ghl, goals, calls=None, meta=None):
     return flags
 
 
+def resolve_field_key(cfields, want_name, fallback_key):
+    """Find a field's fieldKey by its display name, falling back to a configured key.
+
+    Fields added to SID after the last discovery run are absent from config/sid-discovery.json, so a
+    hard-coded fieldKey guess would silently read as empty. The display name is the stable thing a
+    human knows ("SID: Minutes to First Dial"), so match on that first.
+    """
+    target = re.sub(r"[^a-z0-9]", "", str(want_name or "").lower())
+    if target:
+        for f in cfields or []:
+            if re.sub(r"[^a-z0-9]", "", str(f.get("name") or "").lower()) == target and f.get("fieldKey"):
+                return f["fieldKey"]
+    return fallback_key
+
+
+SPEED_FIELD_KEY = None
+
+
 def build_from_raw(ghl, dash):
     meta = load_json(os.path.join(RAW_DIR, "_meta.json"), {})
     if not meta:
@@ -305,8 +323,11 @@ def build_from_raw(ghl, dash):
     cfields = load_json(os.path.join(RAW_DIR, "custom_fields.json"), []) or []
     calls = parse_calls(load_json(os.path.join(RAW_DIR, "calls.json"), []) or [])
 
-    global FIELD_KEY_TO_ID
+    global FIELD_KEY_TO_ID, SPEED_FIELD_KEY
     FIELD_KEY_TO_ID = {f.get("fieldKey"): f.get("id") for f in cfields if f.get("fieldKey") and f.get("id")}
+    stl_cfg = ghl.get("speedToLead") or {}
+    SPEED_FIELD_KEY = resolve_field_key(cfields, stl_cfg.get("fieldName"), stl_cfg.get("fieldKey"))
+    print("build_data: speed to lead field -> %s" % SPEED_FIELD_KEY)
 
     efid = ghl.get("eventDateFieldIds", {})
     afid = ghl.get("attemptFieldIds", {})
@@ -561,6 +582,9 @@ def contact_facts(c, efid, afid, intro_key, intro_booked, held_key, held_val, ba
         # Times Attempted is the dial counter the belt actually increments (sid_attempt_count is stuck),
         # so it is the source for per-client dial totals on the client board.
         "timesAttempted": to_int(field_value(c, "contact.times_attempted")),
+        # SID's own speed-to-lead number, in minutes. Preferred over recomputing from the call feed
+        # so the board agrees with the CRM; None when the field is unset, never 0.
+        "minutesToFirstDial": to_num(field_value(c, SPEED_FIELD_KEY)),
         "lastCallSec": to_int(field_value(c, "contact.sid_last_call_duration_sec")),
         "tags": [t.lower() for t in c.get("tags", [])],
     }
@@ -577,20 +601,21 @@ def build_client(div, rows, since, until, first_dial=None):
     contacted = min(contacted, worked) if worked else contacted
     booked = min(booked, contacted) if contacted else booked
     shows = min(shows, booked) if booked else shows
-    # Speed to lead: lead-in to the first real outbound dial from the call feed, windowed by that
-    # dial. Falls back to the firstAttempt field only when there is no call feed to read.
+    # Speed to lead, per contact, from SID's Minutes to First Dial field. The call-feed measurement
+    # (lead in to first outbound dial) stands in only where that field is empty, so a contact is
+    # never dropped just because the field has not been written yet.
     fd = first_dial or {}
-    if fd:
-        stl = []
-        for f in rows:
-            hit = fd.get(f.get("id"))
-            if not hit or not f["leadDate"]:
-                continue
-            ts = hit[0]
-            if in_window(ts, since, until):
-                stl.append(sla_minutes(f["leadDate"], ts))
-    else:
-        stl = [sla_minutes(f["leadDate"], f["firstAttempt"]) for f in rows if f["leadDate"] and f["firstAttempt"]]
+    stl = []
+    for f in rows:
+        hit = fd.get(f.get("id"))
+        dialed_at = hit[0] if hit else f.get("firstAttempt")
+        if not in_window(dialed_at, since, until):
+            continue
+        v = f.get("minutesToFirstDial")
+        if v is None and f.get("leadDate") and dialed_at:
+            v = sla_minutes(f["leadDate"], dialed_at)
+        if v is not None:
+            stl.append(v)
     return {
         "key": div.get("key"), "label": div.get("label", div.get("key")),
         "market": div.get("market"), "active": True,
@@ -727,18 +752,21 @@ def build_floor(facts, calls, since, until, goals, lane_map, connect_min, droppe
         lane = tier_lane_from_tags(f["tags"], lane_map)
         if lane:
             queue[lane] += 1
-    # Speed to lead = lead-in to the first real outbound dial (from the call feed, same basis as the
-    # per-setter column), windowed by the first dial; the sid_first_dial_at field is unreliable.
+    # Speed to lead = SID's Minutes to First Dial, windowed by the first outbound dial from the call
+    # feed. The call-feed computation (lead in to that dial) stands in only where the field is empty,
+    # so this tile, the setter column and the client rows all report the same number.
     fd_map = first_outbound_by_contact(calls)
     lead_map = {f["id"]: f["leadDate"] for f in facts if f.get("id")}
+    stl_map = {f["id"]: f.get("minutesToFirstDial") for f in facts if f.get("id")}
     for cid, (ts, _uid) in fd_map.items():
         if not in_window(ts, since, until):
             continue
-        ld = lead_map.get(cid)
-        if ld:
-            m = sla_minutes(ld, ts)
-            if m is not None:
-                stl.append(m)
+        m = stl_map.get(cid)
+        if m is None:
+            ld = lead_map.get(cid)
+            m = sla_minutes(ld, ts) if ld else None
+        if m is not None:
+            stl.append(m)
     # Dials, connects and talk time come from the real GHL call feed (conversation call messages),
     # because the sid_* mirror fields (sid_assigned_at, sid_last_call_duration_sec) are not written.
     # Connect = an outbound completed call at/over connect_min seconds -- the same definition SID uses.
@@ -795,16 +823,20 @@ def build_setters(facts, submissions, calls, ghl, goals, since, until, connect_m
     # to each lead (the sid_assigned_to claim field is empty, so this is the only working attribution).
     first_dial = first_outbound_by_contact(calls)
     lead_by_cid = {f["id"]: f["leadDate"] for f in facts if f.get("id")}
+    # Same speed-to-lead basis as the floor tile and the client rows: SID's Minutes to First Dial,
+    # with the call-feed computation standing in only where that field is empty.
+    stl_by_cid = {f["id"]: f.get("minutesToFirstDial") for f in facts if f.get("id")}
     per_user_stl, per_user_leads = {}, {}
     for cid, (ts, uid) in first_dial.items():
         if not (since <= ts <= until):
             continue
         per_user_leads[uid] = per_user_leads.get(uid, 0) + 1
-        ld = lead_by_cid.get(cid)
-        if ld:
-            m = sla_minutes(ld, ts)
-            if m is not None:
-                per_user_stl.setdefault(uid, []).append(m)
+        m = stl_by_cid.get(cid)
+        if m is None:
+            ld = lead_by_cid.get(cid)
+            m = sla_minutes(ld, ts) if ld else None
+        if m is not None:
+            per_user_stl.setdefault(uid, []).append(m)
 
     # Count form submissions (and booked-from-form) per setter first-name (Submitted By).
     forms_by, forms_booked_by = {}, {}
@@ -975,6 +1007,14 @@ def build_insights(floor, clients, setters, goals):
 
 
 # ------------------------------------------------------------------ small utils
+def to_num(v):
+    """Float, or None. Unlike to_int this keeps 'field is empty' distinct from 'the value is 0'."""
+    try:
+        return float(v) if v not in (None, "") else None
+    except (ValueError, TypeError):
+        return None
+
+
 def to_int(v):
     try:
         return int(float(v)) if v not in (None, "") else 0

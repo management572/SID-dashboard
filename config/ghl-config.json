@@ -495,5 +495,10 @@
     "connectRateWarn": 0.15,
     "connectRateBad": 0.08,
     "failRateBad": 0.35
+  },
+  "speedToLead": {
+    "_note": "Speed to lead is read from SID's own field rather than recomputed from the call feed, so the board matches what the CRM reports. Resolved by fieldName first because a field added after the last discovery run has no entry in config/sid-discovery.json; fieldKey is the fallback. When the field is empty on a contact the board falls back to the call-feed measurement (lead in to first outbound dial) rather than dropping the contact.",
+    "fieldName": "SID: Minutes to First Dial",
+    "fieldKey": "contact.sid_minutes_to_first_dial"
   }
 }
