@@ -274,6 +274,7 @@
   .signin-card { width:100%; max-width:380px; background:var(--ink2); border:1px solid var(--hair);
                  border-radius:14px; padding:30px 30px 24px; }
   .signin-brand { font-family:var(--head); font-weight:800; font-size:22px; letter-spacing:-0.5px; color:var(--accent); }
+  .signin-logo { display:block; width:150px; height:auto; margin-bottom:4px; }
   .signin-card h1 { font-family:var(--head); font-size:20px; font-weight:700; margin:14px 0 6px; }
   .signin-sub { font-size:12.5px; color:var(--boneDim); margin:0 0 22px; line-height:1.5; }
   .signin-card label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.5px;
@@ -427,6 +428,7 @@
   <!-- Sign in. A gate, not a security boundary: see docs/access.md. -->
   <div id="signin" hidden>
     <form class="signin-card" id="signinForm" autocomplete="on">
+      <img class="signin-logo" id="signinLogo" alt="" hidden>
       <div class="signin-brand" id="signinBrand">OBB</div>
       <h1>Setter Floor Dashboard</h1>
       <p class="signin-sub">Internal operating report. Access is restricted to named accounts.</p>
@@ -676,6 +678,14 @@ function signOut() { localStorage.removeItem(SESSION_KEY); location.reload(); }
 
 function showSignIn(acc, resolve) {
   const pane = document.getElementById("signin");
+  // The sign-in paints before brand.json is loaded, so fetch just enough to swap the wordmark.
+  getJSON(["config/brand.json"]).then(b => {
+    const src = b && (b.logoFullPath || b.logoPath);
+    if (!src) return;
+    const img = document.getElementById("signinLogo");
+    img.onload = () => { img.hidden = false; document.getElementById("signinBrand").hidden = true; };
+    img.src = src;
+  }).catch(() => {});
   const form = document.getElementById("signinForm");
   const err = document.getElementById("siErr");
   const btn = document.getElementById("siBtn");

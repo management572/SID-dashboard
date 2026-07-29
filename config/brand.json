@@ -5,25 +5,21 @@
   "boardTitle": "Setter Floor Dashboard",
   "preparedBy": "Offer Accelerator",
   "site": "onlinebizbuilders.com",
-  "logoPath": "assets/logo.svg",
-
+  "logoPath": "assets/logo-mark.svg",
   "tokens": {
     "ink": "#0F1829",
     "ink2": "#172236",
     "ink3": "#223350",
     "inkDeep": "#0A1120",
-
     "bone": "#FFFFFF",
     "boneDim": "rgba(233,240,252,0.72)",
     "boneFaint": "rgba(233,240,252,0.42)",
     "hair": "rgba(255,255,255,0.08)",
     "hair2": "rgba(255,255,255,0.16)",
-
     "accent": "#3B82F6",
     "accentText": "#93C0FF",
     "accentDeep": "#1D4ED8",
     "accent2": "#F0B44A",
-
     "good": "#22A565",
     "goodText": "#5CE0A0",
     "warn": "#D9A441",
@@ -31,9 +27,7 @@
     "alert": "#E05340",
     "alertText": "#FF8C7A"
   },
-
   "_paletteSource": "Rebuilt from the OBB logo: a deep navy field (#0F1829), white wordmark, and the blue-gradient accent (#3B82F6). On a near-black navy the accent and status colors read cleanly as both fills and text, so the board no longer needs the mid-tone workarounds the old slate required.",
-
   "_tokenGuide": {
     "ink": "page background, deep navy from the logo",
     "ink2": "card and panel background, one step lighter so cards lift off the page",
@@ -47,22 +41,20 @@
     "good / warn / alert": "solid status colors for filled chips and bars with white text",
     "goodText / warnText / alertText": "brighter tints for status-colored TEXT on the dark navy"
   },
-
   "_contrastRule": "On the deep navy background every tint clears 4.5:1 as text, so status can be carried by either a filled chip (solid color, white text) or the *Text tint directly. The board keeps filled chips for emphasis (data-quality strip, insight severity) and uses the *Text tints for table cells and sparklines. Never use the solid accent as text on ink; use accentText.",
-
   "fonts": {
     "head": "Inter",
     "body": "Inter",
     "mono": "IBM Plex Mono",
     "googleImport": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"
   },
-
   "_fontNote": "Switched headings from a serif to Inter to match the logo's geometric sans and read as a modern data tool. If OBB has a brand typeface, swap head and body here, self-host under assets/fonts/, and drop googleImport.",
-
   "_rules": [
     "Rebranding is a token swap in this file only. Never hard-code a color in index.html.",
     "Never use accent #3B82F6 as text on ink or ink2. Use accentText.",
     "Status colors are semantic. Do not reuse the accent for a status, and do not reuse a status color for a brand element.",
     "No em dashes or en dashes in any board copy. Use commas, colons, or parentheses."
-  ]
+  ],
+  "logoFullPath": "assets/logo.svg",
+  "_logoNote": "logoPath is the mark alone (O B B, no tagline) and sits in the masthead, where the full lockup would render its BIZ BUILDERS line at about five pixels. logoFullPath is the complete lockup and is used on the sign-in screen, where there is room for it. Both are SVG so they stay sharp at any size. If a canonical file arrives from the brand kit, overwrite these two and nothing else needs to change."
 }
