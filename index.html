@@ -1,5 +1,5 @@
 <!--
-  OBB Setter Floor Dashboard
+  OBB S.I.D. Dashboard
   One self-contained page. No framework, no bundler, no build step.
   It fetches config/brand.json, config/dashboard-config.json and data/dashboard-data.json
   (falling back to data/dashboard-data.sample.json) and renders. Every color, label, goal and
@@ -13,7 +13,7 @@
 <meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="favicon.ico" sizes="any" />
 <link rel="icon" href="favicon.png" type="image/png" />
-<title>OBB Setter Floor Dashboard</title>
+<title>OBB S.I.D. Dashboard</title>
 
 <style>
   /* Brand tokens are injected at runtime from config/brand.json into :root as --tokens.
@@ -251,6 +251,8 @@
   .csum-v { font-family:var(--head); font-weight:700; font-size:22px; margin-top:5px; }
 
   .ctable { width:100%; border-collapse:collapse; }
+  .ctable th.sortable { cursor:pointer; user-select:none; }
+  .ctable th.sortable:hover { color:var(--bone); }
   .ctable th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--boneFaint); font-weight:600; padding:9px 14px; border-bottom:1px solid var(--hair); }
   .ctable th.num, .ctable td.num { text-align:right; }
   .ctable td { padding:13px 14px; border-bottom:1px solid var(--hair); vertical-align:middle; }
@@ -403,7 +405,7 @@
       <img id="logo" alt="" hidden />
       <span class="wordmark" id="wordmark">OBB</span>
     </div>
-    <span class="board-title" id="boardTitle">Setter Floor Dashboard</span>
+    <span class="board-title" id="boardTitle">S.I.D. Dashboard</span>
     <div class="mast-right">
       <span class="who" id="whoAmI" hidden></span>
       <span class="chip sample" id="sampleTag" hidden>SAMPLE DATA</span>
@@ -430,7 +432,7 @@
     <form class="signin-card" id="signinForm" autocomplete="on">
       <img class="signin-logo" id="signinLogo" alt="" hidden>
       <div class="signin-brand" id="signinBrand">OBB</div>
-      <h1>Setter Floor Dashboard</h1>
+      <h1 id="signinTitle">S.I.D. Dashboard</h1>
       <p class="signin-sub">Internal operating report. Access is restricted to named accounts.</p>
       <label for="siEmail">Email</label>
       <input id="siEmail" type="email" autocomplete="username" required spellcheck="false" placeholder="you@onlinebizbuilders.com">
@@ -680,6 +682,8 @@ function showSignIn(acc, resolve) {
   const pane = document.getElementById("signin");
   // The sign-in paints before brand.json is loaded, so fetch just enough to swap the wordmark.
   getJSON(["config/brand.json"]).then(b => {
+    const t = document.getElementById("signinTitle");
+    if (t && b && b.boardTitle) t.textContent = b.boardTitle;
     const src = b && (b.logoFullPath || b.logoPath);
     if (!src) return;
     const img = document.getElementById("signinLogo");
@@ -1883,6 +1887,28 @@ function renderNumberCharts(rows) {
     : '<div class="empty">No numbers in this window.</div>';
 }
 
+let NUM_SORT = { key:"dials", dir:-1 };
+/* Health sorts by how much it wants attention, not alphabetically: a Health sort should put the
+   numbers to retire at the top, and "Likely flagged" filed under L would bury them. */
+const HEALTH_RANK = { alert:3, warn:2, good:1, unrated:0 };
+const NUM_COLS = [
+  { key:"number",      label:"Number",    type:"str" },
+  { key:"state",       label:"State",     type:"str" },
+  { key:"topClient",   label:"Client",    type:"str" },
+  { key:"dials",       label:"Dials",     type:"num" },
+  { key:"attempts",    label:"Attempts",  type:"num" },
+  { key:"connects",    label:"Connects",  type:"num" },
+  { key:"connectRate", label:"Connect %", type:"num" },
+  { key:"bookings",    label:"Booked",    type:"num" },
+  { key:"bookRate",    label:"Book %",    type:"num" },
+  { key:"failRate",    label:"Fail %",    type:"num" },
+  { key:"health",      label:"Health",    type:"num" },
+];
+function numSortValue(r, key) {
+  if (key === "health") return HEALTH_RANK[(r.health || {}).band] ?? -1;
+  return r[key];
+}
+
 function renderNumbersTable(rows) {
   const wrap = document.getElementById("numbersTableWrap");
   if (!wrap) return;
@@ -1892,13 +1918,27 @@ function renderNumbersTable(rows) {
       + 'in once a refresh completes.</div>';
     return;
   }
+  const { key, dir } = NUM_SORT;
+  const sorted = rows.slice().sort((a, b) => {
+    const av = numSortValue(a, key), bv = numSortValue(b, key);
+    // Blanks always sit at the bottom, whichever way the column is pointing.
+    if (isNil(av) && isNil(bv)) return 0;
+    if (isNil(av)) return 1;
+    if (isNil(bv)) return -1;
+    if (typeof av === "string") return dir * String(av).localeCompare(String(bv));
+    return dir * (av - bv);
+  });
+
   let body = "";
-  rows.forEach((r, i) => {
+  sorted.forEach((r, i) => {
     const h = r.health || {};
     const cls = h.band === "good" ? "good" : h.band === "warn" ? "warn" : h.band === "alert" ? "alert" : "faint";
+    const more = (r.clientCount || 0) - 1;
     body += '<tr class="crow" data-i="' + i + '">'
       + '<td><span class="cexp">&#9656;</span> <span class="cname mono">' + esc(fmtPhone(r.number)) + '</span></td>'
       + '<td class="cdim">' + (r.state ? esc(r.state) : dash()) + '</td>'
+      + '<td>' + (r.topClient ? '<span class="mono" style="font-weight:600">' + esc(r.topClient) + '</span>'
+          + (more > 0 ? ' <span class="faint" style="font-size:11px">+' + more + '</span>' : "") : dash()) + '</td>'
       + '<td class="num cdim">' + fmtCount(r.dials) + '</td>'
       + '<td class="num cdim">' + fmtCount(r.attempts) + '</td>'
       + '<td class="num cdim">' + fmtCount(r.connects) + '</td>'
@@ -1907,18 +1947,30 @@ function renderNumbersTable(rows) {
       + '<td class="num cdim">' + (isNil(r.bookRate) ? dash() : fmtPct(r.bookRate)) + '</td>'
       + '<td class="num">' + (isNil(r.failRate) ? dash()
           : '<span class="' + (r.failRate >= 0.35 ? "cellalert" : "") + '">' + fmtPct(r.failRate) + '</span>') + '</td>'
-      + '<td class="num cdim">' + (r.clientCount ? fmtCount(r.clientCount) : dash()) + '</td>'
-      + '<td class="num"><span class="cpill ' + cls + '">' + esc(h.label || "—") + '</span></td>'
+      + '<td class="num"><span class="cpill ' + cls + '">' + esc(h.label || "\u2014") + '</span></td>'
       + '</tr>'
-      + '<tr class="cdrawer" id="ndrawer-' + i + '" hidden><td colspan="10"><div class="inner">'
+      + '<tr class="cdrawer" id="ndrawer-' + i + '" hidden><td colspan="' + NUM_COLS.length + '"><div class="inner">'
         + numberDrill(r) + '</div></td></tr>';
   });
-  wrap.innerHTML = '<table class="ctable"><thead><tr>'
-    + '<th>Number</th><th>State</th><th class="num">Dials</th><th class="num">Attempts</th>'
-    + '<th class="num">Connects</th><th class="num">Connect %</th><th class="num">Booked</th>'
-    + '<th class="num">Book %</th><th class="num">Fail %</th>'
-    + '<th class="num">Clients</th><th class="num">Health</th>'
-    + '</tr></thead><tbody>' + body + '</tbody></table>';
+
+  const head = NUM_COLS.map(c => {
+    const arrow = c.key === key ? (dir === 1 ? "arrow-asc" : "arrow-desc") : "";
+    const align = c.type === "num" && c.key !== "health" ? " num" : (c.key === "health" ? " num" : "");
+    return '<th class="sortable' + (arrow ? " " + arrow : "") + align + '" data-k="' + esc(c.key) + '">'
+      + esc(c.label) + '</th>';
+  }).join("");
+
+  wrap.innerHTML = '<table class="ctable"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>';
+
+  wrap.querySelectorAll("th.sortable").forEach(th => th.addEventListener("click", () => {
+    const k = th.dataset.k;
+    // Same column toggles direction; a new column starts descending, except the two text columns
+    // where A-Z is the useful first look.
+    NUM_SORT = (NUM_SORT.key === k)
+      ? { key:k, dir:-NUM_SORT.dir }
+      : { key:k, dir:(k === "number" || k === "state" || k === "topClient") ? 1 : -1 };
+    renderNumbersTable(rows);
+  }));
   wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
     const d = wrap.querySelector("#ndrawer-" + row.dataset.i);
     if (d) { d.hidden = !d.hidden; row.classList.toggle("open", !d.hidden); }
