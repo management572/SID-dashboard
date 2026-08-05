@@ -1,0 +1,294 @@
+{
+  "_note": "Plain-language definition of every metric on the board, shown behind the info dot beside each label. Each entry says what the metric is, how it is calculated, which system it comes from and, where relevant, the exact GHL custom fields behind it. Edit here, not in index.html: the board reads this file at load and nothing is hardcoded.",
+  "metrics": {
+    "leadsToday": {
+      "what": "New leads that landed today.",
+      "how": "Counts contacts whose lead-in date is today.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "contact.entered_24h_at"
+      ]
+    },
+    "leadsInRange": {
+      "what": "New leads in the selected period.",
+      "how": "Counts contacts whose lead-in date falls in the window.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "contact.entered_24h_at"
+      ]
+    },
+    "introsBookedToday": {
+      "what": "Intro calls booked today.",
+      "how": "Counts contacts where the booked toggle is Yes and the booking date is today.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "contact.is_booked_appointment",
+        "contact.date_booked"
+      ]
+    },
+    "unworkedNow": {
+      "what": "Leads sitting with zero dial attempts right now.",
+      "how": "Contacts with a lead-in date and no first dial recorded.",
+      "source": "GHL contact custom field + GHL call feed (conversation call messages)",
+      "fields": [
+        "contact.sid_first_dial_at"
+      ]
+    },
+    "unworkedPastSla": {
+      "what": "Unworked leads already past the 30 minute SLA.",
+      "how": "Unworked leads whose wait, counted only inside floor hours, exceeds speedToLeadSlaMin.",
+      "source": "Derived on the board"
+    },
+    "speedToLeadMedianMin": {
+      "what": "Median minutes from a lead landing to its first dial. Lower is better.",
+      "how": "Median of SID's own per-contact figure. Where that field is empty the board measures lead-in to the first outbound call instead, so no contact is dropped.",
+      "source": "GHL contact custom field, falling back to the GHL call feed (conversation call messages)",
+      "fields": [
+        "SID: Minutes to First Dial",
+        "contact.entered_24h_at"
+      ]
+    },
+    "dayOneCoverage": {
+      "what": "Share of new leads that got a first attempt inside 24 hours.",
+      "how": "First dials within 24h of lead-in, over leads in the window.",
+      "source": "Derived on the board"
+    },
+    "formCompliance": {
+      "what": "Share of connected calls with an Intro Call Form on file.",
+      "how": "Form submissions over connects. Below target, per-setter numbers understate.",
+      "source": "GHL form submissions"
+    },
+    "p1QueueDepth": {
+      "what": "Leads in the P1 lane: engaged in the last 24 hours.",
+      "how": "Counts contacts carrying a P1 belt tier tag.",
+      "source": "GHL contact tags (belt tiers)"
+    },
+    "dialsLogged": {
+      "what": "Outbound calls placed in the window.",
+      "how": "Every outbound call event, connected or not.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "attemptsDialed": {
+      "what": "Distinct leads dialed. One lead dialed six times counts once.",
+      "how": "Distinct contact IDs across outbound calls. The gap against Dials is how hard the floor is re-working the same leads.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "connectsInRange": {
+      "what": "Calls that actually reached a person.",
+      "how": "Outbound calls with a completed status lasting at least connectMinSec (15s).",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "bookings": {
+      "what": "Appointments booked in the window.",
+      "how": "Contacts whose booked toggle is Yes, windowed by booking date or by the connecting call.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "contact.is_booked_appointment",
+        "contact.date_booked"
+      ]
+    },
+    "leadToConnectPct": {
+      "what": "Share of dials that reached a person.",
+      "how": "Connects over dials.",
+      "source": "Derived on the board"
+    },
+    "droppedCalls": {
+      "what": "Calls that failed before a conversation happened.",
+      "how": "Outbound calls in a failure status: busy, no-answer, failed, canceled.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "talkTimeSec": {
+      "what": "Total time spent on connected calls.",
+      "how": "Sum of duration across connects.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "avgDialDurationSec": {
+      "what": "Average length of any dial, connected or not.",
+      "how": "Mean duration across calls that report one.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "avgConnectDurationSec": {
+      "what": "Average length of a connected call.",
+      "how": "Mean duration across connects only.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "connectRate": {
+      "what": "Share of this setter's dials that reached a person.",
+      "how": "Connects over dials, per setter.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "bookRate": {
+      "what": "Share of connects that became a booking.",
+      "how": "Bookings over connects.",
+      "source": "Derived on the board"
+    },
+    "assigned": {
+      "what": "Leads claimed by this setter.",
+      "how": "Attributed by the first outbound call, since the assigned-to field is not written.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "attempts": {
+      "what": "Distinct leads this setter dialed.",
+      "how": "Distinct contacts across this setter's outbound calls.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "dials": {
+      "what": "Outbound calls placed by this setter.",
+      "how": "Call events keyed to the setter's GHL user ID.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "connects": {
+      "what": "This setter's calls that reached a person.",
+      "how": "Completed outbound calls at or over 15 seconds.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "booked": {
+      "what": "Appointments this setter booked.",
+      "how": "Matched on the Booked By name, so it covers setters with no call activity.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "contact.booked_by",
+        "contact.is_booked_appointment"
+      ]
+    },
+    "dealsWon": {
+      "what": "Closed deals credited to this setter.",
+      "how": "Needs a setter on each deal in the revenue export. The #2-wins feed records the client but not who set the appointment, so this reads as a dash until that lands.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "bookToClosePct": {
+      "what": "Share of this setter's bookings that became closed deals.",
+      "how": "Deals won over bookings. Blank while deals carry no setter.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "shows": {
+      "what": "Appointments actually held.",
+      "how": "Reads the Client Call Outcome field, which is not being written yet, so this is currently zero everywhere.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "Client Call Outcome"
+      ]
+    },
+    "showRate": {
+      "what": "Share of bookings that were held.",
+      "how": "Held over booked.",
+      "source": "Derived on the board"
+    },
+    "leads": {
+      "what": "Ad leads delivered for this client, lifetime.",
+      "how": "Lead-form count joined to the client acronym.",
+      "source": "Revenue snapshot, from the Supabase facebook_leads table"
+    },
+    "worked": {
+      "what": "Leads that received at least one dial.",
+      "how": "Contacts with a first dial in the window.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "contacted": {
+      "what": "Leads reached by phone.",
+      "how": "Contacts with a connecting call.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "mrr": {
+      "what": "Monthly recurring revenue from this client's closed deals.",
+      "how": "Sum of deal MRR per client acronym.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "arr": {
+      "what": "Annual value: MRR times twelve.",
+      "how": "Sum of deal ARR per client acronym.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "won": {
+      "what": "Closed deals for this client, lifetime.",
+      "how": "Deal count per acronym. Deals carry no date, so this bar is lifetime while the funnel stages before it follow the selected period.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "perDial": {
+      "what": "Annual value returned per dial. Higher is better.",
+      "how": "Client ARR over that client's lifetime dials. This is revenue earned per unit of effort, not a cost.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed over the GHL call feed (conversation call messages)"
+    },
+    "perLead": {
+      "what": "Annual value returned per ad lead. Higher is better.",
+      "how": "Client ARR over ad leads delivered.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed over Revenue snapshot, from the Supabase facebook_leads table"
+    },
+    "perAttempt": {
+      "what": "This window's revenue share per distinct lead dialed.",
+      "how": "Window MRR share over attempts.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed over the GHL call feed (conversation call messages)"
+    },
+    "perConnect": {
+      "what": "This window's revenue share per connected call.",
+      "how": "Window MRR share over connects.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed over the GHL call feed (conversation call messages)"
+    },
+    "perBooked": {
+      "what": "This window's revenue share per appointment booked.",
+      "how": "Window MRR share over bookings.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed over the GHL call feed (conversation call messages)"
+    },
+    "perHour": {
+      "what": "This window's revenue share per floor hour.",
+      "how": "Window MRR share over days times floorHoursPerDay (12).",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "perDay": {
+      "what": "This window's revenue share per day.",
+      "how": "Window MRR share over days in the window.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "perWeek": {
+      "what": "This window's revenue share per week.",
+      "how": "Window MRR share over weeks in the window.",
+      "source": "Revenue snapshot (data/client-revenue.json), from the #2-wins deal feed"
+    },
+    "workedPct": {
+      "what": "Share of this client's leads that got dialed.",
+      "how": "Worked over leads in.",
+      "source": "Derived on the board"
+    },
+    "number": {
+      "what": "A number the floor dials from.",
+      "how": "Only SID's own number is stored: the from on an outbound call, the to on an inbound one. The lead's number is dropped at fetch time and never reaches the board.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "state": {
+      "what": "Where the number's area code was issued.",
+      "how": "Area code looked up in config/area-codes.json. This is the number's identity, not where the lead lives.",
+      "source": "Derived on the board"
+    },
+    "topClient": {
+      "what": "The client account this number dials most.",
+      "how": "Client of the contacts it called, ranked by dials. The +N badge counts the other accounts it also serves.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "contact.partner_acronym"
+      ]
+    },
+    "failRate": {
+      "what": "Share of this number's dials that failed outright.",
+      "how": "Failed calls over dials. Climbing fail rate alongside a falling connect rate is the signature of carrier filtering.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "health": {
+      "what": "Whether carriers appear to be filtering this number.",
+      "how": "Under 8 percent connect or over 35 percent failed reads as Likely flagged; under 15 percent connect is Watch. Numbers with fewer than 25 dials are not rated, because a handful of calls can miss by chance.",
+      "source": "Derived on the board"
+    },
+    "inbound": {
+      "what": "Calls returned to this number.",
+      "how": "Inbound call events on the number.",
+      "source": "GHL call feed (conversation call messages)"
+    },
+    "clientCount": {
+      "what": "How many client accounts this number is used on.",
+      "how": "Distinct client acronyms across its calls.",
+      "source": "GHL contact custom field",
+      "fields": [
+        "contact.partner_acronym"
+      ]
+    }
+  }
+}

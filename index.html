@@ -270,6 +270,25 @@
   .cpill.warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); }
   .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
   .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
+  /* Metric info dot + popover */
+  .info { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px;
+          border:1px solid var(--hair2); border-radius:50%; font-size:9px; font-weight:700;
+          font-family:var(--body); color:var(--boneFaint); cursor:help; margin-left:5px;
+          vertical-align:middle; flex:none; text-transform:none; letter-spacing:0; }
+  .info:hover, .info:focus { color:var(--bone); border-color:var(--accent); outline:none; }
+  .info-pop { position:fixed; z-index:80; max-width:330px; background:var(--ink2);
+              border:1px solid var(--hair2); border-left:3px solid var(--accent); border-radius:10px;
+              padding:13px 15px; box-shadow:0 12px 34px rgba(0,0,0,.45); font-size:12.5px;
+              line-height:1.6; color:var(--boneDim); pointer-events:none; }
+  .info-pop .ip-t { font-family:var(--head); font-weight:700; font-size:13px; color:var(--bone);
+                    margin-bottom:6px; text-transform:none; letter-spacing:0; }
+  .info-pop .ip-h { font-size:10px; text-transform:uppercase; letter-spacing:.5px;
+                    color:var(--boneFaint); margin-top:10px; }
+  .info-pop .ip-src { color:var(--accentText); }
+  .info-pop code { background:var(--inkDeep); padding:1px 5px; border-radius:4px; font-size:11px;
+                   font-family:var(--mono); }
+  th .info { border-color:var(--hair2); }
+
   /* Sign in */
   #signin { position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
             background:var(--ink); padding:24px; z-index:60; }
@@ -751,6 +770,7 @@ async function boot() {
     // the board still renders (without the money columns) when it is absent.
     try { REV = await getJSON(["data/client-revenue.json"]); } catch (e) { REV = null; }
     try { CFG.access = await getJSON(["config/access.json"]); } catch (e) { CFG.access = null; }
+    try { CFG.glossary = (await getJSON(["config/metric-glossary.json"])).metrics || {}; } catch (e) { CFG.glossary = {}; }
   } catch (e) {
     const el = document.getElementById("loadError");
     el.hidden = false;
@@ -762,6 +782,7 @@ async function boot() {
   applyBrand(CFG.brand);
   initTheme();
   renderWhoAmI();
+  initInfoDots();
   normalizeData();
   STATE.period = (DATA.periods[DATA.defaultPeriod] ? DATA.defaultPeriod : periodKeys()[0]);
   STATE.tab = CFG.dash.defaultTab || CFG.dash.tabs[0];
@@ -1091,7 +1112,7 @@ function renderTileRow(tiles, hostId) {
     el.className = "tile" + (t.hero ? " hero" : "");
     el.innerHTML =
       (band ? '<span class="band ' + band + '"></span>' : "") +
-      '<div class="tlabel">' + esc(t.label) + '</div>' +
+      '<div class="tlabel">' + esc(t.label) + infoDot(t.key) + '</div>' +
       '<div class="tval ' + (band ? "val " + band : "") + '">' + val + '</div>' +
       deltaChip(t) +
       (sub ? '<div class="tsub">' + sub + '</div>' : "");
@@ -1531,7 +1552,7 @@ function renderRevenueTiles(cfg, m) {
     const sub = { perDial:t.dials+" dials", perAttempt:t.attempts+" attempts", perConnect:t.connects+" connects",
       perBooked:(t.bookings||0)+" booked", perHour:Math.round(floorHours)+" floor hrs",
       perDay:days+(days===1?" day":" days"), perWeek:(days/7).toFixed(days<7?2:1)+" wks" }[tl.key] || "";
-    return '<div class="tile"><div class="tlabel">' + esc(tl.label) + '</div>' +
+    return '<div class="tile"><div class="tlabel">' + esc(tl.label) + infoDot(tl.key) + '</div>' +
            '<div class="tval">' + revMoney(v) + '</div>' +
            '<div class="tsub">' + esc(sub) + '</div></div>';
   }).join("");
@@ -1590,7 +1611,7 @@ function renderSetters() {
   let thead = "<tr>";
   cols.forEach(c => {
     const arrow = c.key === key ? (dir === 1 ? "arrow-asc" : "arrow-desc") : "";
-    thead += '<th class="' + arrow + '" data-k="' + esc(c.key) + '">' + esc(c.label) + '</th>';
+    thead += '<th class="' + arrow + '" data-k="' + esc(c.key) + '">' + esc(c.label) + infoDot(c.key) + '</th>';
   });
   thead += "</tr>";
 
@@ -1656,6 +1677,72 @@ function covBar(v, tgt) {
   return '<div class="bar2"><div class="f" style="width:' + Math.min(100, v * 100) + '%;background:' + color + '"></div>'
     + (isNil(tgt) ? "" : '<div class="tgt" style="left:' + Math.min(100, tgt * 100) + '%"></div>')
     + '</div>';
+}
+
+
+/* ------------------------- METRIC INFO DOTS -------------------------
+   Every metric label can carry an info dot explaining what the number is, how it is built and which
+   system it came from. Definitions live in config/metric-glossary.json so they are edited as content,
+   not as markup. A key with no entry renders no dot rather than an empty tooltip. */
+function infoDot(key) {
+  const g = (CFG.glossary || {})[key];
+  if (!g) return "";
+  return '<span class="info" tabindex="0" role="button" aria-label="About this metric" '
+       + 'data-metric="' + esc(key) + '">i</span>';
+}
+
+let INFO_POP = null;
+function hideInfoPop() { if (INFO_POP) { INFO_POP.remove(); INFO_POP = null; } }
+
+function showInfoPop(el) {
+  hideInfoPop();
+  const g = (CFG.glossary || {})[el.dataset.metric];
+  if (!g) return;
+  const label = (el.closest("th, .tlabel, .sdr-l, label") || {}).textContent;
+  const pop = document.createElement("div");
+  pop.className = "info-pop";
+  pop.innerHTML =
+      '<div class="ip-t">' + esc((label || el.dataset.metric).replace(/\s*i\s*$/, "").trim()) + '</div>'
+    + '<div>' + esc(g.what || "") + '</div>'
+    + (g.how ? '<div class="ip-h">How it is built</div><div>' + esc(g.how) + '</div>' : "")
+    + (g.source ? '<div class="ip-h">Where it comes from</div><div class="ip-src">' + esc(g.source) + '</div>' : "")
+    + (g.fields && g.fields.length
+        ? '<div class="ip-h">Fields</div><div>' + g.fields.map(f => '<code>' + esc(f) + '</code>').join(" ") + '</div>'
+        : "");
+  document.body.appendChild(pop);
+  // Keep the popover on screen: flip above or shift left when it would run off an edge.
+  const r = el.getBoundingClientRect(), p = pop.getBoundingClientRect();
+  let top = r.bottom + 8, left = r.left - 6;
+  if (top + p.height > window.innerHeight - 8) top = Math.max(8, r.top - p.height - 8);
+  if (left + p.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - p.width - 8);
+  pop.style.top = top + "px";
+  pop.style.left = left + "px";
+  INFO_POP = pop;
+}
+
+/* Delegated, so dots added by any later render pick it up without rewiring. */
+function initInfoDots() {
+  if (document.body.dataset.infoWired) return;
+  document.body.dataset.infoWired = "1";
+  document.addEventListener("mouseover", e => {
+    const dot = e.target.closest && e.target.closest(".info");
+    if (dot) showInfoPop(dot);
+  });
+  document.addEventListener("mouseout", e => {
+    const dot = e.target.closest && e.target.closest(".info");
+    if (dot) hideInfoPop();
+  });
+  document.addEventListener("focusin", e => {
+    const dot = e.target.closest && e.target.closest(".info");
+    if (dot) showInfoPop(dot);
+  });
+  document.addEventListener("focusout", hideInfoPop);
+  // A dot inside a clickable header must not also sort or expand the row.
+  document.addEventListener("click", e => {
+    const dot = e.target.closest && e.target.closest(".info");
+    if (dot) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  window.addEventListener("scroll", hideInfoPop, true);
 }
 
 /* ---------------------------- ADMIN ----------------------------- */
@@ -1957,7 +2044,7 @@ function renderNumbersTable(rows) {
     const arrow = c.key === key ? (dir === 1 ? "arrow-asc" : "arrow-desc") : "";
     const align = c.type === "num" && c.key !== "health" ? " num" : (c.key === "health" ? " num" : "");
     return '<th class="sortable' + (arrow ? " " + arrow : "") + align + '" data-k="' + esc(c.key) + '">'
-      + esc(c.label) + '</th>';
+      + esc(c.label) + infoDot(c.key) + '</th>';
   }).join("");
 
   wrap.innerHTML = '<table class="ctable"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>';
@@ -1995,7 +2082,10 @@ function numberDrill(r) {
       + '<span class="nd">' + fmtCount(c.connects) + ' / ' + fmtCount(c.dials)
       + (c.bookings ? ' &middot; ' + fmtCount(c.bookings) + ' booked' : "") + '</span></div>';
   }).join("");
-  const stat = (l, v) => '<div><div class="sdr-l">' + esc(l) + '</div><div class="sdr-v">' + v + '</div></div>';
+  const KEYS = { Dials:"dials", Attempts:"attempts", Connects:"connects", Booked:"bookings",
+                 "Book %":"bookRate", Inbound:"inbound" };
+  const stat = (l, v) => '<div><div class="sdr-l">' + esc(l) + infoDot(KEYS[l]) + '</div>'
+    + '<div class="sdr-v">' + v + '</div></div>';
   const box = '<div class="sdrbox" style="margin-top:16px"><div class="sdr-h">This number, this window</div>'
     + '<div class="sdrgrid">'
       + stat("Dials", fmtCount(r.dials))
@@ -2052,9 +2142,12 @@ function renderClients() {
 
   wrap.innerHTML = summary
     + '<table class="ctable"><thead><tr>'
-    + '<th>Client</th><th class="num">Leads</th><th class="num">Dials</th>'
-    + '<th class="num">$/Dial</th><th class="num">$/Lead</th><th class="num">Deals Won</th>'
-    + '<th class="num">MRR</th><th class="num">Status</th>'
+    + '<th>Client</th><th class="num">Leads' + infoDot("leads") + '</th>'
+    + '<th class="num">Dials' + infoDot("dials") + '</th>'
+    + '<th class="num">$/Dial' + infoDot("perDial") + '</th>'
+    + '<th class="num">$/Lead' + infoDot("perLead") + '</th>'
+    + '<th class="num">Deals Won' + infoDot("won") + '</th>'
+    + '<th class="num">MRR' + infoDot("mrr") + '</th><th class="num">Status</th>'
     + '</tr></thead><tbody>' + body + '</tbody></table>';
 
   wrap.querySelectorAll(".crow").forEach(row => row.addEventListener("click", () => {
@@ -2190,7 +2283,9 @@ function clientDrill(row) {
 /* Lifetime SDR economics for one client: what we spent the dialer on and what it returned. */
 function sdrPanel(r) {
   if (!REV) return "";
-  const cell = (label, val, cls) => '<div><div class="sdr-l">' + esc(label) + '</div>'
+  const KEYS = { "Ad leads":"leads", Dials:"dials", "$ / Dial":"perDial", "$ / Lead":"perLead",
+                 "Deals won":"won", MRR:"mrr", ARR:"arr" };
+  const cell = (label, val, cls) => '<div><div class="sdr-l">' + esc(label) + infoDot(KEYS[label]) + '</div>'
     + '<div class="sdr-v' + (cls ? " " + cls : "") + '">' + val + '</div></div>';
   return '<div class="sdrbox"><div class="sdr-h">SDR performance &amp; deals <span class="faint">lifetime</span></div>'
     + '<div class="sdrgrid">'

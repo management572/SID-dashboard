@@ -64,6 +64,10 @@ jobs:
           # Sign-in list: salts and PBKDF2 hashes only, never a password. The board fails closed
           # without it, so a missing file locks everyone out rather than letting everyone in.
           cp config/access.json dist/config/access.json
+          # Metric definitions behind the info dots. Optional: a missing file just means no dots.
+          if [ -f config/metric-glossary.json ]; then
+            cp config/metric-glossary.json dist/config/metric-glossary.json
+          fi
           # Ship the aggregate data file (no PHI). Fall back to the sample if a live pull has not run.
           if [ -f data/dashboard-data.json ]; then
             cp data/dashboard-data.json dist/data/dashboard-data.json
