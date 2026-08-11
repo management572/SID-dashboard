@@ -271,23 +271,23 @@
   .cpill.alert { color:var(--alert); background:color-mix(in srgb, var(--alert) 14%, transparent); }
   .cpill.faint { color:var(--boneDim); background:var(--inkDeep); }
   /* Metric info dot + popover */
-  .info { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px;
+  .minfo { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px;
           border:1px solid var(--hair2); border-radius:50%; font-size:9px; font-weight:700;
           font-family:var(--body); color:var(--boneFaint); cursor:help; margin-left:5px;
           vertical-align:middle; flex:none; text-transform:none; letter-spacing:0; }
-  .info:hover, .info:focus { color:var(--bone); border-color:var(--accent); outline:none; }
-  .info-pop { position:fixed; z-index:80; max-width:330px; background:var(--ink2);
+  .minfo:hover, .minfo:focus { color:var(--bone); border-color:var(--accent); outline:none; }
+  .minfo-pop { position:fixed; z-index:80; max-width:330px; background:var(--ink2);
               border:1px solid var(--hair2); border-left:3px solid var(--accent); border-radius:10px;
               padding:13px 15px; box-shadow:0 12px 34px rgba(0,0,0,.45); font-size:12.5px;
               line-height:1.6; color:var(--boneDim); pointer-events:none; }
-  .info-pop .ip-t { font-family:var(--head); font-weight:700; font-size:13px; color:var(--bone);
+  .minfo-pop .ip-t { font-family:var(--head); font-weight:700; font-size:13px; color:var(--bone);
                     margin-bottom:6px; text-transform:none; letter-spacing:0; }
-  .info-pop .ip-h { font-size:10px; text-transform:uppercase; letter-spacing:.5px;
+  .minfo-pop .ip-h { font-size:10px; text-transform:uppercase; letter-spacing:.5px;
                     color:var(--boneFaint); margin-top:10px; }
-  .info-pop .ip-src { color:var(--accentText); }
-  .info-pop code { background:var(--inkDeep); padding:1px 5px; border-radius:4px; font-size:11px;
+  .minfo-pop .ip-src { color:var(--accentText); }
+  .minfo-pop code { background:var(--inkDeep); padding:1px 5px; border-radius:4px; font-size:11px;
                    font-family:var(--mono); }
-  th .info { border-color:var(--hair2); }
+  th .minfo { border-color:var(--hair2); }
 
   /* Sign in */
   #signin { position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
@@ -1687,7 +1687,7 @@ function covBar(v, tgt) {
 function infoDot(key) {
   const g = (CFG.glossary || {})[key];
   if (!g) return "";
-  return '<span class="info" tabindex="0" role="button" aria-label="About this metric" '
+  return '<span class="minfo" tabindex="0" role="button" aria-label="About this metric" '
        + 'data-metric="' + esc(key) + '">i</span>';
 }
 
@@ -1700,7 +1700,7 @@ function showInfoPop(el) {
   if (!g) return;
   const label = (el.closest("th, .tlabel, .sdr-l, label") || {}).textContent;
   const pop = document.createElement("div");
-  pop.className = "info-pop";
+  pop.className = "minfo-pop";
   pop.innerHTML =
       '<div class="ip-t">' + esc((label || el.dataset.metric).replace(/\s*i\s*$/, "").trim()) + '</div>'
     + '<div>' + esc(g.what || "") + '</div>'
@@ -1725,21 +1725,21 @@ function initInfoDots() {
   if (document.body.dataset.infoWired) return;
   document.body.dataset.infoWired = "1";
   document.addEventListener("mouseover", e => {
-    const dot = e.target.closest && e.target.closest(".info");
+    const dot = e.target.closest && e.target.closest(".minfo");
     if (dot) showInfoPop(dot);
   });
   document.addEventListener("mouseout", e => {
-    const dot = e.target.closest && e.target.closest(".info");
+    const dot = e.target.closest && e.target.closest(".minfo");
     if (dot) hideInfoPop();
   });
   document.addEventListener("focusin", e => {
-    const dot = e.target.closest && e.target.closest(".info");
+    const dot = e.target.closest && e.target.closest(".minfo");
     if (dot) showInfoPop(dot);
   });
   document.addEventListener("focusout", hideInfoPop);
   // A dot inside a clickable header must not also sort or expand the row.
   document.addEventListener("click", e => {
-    const dot = e.target.closest && e.target.closest(".info");
+    const dot = e.target.closest && e.target.closest(".minfo");
     if (dot) { e.stopPropagation(); e.preventDefault(); }
   }, true);
   window.addEventListener("scroll", hideInfoPop, true);
