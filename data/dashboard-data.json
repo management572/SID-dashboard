@@ -4,21 +4,21 @@
   "defaultPeriod": "7d",
   "sample": false,
   "source": "SID",
-  "generatedAt": "2026-08-18T03:33:35+00:00",
-  "freshnessMin": 22,
+  "generatedAt": "2026-08-18T05:26:01+00:00",
+  "freshnessMin": 21,
   "periods": {
     "Today": {
       "dateRange": "18 Aug 2026 to 18 Aug 2026",
       "windowDays": 1,
       "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 0,
+        "leadsToday": 3,
+        "leadsInRange": 3,
         "introsBookedToday": 3,
         "introsBookedInRange": 3,
-        "unworkedNow": 0,
-        "unworkedPastSla": 0,
+        "unworkedNow": 3,
+        "unworkedPastSla": 3,
         "speedToLeadMedianMin": 720.0,
-        "dayOneCoverage": null,
+        "dayOneCoverage": 0.0,
         "formCompliance": null,
         "dialsLogged": 6,
         "attemptsDialed": 6,
@@ -34,13 +34,79 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 8,
-          "p2": 17,
-          "p3": 71,
-          "p4": 148
+          "p2": 22,
+          "p3": 70,
+          "p4": 149
         },
         "onFloorNow": null
       },
       "clients": [
+        {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 0,
+          "contacted": 0,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.0,
+          "connectRate": null,
+          "bookRate": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 72.0,
+            "connectToBooked": 0.0,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "HPI",
+          "label": "HPI",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 0,
+          "contacted": 0,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.0,
+          "connectRate": null,
+          "bookRate": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ROC",
+          "label": "ROC",
+          "market": null,
+          "active": true,
+          "leads": 1,
+          "worked": 0,
+          "contacted": 0,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.0,
+          "connectRate": null,
+          "bookRate": null,
+          "showRate": null,
+          "speedToLeadMedianMin": null,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
         {
           "key": "LPC",
           "label": "Lenorah's Personal Care",
@@ -170,7 +236,7 @@
           "2026-08-18"
         ],
         "leads": [
-          0
+          3
         ],
         "worked": [
           0
@@ -451,18 +517,27 @@
           }
         }
       ],
-      "insights": [],
+      "insights": [
+        {
+          "severity": "alert",
+          "headline": "3 leads unworked past the SLA",
+          "detail": "Inside floor hours, past 30 minutes with zero attempts.",
+          "metric": "unworkedPastSla",
+          "leadsAtRisk": 3,
+          "rank": 1
+        }
+      ],
       "prevDateRange": "17 Aug 2026 to 17 Aug 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 0,
+          "cur": 3,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 0,
-          "prev": 24,
-          "pct": -1.0
+          "cur": 3,
+          "prev": 26,
+          "pct": -0.8846
         },
         "introsBookedToday": {
           "cur": 3,
@@ -470,14 +545,14 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 0,
-          "prev": 10,
-          "pct": -1.0
+          "cur": 3,
+          "prev": 12,
+          "pct": -0.75
         },
         "unworkedPastSla": {
-          "cur": 0,
-          "prev": 10,
-          "pct": -1.0
+          "cur": 3,
+          "prev": 12,
+          "pct": -0.75
         },
         "speedToLeadMedianMin": {
           "cur": 720.0,
@@ -485,9 +560,9 @@
           "pct": 0.0
         },
         "dayOneCoverage": {
-          "cur": null,
-          "prev": 0.5833,
-          "pct": null
+          "cur": 0.0,
+          "prev": 0.5385,
+          "pct": -1.0
         },
         "formCompliance": {
           "cur": null,
@@ -550,14 +625,14 @@
       "dateRange": "11 Aug 2026 to 18 Aug 2026",
       "windowDays": 7,
       "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 240,
+        "leadsToday": 3,
+        "leadsInRange": 245,
         "introsBookedToday": 3,
         "introsBookedInRange": 56,
-        "unworkedNow": 36,
-        "unworkedPastSla": 36,
+        "unworkedNow": 41,
+        "unworkedPastSla": 41,
         "speedToLeadMedianMin": 658.0,
-        "dayOneCoverage": 0.825,
+        "dayOneCoverage": 0.8082,
         "formCompliance": 0.0,
         "dialsLogged": 2134,
         "attemptsDialed": 612,
@@ -573,9 +648,9 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 8,
-          "p2": 17,
-          "p3": 71,
-          "p4": 148
+          "p2": 22,
+          "p3": 70,
+          "p4": 149
         },
         "onFloorNow": null
       },
@@ -651,14 +726,14 @@
           "label": "HPI",
           "market": null,
           "active": true,
-          "leads": 12,
-          "worked": 12,
-          "contacted": 12,
+          "leads": 13,
+          "worked": 13,
+          "contacted": 13,
           "booked": 5,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.4167,
+          "bookRate": 0.3846,
           "showRate": 0.0,
           "speedToLeadMedianMin": 579.5,
           "lags": {
@@ -695,12 +770,12 @@
           "label": "ROC",
           "market": null,
           "active": true,
-          "leads": 11,
+          "leads": 12,
           "worked": 3,
           "contacted": 2,
           "booked": 2,
           "shows": 0,
-          "workedPct": 0.2727,
+          "workedPct": 0.25,
           "connectRate": 0.6667,
           "bookRate": 1.0,
           "showRate": 0.0,
@@ -911,6 +986,28 @@
           }
         },
         {
+          "key": "ALM",
+          "label": "ALM",
+          "market": null,
+          "active": true,
+          "leads": 5,
+          "worked": 4,
+          "contacted": 4,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.8,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 705.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 60.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "PCH",
           "label": "PCH",
           "market": null,
@@ -951,28 +1048,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 9.1,
             "connectToBooked": 1.6,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALM",
-          "label": "ALM",
-          "market": null,
-          "active": true,
-          "leads": 4,
-          "worked": 4,
-          "contacted": 4,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.0,
-          "showRate": null,
-          "speedToLeadMedianMin": 705.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 60.0,
-            "connectToBooked": null,
             "bookedToHeld": null
           }
         },
@@ -1043,6 +1118,28 @@
           }
         },
         {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 3,
+          "worked": 2,
+          "contacted": 2,
+          "booked": 0,
+          "shows": 0,
+          "workedPct": 0.6667,
+          "connectRate": 1.0,
+          "bookRate": 0.0,
+          "showRate": null,
+          "speedToLeadMedianMin": 550.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 72.0,
+            "connectToBooked": 0.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "ALP",
           "label": "ALP",
           "market": null,
@@ -1083,28 +1180,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 48.0,
             "connectToBooked": 24.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACS",
-          "label": "ACS",
-          "market": null,
-          "active": true,
-          "leads": 2,
-          "worked": 2,
-          "contacted": 2,
-          "booked": 0,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.0,
-          "showRate": null,
-          "speedToLeadMedianMin": 550.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 72.0,
-            "connectToBooked": 0.0,
             "bookedToHeld": null
           }
         },
@@ -1375,8 +1450,8 @@
           33,
           36,
           30,
-          24,
-          0
+          26,
+          3
         ],
         "worked": [
           67,
@@ -1574,14 +1649,14 @@
         {
           "number": "+19515015234",
           "state": "CA",
-          "dials": 133,
+          "dials": 132,
           "attempts": 29,
           "connects": 37,
-          "connectRate": 0.2782,
+          "connectRate": 0.2803,
           "bookings": 2,
           "bookRate": 0.0541,
-          "failed": 52,
-          "failRate": 0.391,
+          "failed": 51,
+          "failRate": 0.3864,
           "inbound": 8,
           "talkTimeSec": 3599,
           "avgDurationSec": 74.08,
@@ -1591,10 +1666,10 @@
           "clients": [
             {
               "key": "RHC",
-              "dials": 130,
+              "dials": 129,
               "connects": 36,
               "bookings": 2,
-              "connectRate": 0.2769
+              "connectRate": 0.2791
             },
             {
               "key": "GXY",
@@ -1691,14 +1766,14 @@
         {
           "number": "+12484539294",
           "state": "MI",
-          "dials": 100,
+          "dials": 101,
           "attempts": 20,
           "connects": 21,
-          "connectRate": 0.21,
+          "connectRate": 0.2079,
           "bookings": 6,
           "bookRate": 0.2857,
-          "failed": 25,
-          "failRate": 0.25,
+          "failed": 26,
+          "failRate": 0.2574,
           "inbound": 4,
           "talkTimeSec": 3704,
           "avgDurationSec": 129.72413793103448,
@@ -1708,10 +1783,10 @@
           "clients": [
             {
               "key": "THC",
-              "dials": 91,
+              "dials": 92,
               "connects": 21,
               "bookings": 6,
-              "connectRate": 0.2308
+              "connectRate": 0.2283
             },
             {
               "key": "RHC",
@@ -1957,14 +2032,14 @@
         {
           "number": "+17137142703",
           "state": "TX",
-          "dials": 57,
+          "dials": 58,
           "attempts": 17,
           "connects": 16,
-          "connectRate": 0.2807,
+          "connectRate": 0.2759,
           "bookings": 2,
           "bookRate": 0.125,
-          "failed": 7,
-          "failRate": 0.1228,
+          "failed": 8,
+          "failRate": 0.1379,
           "inbound": 7,
           "talkTimeSec": 2423,
           "avgDurationSec": 98.6,
@@ -1980,18 +2055,18 @@
               "connectRate": 0.2778
             },
             {
+              "key": "LPC",
+              "dials": 2,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            },
+            {
               "key": "OYV",
               "dials": 1,
               "connects": 1,
               "bookings": 0,
               "connectRate": 1.0
-            },
-            {
-              "key": "LPC",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
             },
             {
               "key": "ALP",
@@ -2689,6 +2764,45 @@
           }
         },
         {
+          "number": "+17372014257",
+          "state": "TX",
+          "dials": 20,
+          "attempts": 8,
+          "connects": 5,
+          "connectRate": 0.25,
+          "bookings": 1,
+          "bookRate": 0.2,
+          "failed": 2,
+          "failRate": 0.1,
+          "inbound": 2,
+          "talkTimeSec": 704,
+          "avgDurationSec": 90.0,
+          "setters": 5,
+          "clientCount": 2,
+          "topClient": "SHE",
+          "clients": [
+            {
+              "key": "SHE",
+              "dials": 19,
+              "connects": 5,
+              "bookings": 1,
+              "connectRate": 0.2632
+            },
+            {
+              "key": "SHC",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
+          "health": {
+            "band": "unrated",
+            "label": "Too few dials"
+          }
+        },
+        {
           "number": "+14014433774",
           "state": "RI",
           "dials": 20,
@@ -2715,45 +2829,6 @@
             }
           ],
           "lastUsed": "2026-08-17T18:15:11.235000+00:00",
-          "health": {
-            "band": "unrated",
-            "label": "Too few dials"
-          }
-        },
-        {
-          "number": "+17372014257",
-          "state": "TX",
-          "dials": 19,
-          "attempts": 8,
-          "connects": 5,
-          "connectRate": 0.2632,
-          "bookings": 1,
-          "bookRate": 0.2,
-          "failed": 2,
-          "failRate": 0.1053,
-          "inbound": 2,
-          "talkTimeSec": 704,
-          "avgDurationSec": 90.0,
-          "setters": 4,
-          "clientCount": 2,
-          "topClient": "SHE",
-          "clients": [
-            {
-              "key": "SHE",
-              "dials": 18,
-              "connects": 5,
-              "bookings": 1,
-              "connectRate": 0.2778
-            },
-            {
-              "key": "SHC",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
           "health": {
             "band": "unrated",
             "label": "Too few dials"
@@ -2841,7 +2916,7 @@
           "bookRate": 0.0,
           "failed": 0,
           "failRate": 0.0,
-          "inbound": 5,
+          "inbound": 6,
           "talkTimeSec": 510,
           "avgDurationSec": 42.76923076923077,
           "setters": 3,
@@ -3581,6 +3656,30 @@
           }
         },
         {
+          "number": "+17723482714",
+          "state": "FL",
+          "dials": 3,
+          "attempts": 1,
+          "connects": 1,
+          "connectRate": 0.3333,
+          "bookings": 0,
+          "bookRate": 0.0,
+          "failed": 0,
+          "failRate": 0.0,
+          "inbound": 0,
+          "talkTimeSec": 21,
+          "avgDurationSec": 21.0,
+          "setters": 2,
+          "clientCount": 0,
+          "topClient": null,
+          "clients": [],
+          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
+          "health": {
+            "band": "unrated",
+            "label": "Too few dials"
+          }
+        },
+        {
           "number": "+13148766452",
           "state": "MO",
           "dials": 3,
@@ -3734,30 +3833,6 @@
             }
           ],
           "lastUsed": "2026-08-16T21:54:28.543000+00:00",
-          "health": {
-            "band": "unrated",
-            "label": "Too few dials"
-          }
-        },
-        {
-          "number": "+17723482714",
-          "state": "FL",
-          "dials": 2,
-          "attempts": 1,
-          "connects": 1,
-          "connectRate": 0.5,
-          "bookings": 0,
-          "bookRate": 0.0,
-          "failed": 0,
-          "failRate": 0.0,
-          "inbound": 0,
-          "talkTimeSec": 21,
-          "avgDurationSec": 21.0,
-          "setters": 2,
-          "clientCount": 0,
-          "topClient": null,
-          "clients": [],
-          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
           "health": {
             "band": "unrated",
             "label": "Too few dials"
@@ -4231,10 +4306,10 @@
         },
         {
           "severity": "alert",
-          "headline": "36 leads unworked past the SLA",
+          "headline": "41 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 36,
+          "leadsAtRisk": 41,
           "rank": 3
         },
         {
@@ -4249,14 +4324,14 @@
       "prevDateRange": "04 Aug 2026 to 11 Aug 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 0,
+          "cur": 3,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 240,
+          "cur": 245,
           "prev": 219,
-          "pct": 0.0959
+          "pct": 0.1187
         },
         "introsBookedToday": {
           "cur": 3,
@@ -4264,14 +4339,14 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 36,
+          "cur": 41,
           "prev": 18,
-          "pct": 1.0
+          "pct": 1.2778
         },
         "unworkedPastSla": {
-          "cur": 36,
+          "cur": 41,
           "prev": 18,
-          "pct": 1.0
+          "pct": 1.2778
         },
         "speedToLeadMedianMin": {
           "cur": 658.0,
@@ -4279,9 +4354,9 @@
           "pct": 0.0545
         },
         "dayOneCoverage": {
-          "cur": 0.825,
+          "cur": 0.8082,
           "prev": 0.8813,
-          "pct": -0.0639
+          "pct": -0.0829
         },
         "formCompliance": {
           "cur": 0.0,
@@ -4344,14 +4419,14 @@
       "dateRange": "19 Jul 2026 to 18 Aug 2026",
       "windowDays": 30,
       "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 990,
+        "leadsToday": 3,
+        "leadsInRange": 995,
         "introsBookedToday": 3,
         "introsBookedInRange": 269,
-        "unworkedNow": 103,
-        "unworkedPastSla": 103,
+        "unworkedNow": 108,
+        "unworkedPastSla": 108,
         "speedToLeadMedianMin": 434.0,
-        "dayOneCoverage": 0.8596,
+        "dayOneCoverage": 0.8553,
         "formCompliance": 0.0,
         "dialsLogged": 7990,
         "attemptsDialed": 2175,
@@ -4367,9 +4442,9 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 8,
-          "p2": 17,
-          "p3": 71,
-          "p4": 148
+          "p2": 22,
+          "p3": 70,
+          "p4": 149
         },
         "onFloorNow": null
       },
@@ -4463,6 +4538,28 @@
           }
         },
         {
+          "key": "HPI",
+          "label": "HPI",
+          "market": null,
+          "active": true,
+          "leads": 37,
+          "worked": 37,
+          "contacted": 33,
+          "booked": 9,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 0.8919,
+          "bookRate": 0.2727,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 601.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "RHC",
           "label": "RHC",
           "market": null,
@@ -4481,28 +4578,6 @@
             "leadToFirstAttempt": 12.0,
             "leadToConnect": 24.0,
             "connectToBooked": 27.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HPI",
-          "label": "HPI",
-          "market": null,
-          "active": true,
-          "leads": 36,
-          "worked": 36,
-          "contacted": 33,
-          "booked": 9,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 0.9167,
-          "bookRate": 0.2727,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 601.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -4551,6 +4626,28 @@
           }
         },
         {
+          "key": "ROC",
+          "label": "ROC",
+          "market": null,
+          "active": true,
+          "leads": 32,
+          "worked": 29,
+          "contacted": 29,
+          "booked": 8,
+          "shows": 0,
+          "workedPct": 0.9062,
+          "connectRate": 1.0,
+          "bookRate": 0.2759,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 704.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "JOY",
           "label": "JOY",
           "market": null,
@@ -4569,28 +4666,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 46.9,
             "connectToBooked": 51.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ROC",
-          "label": "ROC",
-          "market": null,
-          "active": true,
-          "leads": 31,
-          "worked": 29,
-          "contacted": 29,
-          "booked": 8,
-          "shows": 0,
-          "workedPct": 0.9355,
-          "connectRate": 1.0,
-          "bookRate": 0.2759,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 704.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -4837,6 +4912,28 @@
           }
         },
         {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 14,
+          "worked": 14,
+          "contacted": 14,
+          "booked": 6,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.4286,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 460.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 72.0,
+            "connectToBooked": 0.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "APA",
           "label": "APA",
           "market": null,
@@ -4899,28 +4996,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 90.7,
             "connectToBooked": 117.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACS",
-          "label": "ACS",
-          "market": null,
-          "active": true,
-          "leads": 13,
-          "worked": 13,
-          "contacted": 13,
-          "booked": 6,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.4615,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 460.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 72.0,
-            "connectToBooked": 0.0,
             "bookedToHeld": null
           }
         },
@@ -4991,6 +5066,28 @@
           }
         },
         {
+          "key": "ALM",
+          "label": "ALM",
+          "market": null,
+          "active": true,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.2,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 690.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 60.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "HSE",
           "label": "HSE",
           "market": null,
@@ -5009,28 +5106,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 24.0,
             "connectToBooked": 24.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALM",
-          "label": "ALM",
-          "market": null,
-          "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
-          "booked": 2,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.2222,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 690.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 60.0,
-            "connectToBooked": null,
             "bookedToHeld": null
           }
         },
@@ -5404,8 +5479,8 @@
           33,
           36,
           30,
-          24,
-          0
+          26,
+          3
         ],
         "worked": [
           64,
@@ -5651,14 +5726,14 @@
         {
           "number": "+14408272537",
           "state": "OH",
-          "dials": 685,
+          "dials": 684,
           "attempts": 163,
           "connects": 261,
-          "connectRate": 0.381,
+          "connectRate": 0.3816,
           "bookings": 33,
           "bookRate": 0.1264,
-          "failed": 29,
-          "failRate": 0.0423,
+          "failed": 28,
+          "failRate": 0.0409,
           "inbound": 59,
           "talkTimeSec": 19347,
           "avgDurationSec": 43.64968152866242,
@@ -5668,10 +5743,10 @@
           "clients": [
             {
               "key": "ENC",
-              "dials": 673,
+              "dials": 672,
               "connects": 256,
               "bookings": 33,
-              "connectRate": 0.3804
+              "connectRate": 0.381
             },
             {
               "key": "AHC",
@@ -5698,7 +5773,7 @@
           "bookRate": 0.1019,
           "failed": 29,
           "failRate": 0.0714,
-          "inbound": 21,
+          "inbound": 18,
           "talkTimeSec": 14640,
           "avgDurationSec": 52.97586206896552,
           "setters": 7,
@@ -5750,27 +5825,27 @@
         {
           "number": "+14705744539",
           "state": "GA",
-          "dials": 371,
+          "dials": 372,
           "attempts": 105,
           "connects": 136,
-          "connectRate": 0.3666,
+          "connectRate": 0.3656,
           "bookings": 3,
           "bookRate": 0.0221,
           "failed": 32,
-          "failRate": 0.0863,
+          "failRate": 0.086,
           "inbound": 47,
           "talkTimeSec": 12523,
-          "avgDurationSec": 54.30612244897959,
+          "avgDurationSec": 54.1260162601626,
           "setters": 7,
           "clientCount": 3,
           "topClient": "BCF",
           "clients": [
             {
               "key": "BCF",
-              "dials": 339,
+              "dials": 340,
               "connects": 123,
               "bookings": 2,
-              "connectRate": 0.3628
+              "connectRate": 0.3618
             },
             {
               "key": "ACL",
@@ -5856,15 +5931,15 @@
         {
           "number": "+13053767715",
           "state": "FL",
-          "dials": 329,
+          "dials": 330,
           "attempts": 109,
           "connects": 107,
-          "connectRate": 0.3252,
+          "connectRate": 0.3242,
           "bookings": 10,
           "bookRate": 0.0935,
-          "failed": 27,
-          "failRate": 0.0821,
-          "inbound": 53,
+          "failed": 28,
+          "failRate": 0.0848,
+          "inbound": 52,
           "talkTimeSec": 10878,
           "avgDurationSec": 53.901869158878505,
           "setters": 7,
@@ -5987,14 +6062,14 @@
         {
           "number": "+12484539294",
           "state": "MI",
-          "dials": 220,
+          "dials": 221,
           "attempts": 61,
           "connects": 79,
-          "connectRate": 0.3591,
+          "connectRate": 0.3575,
           "bookings": 11,
           "bookRate": 0.1392,
-          "failed": 29,
-          "failRate": 0.1318,
+          "failed": 30,
+          "failRate": 0.1357,
           "inbound": 25,
           "talkTimeSec": 11118,
           "avgDurationSec": 97.11111111111111,
@@ -6004,10 +6079,10 @@
           "clients": [
             {
               "key": "THC",
-              "dials": 192,
+              "dials": 193,
               "connects": 71,
               "bookings": 11,
-              "connectRate": 0.3698
+              "connectRate": 0.3679
             },
             {
               "key": "AHS",
@@ -6086,15 +6161,15 @@
         {
           "number": "+18135440703",
           "state": "FL",
-          "dials": 209,
-          "attempts": 90,
+          "dials": 210,
+          "attempts": 91,
           "connects": 70,
-          "connectRate": 0.3349,
+          "connectRate": 0.3333,
           "bookings": 3,
           "bookRate": 0.0429,
-          "failed": 10,
-          "failRate": 0.0478,
-          "inbound": 37,
+          "failed": 11,
+          "failRate": 0.0524,
+          "inbound": 34,
           "talkTimeSec": 7417,
           "avgDurationSec": 56.96376811594203,
           "setters": 6,
@@ -6133,7 +6208,7 @@
           "bookRate": 0.0769,
           "failed": 10,
           "failRate": 0.0485,
-          "inbound": 10,
+          "inbound": 11,
           "talkTimeSec": 6724,
           "avgDurationSec": 45.84375,
           "setters": 7,
@@ -6157,14 +6232,14 @@
         {
           "number": "+19515015234",
           "state": "CA",
-          "dials": 205,
+          "dials": 204,
           "attempts": 51,
           "connects": 72,
-          "connectRate": 0.3512,
+          "connectRate": 0.3529,
           "bookings": 8,
           "bookRate": 0.1111,
-          "failed": 54,
-          "failRate": 0.2634,
+          "failed": 53,
+          "failRate": 0.2598,
           "inbound": 28,
           "talkTimeSec": 8097,
           "avgDurationSec": 81.10679611650485,
@@ -6174,10 +6249,10 @@
           "clients": [
             {
               "key": "RHC",
-              "dials": 191,
+              "dials": 190,
               "connects": 67,
               "bookings": 8,
-              "connectRate": 0.3508
+              "connectRate": 0.3526
             },
             {
               "key": "GXY",
@@ -6203,14 +6278,14 @@
         {
           "number": "+17137142703",
           "state": "TX",
-          "dials": 198,
+          "dials": 199,
           "attempts": 62,
           "connects": 64,
-          "connectRate": 0.3232,
+          "connectRate": 0.3216,
           "bookings": 8,
           "bookRate": 0.125,
-          "failed": 21,
-          "failRate": 0.1061,
+          "failed": 22,
+          "failRate": 0.1106,
           "inbound": 27,
           "talkTimeSec": 9469,
           "avgDurationSec": 81.64166666666667,
@@ -6226,18 +6301,18 @@
               "connectRate": 0.3481
             },
             {
+              "key": "LPC",
+              "dials": 2,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            },
+            {
               "key": "OYV",
               "dials": 1,
               "connects": 1,
               "bookings": 0,
               "connectRate": 1.0
-            },
-            {
-              "key": "LPC",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
             },
             {
               "key": "ALP",
@@ -6536,7 +6611,7 @@
           "bookRate": 0.1029,
           "failed": 8,
           "failRate": 0.0516,
-          "inbound": 21,
+          "inbound": 22,
           "talkTimeSec": 9229,
           "avgDurationSec": 78.93388429752066,
           "setters": 7,
@@ -6582,7 +6657,7 @@
           "bookRate": 0.0952,
           "failed": 8,
           "failRate": 0.053,
-          "inbound": 19,
+          "inbound": 20,
           "talkTimeSec": 5728,
           "avgDurationSec": 56.801886792452834,
           "setters": 7,
@@ -6620,27 +6695,27 @@
         {
           "number": "+16238870272",
           "state": "AZ",
-          "dials": 149,
+          "dials": 148,
           "attempts": 49,
           "connects": 50,
-          "connectRate": 0.3356,
+          "connectRate": 0.3378,
           "bookings": 4,
           "bookRate": 0.08,
           "failed": 3,
-          "failRate": 0.0201,
-          "inbound": 5,
+          "failRate": 0.0203,
+          "inbound": 4,
           "talkTimeSec": 6618,
-          "avgDurationSec": 64.46296296296296,
+          "avgDurationSec": 65.00934579439253,
           "setters": 6,
           "clientCount": 2,
           "topClient": "GEN",
           "clients": [
             {
               "key": "GEN",
-              "dials": 28,
+              "dials": 27,
               "connects": 13,
               "bookings": 3,
-              "connectRate": 0.4643
+              "connectRate": 0.4815
             },
             {
               "key": "HWZ",
@@ -6667,7 +6742,7 @@
           "bookRate": 0.1277,
           "failed": 16,
           "failRate": 0.1096,
-          "inbound": 11,
+          "inbound": 12,
           "talkTimeSec": 4403,
           "avgDurationSec": 51.285714285714285,
           "setters": 5,
@@ -6978,14 +7053,14 @@
         {
           "number": "+19253911056",
           "state": "CA",
-          "dials": 90,
+          "dials": 91,
           "attempts": 29,
           "connects": 26,
-          "connectRate": 0.2889,
+          "connectRate": 0.2857,
           "bookings": 0,
           "bookRate": 0.0,
-          "failed": 5,
-          "failRate": 0.0556,
+          "failed": 6,
+          "failRate": 0.0659,
           "inbound": 12,
           "talkTimeSec": 1103,
           "avgDurationSec": 23.140350877192983,
@@ -7135,7 +7210,7 @@
           "bookRate": 0.0303,
           "failed": 4,
           "failRate": 0.0513,
-          "inbound": 5,
+          "inbound": 6,
           "talkTimeSec": 2718,
           "avgDurationSec": 48.559322033898304,
           "setters": 6,
@@ -7363,6 +7438,45 @@
           }
         },
         {
+          "number": "+17372014257",
+          "state": "TX",
+          "dials": 65,
+          "attempts": 21,
+          "connects": 21,
+          "connectRate": 0.3231,
+          "bookings": 2,
+          "bookRate": 0.0952,
+          "failed": 6,
+          "failRate": 0.0923,
+          "inbound": 9,
+          "talkTimeSec": 1780,
+          "avgDurationSec": 50.513513513513516,
+          "setters": 6,
+          "clientCount": 2,
+          "topClient": "SHE",
+          "clients": [
+            {
+              "key": "SHE",
+              "dials": 57,
+              "connects": 18,
+              "bookings": 2,
+              "connectRate": 0.3158
+            },
+            {
+              "key": "SHC",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+13465214705",
           "state": "TX",
           "dials": 63,
@@ -7403,45 +7517,6 @@
             }
           ],
           "lastUsed": "2026-08-18T02:03:15.256000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
-          "number": "+17372014257",
-          "state": "TX",
-          "dials": 63,
-          "attempts": 20,
-          "connects": 21,
-          "connectRate": 0.3333,
-          "bookings": 2,
-          "bookRate": 0.0952,
-          "failed": 6,
-          "failRate": 0.0952,
-          "inbound": 8,
-          "talkTimeSec": 1780,
-          "avgDurationSec": 50.513513513513516,
-          "setters": 5,
-          "clientCount": 2,
-          "topClient": "SHE",
-          "clients": [
-            {
-              "key": "SHE",
-              "dials": 56,
-              "connects": 18,
-              "bookings": 2,
-              "connectRate": 0.3214
-            },
-            {
-              "key": "SHC",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
           "health": {
             "band": "good",
             "label": "Healthy"
@@ -8130,7 +8205,7 @@
           "bookRate": 0.0,
           "failed": 0,
           "failRate": 0.0,
-          "inbound": 5,
+          "inbound": 6,
           "talkTimeSec": 510,
           "avgDurationSec": 42.76923076923077,
           "setters": 3,
@@ -8240,6 +8315,45 @@
           }
         },
         {
+          "number": "+13466712189",
+          "state": "TX",
+          "dials": 12,
+          "attempts": 8,
+          "connects": 3,
+          "connectRate": 0.25,
+          "bookings": 1,
+          "bookRate": 0.3333,
+          "failed": 2,
+          "failRate": 0.1667,
+          "inbound": 10,
+          "talkTimeSec": 219,
+          "avgDurationSec": 45.4,
+          "setters": 1,
+          "clientCount": 2,
+          "topClient": "HHC",
+          "clients": [
+            {
+              "key": "HHC",
+              "dials": 11,
+              "connects": 3,
+              "bookings": 0,
+              "connectRate": 0.2727
+            },
+            {
+              "key": "LPC",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-11T07:42:46.829000+00:00",
+          "health": {
+            "band": "unrated",
+            "label": "Too few dials"
+          }
+        },
+        {
           "number": "+14752711843",
           "state": "CT",
           "dials": 11,
@@ -8333,38 +8447,6 @@
             }
           ],
           "lastUsed": "2026-08-17T16:58:38.018000+00:00",
-          "health": {
-            "band": "unrated",
-            "label": "Too few dials"
-          }
-        },
-        {
-          "number": "+13466712189",
-          "state": "TX",
-          "dials": 11,
-          "attempts": 7,
-          "connects": 3,
-          "connectRate": 0.2727,
-          "bookings": 1,
-          "bookRate": 0.3333,
-          "failed": 2,
-          "failRate": 0.1818,
-          "inbound": 10,
-          "talkTimeSec": 219,
-          "avgDurationSec": 45.4,
-          "setters": 1,
-          "clientCount": 1,
-          "topClient": "HHC",
-          "clients": [
-            {
-              "key": "HHC",
-              "dials": 11,
-              "connects": 3,
-              "bookings": 0,
-              "connectRate": 0.2727
-            }
-          ],
-          "lastUsed": "2026-08-11T07:42:46.829000+00:00",
           "health": {
             "band": "unrated",
             "label": "Too few dials"
@@ -8665,6 +8747,30 @@
           }
         },
         {
+          "number": "+17723482714",
+          "state": "FL",
+          "dials": 5,
+          "attempts": 2,
+          "connects": 3,
+          "connectRate": 0.6,
+          "bookings": 0,
+          "bookRate": 0.0,
+          "failed": 0,
+          "failRate": 0.0,
+          "inbound": 7,
+          "talkTimeSec": 73,
+          "avgDurationSec": 24.333333333333332,
+          "setters": 3,
+          "clientCount": 0,
+          "topClient": null,
+          "clients": [],
+          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
+          "health": {
+            "band": "unrated",
+            "label": "Too few dials"
+          }
+        },
+        {
           "number": "+18135928641",
           "state": "FL",
           "dials": 4,
@@ -8698,30 +8804,6 @@
             }
           ],
           "lastUsed": "2026-08-06T20:14:07.228000+00:00",
-          "health": {
-            "band": "unrated",
-            "label": "Too few dials"
-          }
-        },
-        {
-          "number": "+17723482714",
-          "state": "FL",
-          "dials": 4,
-          "attempts": 2,
-          "connects": 3,
-          "connectRate": 0.75,
-          "bookings": 0,
-          "bookRate": 0.0,
-          "failed": 0,
-          "failRate": 0.0,
-          "inbound": 7,
-          "talkTimeSec": 73,
-          "avgDurationSec": 24.333333333333332,
-          "setters": 3,
-          "clientCount": 0,
-          "topClient": null,
-          "clients": [],
-          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
           "health": {
             "band": "unrated",
             "label": "Too few dials"
@@ -9283,24 +9365,24 @@
         },
         {
           "severity": "alert",
-          "headline": "103 leads unworked past the SLA",
+          "headline": "108 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 103,
+          "leadsAtRisk": 108,
           "rank": 4
         }
       ],
       "prevDateRange": "19 Jun 2026 to 19 Jul 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 0,
+          "cur": 3,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 990,
+          "cur": 995,
           "prev": 2,
-          "pct": 494.0
+          "pct": 496.5
         },
         "introsBookedToday": {
           "cur": 3,
@@ -9308,14 +9390,14 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 103,
+          "cur": 108,
           "prev": 1,
-          "pct": 102.0
+          "pct": 107.0
         },
         "unworkedPastSla": {
-          "cur": 103,
+          "cur": 108,
           "prev": 1,
-          "pct": 102.0
+          "pct": 107.0
         },
         "speedToLeadMedianMin": {
           "cur": 434.0,
@@ -9323,7 +9405,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.8596,
+          "cur": 0.8553,
           "prev": 0.0,
           "pct": null
         },
@@ -9388,14 +9470,14 @@
       "dateRange": "01 Aug 2026 to 18 Aug 2026",
       "windowDays": 17,
       "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 582,
+        "leadsToday": 3,
+        "leadsInRange": 587,
         "introsBookedToday": 3,
         "introsBookedInRange": 147,
-        "unworkedNow": 67,
-        "unworkedPastSla": 67,
+        "unworkedNow": 72,
+        "unworkedPastSla": 72,
         "speedToLeadMedianMin": 624.0,
-        "dayOneCoverage": 0.8591,
+        "dayOneCoverage": 0.8518,
         "formCompliance": 0.0,
         "dialsLogged": 5397,
         "attemptsDialed": 1602,
@@ -9411,9 +9493,9 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 8,
-          "p2": 17,
-          "p3": 71,
-          "p4": 148
+          "p2": 22,
+          "p3": 70,
+          "p4": 149
         },
         "onFloorNow": null
       },
@@ -9511,12 +9593,12 @@
           "label": "ROC",
           "market": null,
           "active": true,
-          "leads": 28,
+          "leads": 29,
           "worked": 23,
           "contacted": 23,
           "booked": 6,
           "shows": 0,
-          "workedPct": 0.8214,
+          "workedPct": 0.7931,
           "connectRate": 1.0,
           "bookRate": 0.2609,
           "showRate": 0.0,
@@ -9533,14 +9615,14 @@
           "label": "HPI",
           "market": null,
           "active": true,
-          "leads": 25,
-          "worked": 25,
-          "contacted": 25,
+          "leads": 26,
+          "worked": 26,
+          "contacted": 26,
           "booked": 9,
           "shows": 0,
           "workedPct": 1.0,
           "connectRate": 1.0,
-          "bookRate": 0.36,
+          "bookRate": 0.3462,
           "showRate": 0.0,
           "speedToLeadMedianMin": 674.0,
           "lags": {
@@ -9859,6 +9941,50 @@
           }
         },
         {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 7,
+          "worked": 7,
+          "contacted": 7,
+          "booked": 3,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.4286,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 446.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 72.0,
+            "connectToBooked": 0.0,
+            "bookedToHeld": null
+          }
+        },
+        {
+          "key": "ALM",
+          "label": "ALM",
+          "market": null,
+          "active": true,
+          "leads": 7,
+          "worked": 7,
+          "contacted": 7,
+          "booked": 1,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.1429,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 719.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 60.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "APA",
           "label": "APA",
           "market": null,
@@ -9965,50 +10091,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 132.0,
             "connectToBooked": 170.8,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACS",
-          "label": "ACS",
-          "market": null,
-          "active": true,
-          "leads": 6,
-          "worked": 6,
-          "contacted": 6,
-          "booked": 3,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.5,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 446.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 72.0,
-            "connectToBooked": 0.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALM",
-          "label": "ALM",
-          "market": null,
-          "active": true,
-          "leads": 6,
-          "worked": 6,
-          "contacted": 6,
-          "booked": 1,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.1667,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 719.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 60.0,
-            "connectToBooked": null,
             "bookedToHeld": null
           }
         },
@@ -10419,8 +10501,8 @@
           33,
           36,
           30,
-          24,
-          0
+          26,
+          3
         ],
         "worked": [
           55,
@@ -10628,27 +10710,27 @@
         {
           "number": "+14705744539",
           "state": "GA",
-          "dials": 279,
+          "dials": 280,
           "attempts": 85,
           "connects": 98,
-          "connectRate": 0.3513,
+          "connectRate": 0.35,
           "bookings": 2,
           "bookRate": 0.0204,
           "failed": 26,
-          "failRate": 0.0932,
+          "failRate": 0.0929,
           "inbound": 27,
           "talkTimeSec": 8520,
-          "avgDurationSec": 48.638297872340424,
+          "avgDurationSec": 48.43386243386244,
           "setters": 7,
           "clientCount": 2,
           "topClient": "BCF",
           "clients": [
             {
               "key": "BCF",
-              "dials": 260,
+              "dials": 261,
               "connects": 91,
               "bookings": 1,
-              "connectRate": 0.35
+              "connectRate": 0.3487
             },
             {
               "key": "ACL",
@@ -10727,14 +10809,14 @@
         {
           "number": "+14408272537",
           "state": "OH",
-          "dials": 236,
+          "dials": 235,
           "attempts": 85,
           "connects": 83,
-          "connectRate": 0.3517,
+          "connectRate": 0.3532,
           "bookings": 7,
           "bookRate": 0.0843,
-          "failed": 11,
-          "failRate": 0.0466,
+          "failed": 10,
+          "failRate": 0.0426,
           "inbound": 17,
           "talkTimeSec": 5328,
           "avgDurationSec": 36.2,
@@ -10744,10 +10826,10 @@
           "clients": [
             {
               "key": "ENC",
-              "dials": 226,
+              "dials": 225,
               "connects": 78,
               "bookings": 7,
-              "connectRate": 0.3451
+              "connectRate": 0.3467
             }
           ],
           "lastUsed": "2026-08-16T21:28:06.035000+00:00",
@@ -10759,15 +10841,15 @@
         {
           "number": "+13053767715",
           "state": "FL",
-          "dials": 228,
+          "dials": 229,
           "attempts": 83,
           "connects": 69,
-          "connectRate": 0.3026,
+          "connectRate": 0.3013,
           "bookings": 5,
           "bookRate": 0.0725,
-          "failed": 19,
-          "failRate": 0.0833,
-          "inbound": 31,
+          "failed": 20,
+          "failRate": 0.0873,
+          "inbound": 30,
           "talkTimeSec": 7958,
           "avgDurationSec": 58.38194444444444,
           "setters": 7,
@@ -10805,14 +10887,14 @@
         {
           "number": "+18135440703",
           "state": "FL",
-          "dials": 172,
-          "attempts": 73,
+          "dials": 173,
+          "attempts": 74,
           "connects": 53,
-          "connectRate": 0.3081,
+          "connectRate": 0.3064,
           "bookings": 2,
           "bookRate": 0.0377,
-          "failed": 8,
-          "failRate": 0.0465,
+          "failed": 9,
+          "failRate": 0.052,
           "inbound": 18,
           "talkTimeSec": 6035,
           "avgDurationSec": 57.873873873873876,
@@ -10876,14 +10958,14 @@
         {
           "number": "+12484539294",
           "state": "MI",
-          "dials": 169,
+          "dials": 170,
           "attempts": 41,
           "connects": 52,
-          "connectRate": 0.3077,
+          "connectRate": 0.3059,
           "bookings": 8,
           "bookRate": 0.1538,
-          "failed": 26,
-          "failRate": 0.1538,
+          "failed": 27,
+          "failRate": 0.1588,
           "inbound": 20,
           "talkTimeSec": 6365,
           "avgDurationSec": 82.88607594936708,
@@ -10893,10 +10975,10 @@
           "clients": [
             {
               "key": "THC",
-              "dials": 150,
+              "dials": 151,
               "connects": 48,
               "bookings": 8,
-              "connectRate": 0.32
+              "connectRate": 0.3179
             },
             {
               "key": "AHS",
@@ -10929,14 +11011,14 @@
         {
           "number": "+19515015234",
           "state": "CA",
-          "dials": 163,
+          "dials": 162,
           "attempts": 38,
           "connects": 54,
-          "connectRate": 0.3313,
+          "connectRate": 0.3333,
           "bookings": 6,
           "bookRate": 0.1111,
-          "failed": 52,
-          "failRate": 0.319,
+          "failed": 51,
+          "failRate": 0.3148,
           "inbound": 22,
           "talkTimeSec": 6803,
           "avgDurationSec": 93.18666666666667,
@@ -10946,10 +11028,10 @@
           "clients": [
             {
               "key": "RHC",
-              "dials": 156,
+              "dials": 155,
               "connects": 52,
               "bookings": 6,
-              "connectRate": 0.3333
+              "connectRate": 0.3355
             },
             {
               "key": "GXY",
@@ -10968,14 +11050,14 @@
         {
           "number": "+17137142703",
           "state": "TX",
-          "dials": 151,
+          "dials": 152,
           "attempts": 47,
           "connects": 45,
-          "connectRate": 0.298,
+          "connectRate": 0.2961,
           "bookings": 8,
           "bookRate": 0.1778,
-          "failed": 19,
-          "failRate": 0.1258,
+          "failed": 20,
+          "failRate": 0.1316,
           "inbound": 21,
           "talkTimeSec": 7848,
           "avgDurationSec": 92.95402298850574,
@@ -10991,18 +11073,18 @@
               "connectRate": 0.325
             },
             {
+              "key": "LPC",
+              "dials": 2,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            },
+            {
               "key": "OYV",
               "dials": 1,
               "connects": 1,
               "bookings": 0,
               "connectRate": 1.0
-            },
-            {
-              "key": "LPC",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
             },
             {
               "key": "ALP",
@@ -11439,14 +11521,14 @@
         {
           "number": "+19253911056",
           "state": "CA",
-          "dials": 87,
+          "dials": 88,
           "attempts": 27,
           "connects": 25,
-          "connectRate": 0.2874,
+          "connectRate": 0.2841,
           "bookings": 0,
           "bookRate": 0.0,
-          "failed": 5,
-          "failRate": 0.0575,
+          "failed": 6,
+          "failRate": 0.0682,
           "inbound": 12,
           "talkTimeSec": 1070,
           "avgDurationSec": 23.327272727272728,
@@ -11486,7 +11568,7 @@
           "bookRate": 0.15,
           "failed": 2,
           "failRate": 0.0233,
-          "inbound": 9,
+          "inbound": 10,
           "talkTimeSec": 7093,
           "avgDurationSec": 99.79452054794521,
           "setters": 5,
@@ -11748,7 +11830,7 @@
           "bookRate": 0.1364,
           "failed": 8,
           "failRate": 0.1111,
-          "inbound": 4,
+          "inbound": 5,
           "talkTimeSec": 1537,
           "avgDurationSec": 37.15555555555556,
           "setters": 5,
@@ -12241,6 +12323,45 @@
           }
         },
         {
+          "number": "+17372014257",
+          "state": "TX",
+          "dials": 41,
+          "attempts": 11,
+          "connects": 13,
+          "connectRate": 0.3171,
+          "bookings": 1,
+          "bookRate": 0.0769,
+          "failed": 2,
+          "failRate": 0.0488,
+          "inbound": 6,
+          "talkTimeSec": 1116,
+          "avgDurationSec": 53.22727272727273,
+          "setters": 5,
+          "clientCount": 2,
+          "topClient": "SHE",
+          "clients": [
+            {
+              "key": "SHE",
+              "dials": 39,
+              "connects": 13,
+              "bookings": 1,
+              "connectRate": 0.3333
+            },
+            {
+              "key": "SHC",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+14754451461",
           "state": "CT",
           "dials": 40,
@@ -12267,45 +12388,6 @@
             }
           ],
           "lastUsed": "2026-08-17T23:45:29.264000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
-          "number": "+17372014257",
-          "state": "TX",
-          "dials": 39,
-          "attempts": 10,
-          "connects": 13,
-          "connectRate": 0.3333,
-          "bookings": 1,
-          "bookRate": 0.0769,
-          "failed": 2,
-          "failRate": 0.0513,
-          "inbound": 5,
-          "talkTimeSec": 1116,
-          "avgDurationSec": 53.22727272727273,
-          "setters": 4,
-          "clientCount": 2,
-          "topClient": "SHE",
-          "clients": [
-            {
-              "key": "SHE",
-              "dials": 38,
-              "connects": 13,
-              "bookings": 1,
-              "connectRate": 0.3421
-            },
-            {
-              "key": "SHC",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
           "health": {
             "band": "good",
             "label": "Healthy"
@@ -12711,7 +12793,7 @@
           "bookRate": 0.0,
           "failed": 0,
           "failRate": 0.0,
-          "inbound": 5,
+          "inbound": 6,
           "talkTimeSec": 510,
           "avgDurationSec": 42.76923076923077,
           "setters": 3,
@@ -13249,6 +13331,45 @@
           }
         },
         {
+          "number": "+13466712189",
+          "state": "TX",
+          "dials": 5,
+          "attempts": 4,
+          "connects": 0,
+          "connectRate": 0.0,
+          "bookings": 1,
+          "bookRate": null,
+          "failed": 0,
+          "failRate": 0.0,
+          "inbound": 10,
+          "talkTimeSec": 0,
+          "avgDurationSec": 3.0,
+          "setters": 1,
+          "clientCount": 2,
+          "topClient": "HHC",
+          "clients": [
+            {
+              "key": "HHC",
+              "dials": 4,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            },
+            {
+              "key": "LPC",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-11T07:42:46.829000+00:00",
+          "health": {
+            "band": "unrated",
+            "label": "Too few dials"
+          }
+        },
+        {
           "number": "+18135928641",
           "state": "FL",
           "dials": 4,
@@ -13288,32 +13409,24 @@
           }
         },
         {
-          "number": "+13466712189",
-          "state": "TX",
+          "number": "+17723482714",
+          "state": "FL",
           "dials": 4,
-          "attempts": 3,
-          "connects": 0,
-          "connectRate": 0.0,
-          "bookings": 1,
-          "bookRate": null,
+          "attempts": 1,
+          "connects": 2,
+          "connectRate": 0.5,
+          "bookings": 0,
+          "bookRate": 0.0,
           "failed": 0,
           "failRate": 0.0,
-          "inbound": 10,
-          "talkTimeSec": 0,
-          "avgDurationSec": 3.0,
-          "setters": 1,
-          "clientCount": 1,
-          "topClient": "HHC",
-          "clients": [
-            {
-              "key": "HHC",
-              "dials": 4,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-11T07:42:46.829000+00:00",
+          "inbound": 6,
+          "talkTimeSec": 51,
+          "avgDurationSec": 25.5,
+          "setters": 3,
+          "clientCount": 0,
+          "topClient": null,
+          "clients": [],
+          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
           "health": {
             "band": "unrated",
             "label": "Too few dials"
@@ -13346,30 +13459,6 @@
             }
           ],
           "lastUsed": "2026-08-08T20:16:37.331000+00:00",
-          "health": {
-            "band": "unrated",
-            "label": "Too few dials"
-          }
-        },
-        {
-          "number": "+17723482714",
-          "state": "FL",
-          "dials": 3,
-          "attempts": 1,
-          "connects": 2,
-          "connectRate": 0.6667,
-          "bookings": 0,
-          "bookRate": 0.0,
-          "failed": 0,
-          "failRate": 0.0,
-          "inbound": 6,
-          "talkTimeSec": 51,
-          "avgDurationSec": 25.5,
-          "setters": 3,
-          "clientCount": 0,
-          "topClient": null,
-          "clients": [],
-          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
           "health": {
             "band": "unrated",
             "label": "Too few dials"
@@ -13979,24 +14068,24 @@
         },
         {
           "severity": "alert",
-          "headline": "67 leads unworked past the SLA",
+          "headline": "72 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 67,
+          "leadsAtRisk": 72,
           "rank": 4
         }
       ],
       "prevDateRange": "01 Jul 2026 to 18 Jul 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 0,
+          "cur": 3,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 582,
+          "cur": 587,
           "prev": 2,
-          "pct": 290.0
+          "pct": 292.5
         },
         "introsBookedToday": {
           "cur": 3,
@@ -14004,14 +14093,14 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 67,
+          "cur": 72,
           "prev": 1,
-          "pct": 66.0
+          "pct": 71.0
         },
         "unworkedPastSla": {
-          "cur": 67,
+          "cur": 72,
           "prev": 1,
-          "pct": 66.0
+          "pct": 71.0
         },
         "speedToLeadMedianMin": {
           "cur": 624.0,
@@ -14019,7 +14108,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.8591,
+          "cur": 0.8518,
           "prev": 0.0,
           "pct": null
         },
@@ -14084,14 +14173,14 @@
       "dateRange": "01 Jul 2026 to 18 Aug 2026",
       "windowDays": 48,
       "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 992,
+        "leadsToday": 3,
+        "leadsInRange": 997,
         "introsBookedToday": 3,
         "introsBookedInRange": 360,
-        "unworkedNow": 104,
-        "unworkedPastSla": 104,
+        "unworkedNow": 109,
+        "unworkedPastSla": 109,
         "speedToLeadMedianMin": 433.0,
-        "dayOneCoverage": 0.8579,
+        "dayOneCoverage": 0.8536,
         "formCompliance": 0.0,
         "dialsLogged": 9667,
         "attemptsDialed": 2191,
@@ -14107,9 +14196,9 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 8,
-          "p2": 17,
-          "p3": 71,
-          "p4": 148
+          "p2": 22,
+          "p3": 70,
+          "p4": 149
         },
         "onFloorNow": null
       },
@@ -14203,6 +14292,28 @@
           }
         },
         {
+          "key": "HPI",
+          "label": "HPI",
+          "market": null,
+          "active": true,
+          "leads": 37,
+          "worked": 37,
+          "contacted": 36,
+          "booked": 11,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 0.973,
+          "bookRate": 0.3056,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 601.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "RHC",
           "label": "RHC",
           "market": null,
@@ -14221,28 +14332,6 @@
             "leadToFirstAttempt": 12.0,
             "leadToConnect": 24.0,
             "connectToBooked": 27.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HPI",
-          "label": "HPI",
-          "market": null,
-          "active": true,
-          "leads": 36,
-          "worked": 36,
-          "contacted": 36,
-          "booked": 11,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.3056,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 601.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -14291,6 +14380,28 @@
           }
         },
         {
+          "key": "ROC",
+          "label": "ROC",
+          "market": null,
+          "active": true,
+          "leads": 32,
+          "worked": 32,
+          "contacted": 32,
+          "booked": 10,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.3125,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 704.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "JOY",
           "label": "JOY",
           "market": null,
@@ -14309,28 +14420,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 46.9,
             "connectToBooked": 51.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ROC",
-          "label": "ROC",
-          "market": null,
-          "active": true,
-          "leads": 31,
-          "worked": 31,
-          "contacted": 31,
-          "booked": 10,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.3226,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 704.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -14577,6 +14666,28 @@
           }
         },
         {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 14,
+          "worked": 14,
+          "contacted": 14,
+          "booked": 7,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.5,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 460.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 72.0,
+            "connectToBooked": 0.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "APA",
           "label": "APA",
           "market": null,
@@ -14639,28 +14750,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 90.7,
             "connectToBooked": 117.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACS",
-          "label": "ACS",
-          "market": null,
-          "active": true,
-          "leads": 13,
-          "worked": 13,
-          "contacted": 13,
-          "booked": 7,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.5385,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 460.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 72.0,
-            "connectToBooked": 0.0,
             "bookedToHeld": null
           }
         },
@@ -14731,6 +14820,28 @@
           }
         },
         {
+          "key": "ALM",
+          "label": "ALM",
+          "market": null,
+          "active": true,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.2,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 690.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 60.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "AVA",
           "label": "AVA",
           "market": null,
@@ -14771,28 +14882,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 24.0,
             "connectToBooked": 24.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALM",
-          "label": "ALM",
-          "market": null,
-          "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
-          "booked": 2,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.2222,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 690.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 60.0,
-            "connectToBooked": null,
             "bookedToHeld": null
           }
         },
@@ -15154,8 +15243,8 @@
           33,
           36,
           30,
-          24,
-          0
+          26,
+          3
         ],
         "worked": [
           64,
@@ -15401,14 +15490,14 @@
         {
           "number": "+14408272537",
           "state": "OH",
-          "dials": 851,
+          "dials": 849,
           "attempts": 165,
           "connects": 333,
-          "connectRate": 0.3913,
+          "connectRate": 0.3922,
           "bookings": 35,
           "bookRate": 0.1051,
-          "failed": 31,
-          "failRate": 0.0364,
+          "failed": 29,
+          "failRate": 0.0342,
           "inbound": 72,
           "talkTimeSec": 27467,
           "avgDurationSec": 49.07783417935702,
@@ -15418,10 +15507,10 @@
           "clients": [
             {
               "key": "ENC",
-              "dials": 830,
+              "dials": 828,
               "connects": 327,
               "bookings": 35,
-              "connectRate": 0.394
+              "connectRate": 0.3949
             },
             {
               "key": "AHC",
@@ -15448,7 +15537,7 @@
           "bookRate": 0.078,
           "failed": 38,
           "failRate": 0.0701,
-          "inbound": 29,
+          "inbound": 26,
           "talkTimeSec": 17549,
           "avgDurationSec": 49.11936339522546,
           "setters": 8,
@@ -15514,27 +15603,27 @@
         {
           "number": "+14705744539",
           "state": "GA",
-          "dials": 478,
+          "dials": 479,
           "attempts": 108,
           "connects": 181,
-          "connectRate": 0.3787,
+          "connectRate": 0.3779,
           "bookings": 3,
           "bookRate": 0.0166,
           "failed": 48,
-          "failRate": 0.1004,
+          "failRate": 0.1002,
           "inbound": 52,
           "talkTimeSec": 16074,
-          "avgDurationSec": 54.325878594249204,
+          "avgDurationSec": 54.18471337579618,
           "setters": 9,
           "clientCount": 3,
           "topClient": "BCF",
           "clients": [
             {
               "key": "BCF",
-              "dials": 445,
+              "dials": 446,
               "connects": 168,
               "bookings": 2,
-              "connectRate": 0.3775
+              "connectRate": 0.3767
             },
             {
               "key": "ACL",
@@ -15560,15 +15649,15 @@
         {
           "number": "+13053767715",
           "state": "FL",
-          "dials": 412,
+          "dials": 413,
           "attempts": 109,
           "connects": 144,
-          "connectRate": 0.3495,
+          "connectRate": 0.3487,
           "bookings": 10,
           "bookRate": 0.0694,
-          "failed": 35,
-          "failRate": 0.085,
-          "inbound": 66,
+          "failed": 36,
+          "failRate": 0.0872,
+          "inbound": 65,
           "talkTimeSec": 13970,
           "avgDurationSec": 53.996350364963504,
           "setters": 8,
@@ -15818,14 +15907,14 @@
         {
           "number": "+18135440703",
           "state": "FL",
-          "dials": 253,
-          "attempts": 91,
+          "dials": 254,
+          "attempts": 92,
           "connects": 88,
-          "connectRate": 0.3478,
+          "connectRate": 0.3465,
           "bookings": 3,
           "bookRate": 0.0341,
-          "failed": 14,
-          "failRate": 0.0553,
+          "failed": 15,
+          "failRate": 0.0591,
           "inbound": 41,
           "talkTimeSec": 8347,
           "avgDurationSec": 53.33734939759036,
@@ -15857,14 +15946,14 @@
         {
           "number": "+19515015234",
           "state": "CA",
-          "dials": 246,
+          "dials": 245,
           "attempts": 55,
           "connects": 86,
-          "connectRate": 0.3496,
+          "connectRate": 0.351,
           "bookings": 8,
           "bookRate": 0.093,
-          "failed": 62,
-          "failRate": 0.252,
+          "failed": 61,
+          "failRate": 0.249,
           "inbound": 31,
           "talkTimeSec": 8544,
           "avgDurationSec": 69.93700787401575,
@@ -15874,10 +15963,10 @@
           "clients": [
             {
               "key": "RHC",
-              "dials": 217,
+              "dials": 216,
               "connects": 79,
               "bookings": 8,
-              "connectRate": 0.3641
+              "connectRate": 0.3657
             },
             {
               "key": "GXY",
@@ -16065,14 +16154,14 @@
         {
           "number": "+17137142703",
           "state": "TX",
-          "dials": 221,
+          "dials": 222,
           "attempts": 64,
           "connects": 71,
-          "connectRate": 0.3213,
+          "connectRate": 0.3198,
           "bookings": 9,
           "bookRate": 0.1268,
-          "failed": 23,
-          "failRate": 0.1041,
+          "failed": 24,
+          "failRate": 0.1081,
           "inbound": 32,
           "talkTimeSec": 11334,
           "avgDurationSec": 87.87218045112782,
@@ -16088,18 +16177,18 @@
               "connectRate": 0.3429
             },
             {
+              "key": "LPC",
+              "dials": 4,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            },
+            {
               "key": "KTY",
               "dials": 4,
               "connects": 2,
               "bookings": 1,
               "connectRate": 0.5
-            },
-            {
-              "key": "LPC",
-              "dials": 3,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
             },
             {
               "key": "OYV",
@@ -16123,48 +16212,16 @@
           }
         },
         {
-          "number": "+18303568380",
-          "state": "TX",
-          "dials": 221,
-          "attempts": 41,
-          "connects": 71,
-          "connectRate": 0.3213,
-          "bookings": 5,
-          "bookRate": 0.0704,
-          "failed": 10,
-          "failRate": 0.0452,
-          "inbound": 10,
-          "talkTimeSec": 6977,
-          "avgDurationSec": 43.63428571428572,
-          "setters": 7,
-          "clientCount": 1,
-          "topClient": "CCC",
-          "clients": [
-            {
-              "key": "CCC",
-              "dials": 221,
-              "connects": 71,
-              "bookings": 5,
-              "connectRate": 0.3213
-            }
-          ],
-          "lastUsed": "2026-08-17T19:30:28.730000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
           "number": "+12484539294",
           "state": "MI",
-          "dials": 220,
+          "dials": 221,
           "attempts": 61,
           "connects": 79,
-          "connectRate": 0.3591,
+          "connectRate": 0.3575,
           "bookings": 11,
           "bookRate": 0.1392,
-          "failed": 29,
-          "failRate": 0.1318,
+          "failed": 30,
+          "failRate": 0.1357,
           "inbound": 25,
           "talkTimeSec": 11118,
           "avgDurationSec": 97.11111111111111,
@@ -16174,10 +16231,10 @@
           "clients": [
             {
               "key": "THC",
-              "dials": 192,
+              "dials": 193,
               "connects": 71,
               "bookings": 11,
-              "connectRate": 0.3698
+              "connectRate": 0.3679
             },
             {
               "key": "AHS",
@@ -16215,6 +16272,38 @@
           }
         },
         {
+          "number": "+18303568380",
+          "state": "TX",
+          "dials": 221,
+          "attempts": 41,
+          "connects": 71,
+          "connectRate": 0.3213,
+          "bookings": 5,
+          "bookRate": 0.0704,
+          "failed": 10,
+          "failRate": 0.0452,
+          "inbound": 11,
+          "talkTimeSec": 6977,
+          "avgDurationSec": 43.63428571428572,
+          "setters": 7,
+          "clientCount": 1,
+          "topClient": "CCC",
+          "clients": [
+            {
+              "key": "CCC",
+              "dials": 221,
+              "connects": 71,
+              "bookings": 5,
+              "connectRate": 0.3213
+            }
+          ],
+          "lastUsed": "2026-08-17T19:30:28.730000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+16572363063",
           "state": "CA",
           "dials": 218,
@@ -16225,7 +16314,7 @@
           "bookRate": 0.087,
           "failed": 12,
           "failRate": 0.055,
-          "inbound": 35,
+          "inbound": 36,
           "talkTimeSec": 10106,
           "avgDurationSec": 65.7125,
           "setters": 9,
@@ -16278,7 +16367,7 @@
           "bookRate": 0.127,
           "failed": 16,
           "failRate": 0.0804,
-          "inbound": 16,
+          "inbound": 17,
           "talkTimeSec": 6326,
           "avgDurationSec": 55.33884297520661,
           "setters": 6,
@@ -16522,7 +16611,7 @@
           "bookRate": 0.0986,
           "failed": 8,
           "failRate": 0.0465,
-          "inbound": 23,
+          "inbound": 24,
           "talkTimeSec": 6741,
           "avgDurationSec": 57.25806451612903,
           "setters": 7,
@@ -16606,27 +16695,27 @@
         {
           "number": "+16238870272",
           "state": "AZ",
-          "dials": 149,
+          "dials": 148,
           "attempts": 49,
           "connects": 50,
-          "connectRate": 0.3356,
+          "connectRate": 0.3378,
           "bookings": 4,
           "bookRate": 0.08,
           "failed": 3,
-          "failRate": 0.0201,
-          "inbound": 5,
+          "failRate": 0.0203,
+          "inbound": 4,
           "talkTimeSec": 6618,
-          "avgDurationSec": 64.46296296296296,
+          "avgDurationSec": 65.00934579439253,
           "setters": 6,
           "clientCount": 2,
           "topClient": "GEN",
           "clients": [
             {
               "key": "GEN",
-              "dials": 28,
+              "dials": 27,
               "connects": 13,
               "bookings": 3,
-              "connectRate": 0.4643
+              "connectRate": 0.4815
             },
             {
               "key": "HWZ",
@@ -16999,14 +17088,14 @@
         {
           "number": "+19253911056",
           "state": "CA",
-          "dials": 90,
+          "dials": 91,
           "attempts": 29,
           "connects": 26,
-          "connectRate": 0.2889,
+          "connectRate": 0.2857,
           "bookings": 0,
           "bookRate": 0.0,
-          "failed": 5,
-          "failRate": 0.0556,
+          "failed": 6,
+          "failRate": 0.0659,
           "inbound": 12,
           "talkTimeSec": 1103,
           "avgDurationSec": 23.140350877192983,
@@ -17046,7 +17135,7 @@
           "bookRate": 0.0833,
           "failed": 13,
           "failRate": 0.1461,
-          "inbound": 9,
+          "inbound": 8,
           "talkTimeSec": 2961,
           "avgDurationSec": 54.50877192982456,
           "setters": 6,
@@ -17092,7 +17181,7 @@
           "bookRate": 0.0278,
           "failed": 4,
           "failRate": 0.0455,
-          "inbound": 6,
+          "inbound": 7,
           "talkTimeSec": 2791,
           "avgDurationSec": 45.646153846153844,
           "setters": 7,
@@ -17309,6 +17398,45 @@
           }
         },
         {
+          "number": "+17372014257",
+          "state": "TX",
+          "dials": 69,
+          "attempts": 21,
+          "connects": 23,
+          "connectRate": 0.3333,
+          "bookings": 2,
+          "bookRate": 0.087,
+          "failed": 6,
+          "failRate": 0.087,
+          "inbound": 10,
+          "talkTimeSec": 1832,
+          "avgDurationSec": 47.09756097560975,
+          "setters": 7,
+          "clientCount": 2,
+          "topClient": "SHE",
+          "clients": [
+            {
+              "key": "SHE",
+              "dials": 59,
+              "connects": 19,
+              "bookings": 2,
+              "connectRate": 0.322
+            },
+            {
+              "key": "SHC",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+16027867409",
           "state": "AZ",
           "dials": 68,
@@ -17356,45 +17484,6 @@
             }
           ],
           "lastUsed": "2026-08-16T21:52:02.924000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
-          "number": "+17372014257",
-          "state": "TX",
-          "dials": 67,
-          "attempts": 20,
-          "connects": 23,
-          "connectRate": 0.3433,
-          "bookings": 2,
-          "bookRate": 0.087,
-          "failed": 6,
-          "failRate": 0.0896,
-          "inbound": 9,
-          "talkTimeSec": 1832,
-          "avgDurationSec": 47.09756097560975,
-          "setters": 6,
-          "clientCount": 2,
-          "topClient": "SHE",
-          "clients": [
-            {
-              "key": "SHE",
-              "dials": 58,
-              "connects": 19,
-              "bookings": 2,
-              "connectRate": 0.3276
-            },
-            {
-              "key": "SHC",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-17T18:12:19.223000+00:00",
           "health": {
             "band": "good",
             "label": "Healthy"
@@ -18241,14 +18330,14 @@
         {
           "number": "+13466712189",
           "state": "TX",
-          "dials": 18,
-          "attempts": 10,
+          "dials": 19,
+          "attempts": 11,
           "connects": 4,
-          "connectRate": 0.2222,
+          "connectRate": 0.2105,
           "bookings": 1,
           "bookRate": 0.25,
           "failed": 7,
-          "failRate": 0.3889,
+          "failRate": 0.3684,
           "inbound": 10,
           "talkTimeSec": 246,
           "avgDurationSec": 37.714285714285715,
@@ -18272,7 +18361,7 @@
             },
             {
               "key": "LPC",
-              "dials": 1,
+              "dials": 2,
               "connects": 0,
               "bookings": 0,
               "connectRate": 0.0
@@ -18327,7 +18416,7 @@
           "bookRate": 0.0,
           "failed": 0,
           "failRate": 0.0,
-          "inbound": 5,
+          "inbound": 6,
           "talkTimeSec": 510,
           "avgDurationSec": 42.76923076923077,
           "setters": 3,
@@ -18784,6 +18873,30 @@
           }
         },
         {
+          "number": "+17723482714",
+          "state": "FL",
+          "dials": 5,
+          "attempts": 2,
+          "connects": 3,
+          "connectRate": 0.6,
+          "bookings": 0,
+          "bookRate": 0.0,
+          "failed": 0,
+          "failRate": 0.0,
+          "inbound": 7,
+          "talkTimeSec": 73,
+          "avgDurationSec": 24.333333333333332,
+          "setters": 3,
+          "clientCount": 0,
+          "topClient": null,
+          "clients": [],
+          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
+          "health": {
+            "band": "unrated",
+            "label": "Too few dials"
+          }
+        },
+        {
           "number": "+12798008359",
           "state": "CA",
           "dials": 5,
@@ -18920,30 +19033,6 @@
             }
           ],
           "lastUsed": "2026-08-03T19:23:34.774000+00:00",
-          "health": {
-            "band": "unrated",
-            "label": "Too few dials"
-          }
-        },
-        {
-          "number": "+17723482714",
-          "state": "FL",
-          "dials": 4,
-          "attempts": 2,
-          "connects": 3,
-          "connectRate": 0.75,
-          "bookings": 0,
-          "bookRate": 0.0,
-          "failed": 0,
-          "failRate": 0.0,
-          "inbound": 7,
-          "talkTimeSec": 73,
-          "avgDurationSec": 24.333333333333332,
-          "setters": 3,
-          "clientCount": 0,
-          "topClient": null,
-          "clients": [],
-          "lastUsed": "2026-08-12T15:38:05.046000+00:00",
           "health": {
             "band": "unrated",
             "label": "Too few dials"
@@ -19487,22 +19576,22 @@
         },
         {
           "severity": "alert",
-          "headline": "104 leads unworked past the SLA",
+          "headline": "109 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 104,
+          "leadsAtRisk": 109,
           "rank": 4
         }
       ],
       "prevDateRange": "01 Apr 2026 to 19 May 2026",
       "deltas": {
         "leadsToday": {
-          "cur": 0,
+          "cur": 3,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 992,
+          "cur": 997,
           "prev": 0,
           "pct": null
         },
@@ -19512,12 +19601,12 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 104,
+          "cur": 109,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 104,
+          "cur": 109,
           "prev": 0,
           "pct": null
         },
@@ -19527,7 +19616,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.8579,
+          "cur": 0.8536,
           "prev": null,
           "pct": null
         },
@@ -19592,14 +19681,14 @@
       "dateRange": "01 Jan 2026 to 18 Aug 2026",
       "windowDays": 229,
       "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 992,
+        "leadsToday": 3,
+        "leadsInRange": 997,
         "introsBookedToday": 3,
         "introsBookedInRange": 410,
-        "unworkedNow": 104,
-        "unworkedPastSla": 104,
+        "unworkedNow": 109,
+        "unworkedPastSla": 109,
         "speedToLeadMedianMin": 433.0,
-        "dayOneCoverage": 0.8579,
+        "dayOneCoverage": 0.8536,
         "formCompliance": 0.0,
         "dialsLogged": 10996,
         "attemptsDialed": 2200,
@@ -19615,9 +19704,9 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 8,
-          "p2": 17,
-          "p3": 71,
-          "p4": 148
+          "p2": 22,
+          "p3": 70,
+          "p4": 149
         },
         "onFloorNow": null
       },
@@ -19711,6 +19800,28 @@
           }
         },
         {
+          "key": "HPI",
+          "label": "HPI",
+          "market": null,
+          "active": true,
+          "leads": 37,
+          "worked": 37,
+          "contacted": 36,
+          "booked": 11,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 0.973,
+          "bookRate": 0.3056,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 601.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "RHC",
           "label": "RHC",
           "market": null,
@@ -19729,28 +19840,6 @@
             "leadToFirstAttempt": 12.0,
             "leadToConnect": 24.0,
             "connectToBooked": 27.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HPI",
-          "label": "HPI",
-          "market": null,
-          "active": true,
-          "leads": 36,
-          "worked": 36,
-          "contacted": 36,
-          "booked": 11,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.3056,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 601.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -19799,6 +19888,28 @@
           }
         },
         {
+          "key": "ROC",
+          "label": "ROC",
+          "market": null,
+          "active": true,
+          "leads": 32,
+          "worked": 32,
+          "contacted": 32,
+          "booked": 10,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.3125,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 704.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "JOY",
           "label": "JOY",
           "market": null,
@@ -19817,28 +19928,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 46.9,
             "connectToBooked": 51.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ROC",
-          "label": "ROC",
-          "market": null,
-          "active": true,
-          "leads": 31,
-          "worked": 31,
-          "contacted": 31,
-          "booked": 10,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.3226,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 704.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -20085,6 +20174,28 @@
           }
         },
         {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 14,
+          "worked": 14,
+          "contacted": 14,
+          "booked": 7,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.5,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 460.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 72.0,
+            "connectToBooked": 0.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "APA",
           "label": "APA",
           "market": null,
@@ -20147,28 +20258,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 90.7,
             "connectToBooked": 117.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACS",
-          "label": "ACS",
-          "market": null,
-          "active": true,
-          "leads": 13,
-          "worked": 13,
-          "contacted": 13,
-          "booked": 7,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.5385,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 460.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 72.0,
-            "connectToBooked": 0.0,
             "bookedToHeld": null
           }
         },
@@ -20239,6 +20328,28 @@
           }
         },
         {
+          "key": "ALM",
+          "label": "ALM",
+          "market": null,
+          "active": true,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.2,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 690.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 60.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "AVA",
           "label": "AVA",
           "market": null,
@@ -20279,28 +20390,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 24.0,
             "connectToBooked": 24.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALM",
-          "label": "ALM",
-          "market": null,
-          "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
-          "booked": 2,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.2222,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 690.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 60.0,
-            "connectToBooked": null,
             "bookedToHeld": null
           }
         },
@@ -20672,8 +20761,8 @@
           33,
           36,
           30,
-          24,
-          0
+          26,
+          3
         ],
         "worked": [
           64,
@@ -20919,14 +21008,14 @@
         {
           "number": "+14408272537",
           "state": "OH",
-          "dials": 874,
+          "dials": 872,
           "attempts": 165,
           "connects": 340,
-          "connectRate": 0.389,
+          "connectRate": 0.3899,
           "bookings": 35,
           "bookRate": 0.1029,
-          "failed": 37,
-          "failRate": 0.0423,
+          "failed": 35,
+          "failRate": 0.0401,
           "inbound": 72,
           "talkTimeSec": 27685,
           "avgDurationSec": 48.37520661157025,
@@ -20936,10 +21025,10 @@
           "clients": [
             {
               "key": "ENC",
-              "dials": 830,
+              "dials": 828,
               "connects": 327,
               "bookings": 35,
-              "connectRate": 0.394
+              "connectRate": 0.3949
             },
             {
               "key": "AHC",
@@ -20966,7 +21055,7 @@
           "bookRate": 0.0741,
           "failed": 38,
           "failRate": 0.0676,
-          "inbound": 30,
+          "inbound": 27,
           "talkTimeSec": 18455,
           "avgDurationSec": 49.630102040816325,
           "setters": 8,
@@ -21042,7 +21131,7 @@
           "failRate": 0.0955,
           "inbound": 68,
           "talkTimeSec": 18555,
-          "avgDurationSec": 57.77810650887574,
+          "avgDurationSec": 57.63716814159292,
           "setters": 10,
           "clientCount": 3,
           "topClient": "BCF",
@@ -21078,15 +21167,15 @@
         {
           "number": "+13053767715",
           "state": "FL",
-          "dials": 445,
+          "dials": 446,
           "attempts": 113,
           "connects": 151,
-          "connectRate": 0.3393,
+          "connectRate": 0.3386,
           "bookings": 10,
           "bookRate": 0.0662,
-          "failed": 42,
-          "failRate": 0.0944,
-          "inbound": 136,
+          "failed": 43,
+          "failRate": 0.0964,
+          "inbound": 135,
           "talkTimeSec": 14796,
           "avgDurationSec": 54.1764705882353,
           "setters": 9,
@@ -21191,14 +21280,14 @@
         {
           "number": "+18135440703",
           "state": "FL",
-          "dials": 369,
-          "attempts": 92,
+          "dials": 370,
+          "attempts": 93,
           "connects": 142,
-          "connectRate": 0.3848,
+          "connectRate": 0.3838,
           "bookings": 3,
           "bookRate": 0.0211,
-          "failed": 18,
-          "failRate": 0.0488,
+          "failed": 19,
+          "failRate": 0.0514,
           "inbound": 79,
           "talkTimeSec": 13546,
           "avgDurationSec": 55.77734375,
@@ -21454,16 +21543,76 @@
           }
         },
         {
+          "number": "+17137142703",
+          "state": "TX",
+          "dials": 260,
+          "attempts": 64,
+          "connects": 76,
+          "connectRate": 0.2923,
+          "bookings": 9,
+          "bookRate": 0.1184,
+          "failed": 28,
+          "failRate": 0.1077,
+          "inbound": 46,
+          "talkTimeSec": 11508,
+          "avgDurationSec": 79.64,
+          "setters": 10,
+          "clientCount": 5,
+          "topClient": "JOY",
+          "clients": [
+            {
+              "key": "JOY",
+              "dials": 184,
+              "connects": 62,
+              "bookings": 8,
+              "connectRate": 0.337
+            },
+            {
+              "key": "LPC",
+              "dials": 4,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            },
+            {
+              "key": "KTY",
+              "dials": 4,
+              "connects": 2,
+              "bookings": 1,
+              "connectRate": 0.5
+            },
+            {
+              "key": "OYV",
+              "dials": 1,
+              "connects": 1,
+              "bookings": 0,
+              "connectRate": 1.0
+            },
+            {
+              "key": "ALP",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-18T00:25:33.859000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+19515015234",
           "state": "CA",
-          "dials": 260,
+          "dials": 259,
           "attempts": 61,
           "connects": 93,
-          "connectRate": 0.3577,
+          "connectRate": 0.3591,
           "bookings": 8,
           "bookRate": 0.086,
-          "failed": 62,
-          "failRate": 0.2385,
+          "failed": 61,
+          "failRate": 0.2355,
           "inbound": 49,
           "talkTimeSec": 9541,
           "avgDurationSec": 71.30935251798562,
@@ -21473,10 +21622,10 @@
           "clients": [
             {
               "key": "RHC",
-              "dials": 220,
+              "dials": 219,
               "connects": 81,
               "bookings": 8,
-              "connectRate": 0.3682
+              "connectRate": 0.3699
             },
             {
               "key": "HHA",
@@ -21529,66 +21678,6 @@
             }
           ],
           "lastUsed": "2026-08-17T23:13:44.499000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
-          "number": "+17137142703",
-          "state": "TX",
-          "dials": 259,
-          "attempts": 64,
-          "connects": 76,
-          "connectRate": 0.2934,
-          "bookings": 9,
-          "bookRate": 0.1184,
-          "failed": 27,
-          "failRate": 0.1042,
-          "inbound": 46,
-          "talkTimeSec": 11508,
-          "avgDurationSec": 79.64,
-          "setters": 10,
-          "clientCount": 5,
-          "topClient": "JOY",
-          "clients": [
-            {
-              "key": "JOY",
-              "dials": 184,
-              "connects": 62,
-              "bookings": 8,
-              "connectRate": 0.337
-            },
-            {
-              "key": "KTY",
-              "dials": 4,
-              "connects": 2,
-              "bookings": 1,
-              "connectRate": 0.5
-            },
-            {
-              "key": "LPC",
-              "dials": 3,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            },
-            {
-              "key": "OYV",
-              "dials": 1,
-              "connects": 1,
-              "bookings": 0,
-              "connectRate": 1.0
-            },
-            {
-              "key": "ALP",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-18T00:25:33.859000+00:00",
           "health": {
             "band": "good",
             "label": "Healthy"
@@ -21806,7 +21895,7 @@
           "bookRate": 0.0833,
           "failed": 12,
           "failRate": 0.0519,
-          "inbound": 36,
+          "inbound": 37,
           "talkTimeSec": 10295,
           "avgDurationSec": 64.1437125748503,
           "setters": 9,
@@ -21849,48 +21938,16 @@
           }
         },
         {
-          "number": "+18303568380",
-          "state": "TX",
-          "dials": 221,
-          "attempts": 41,
-          "connects": 71,
-          "connectRate": 0.3213,
-          "bookings": 5,
-          "bookRate": 0.0704,
-          "failed": 10,
-          "failRate": 0.0452,
-          "inbound": 10,
-          "talkTimeSec": 6977,
-          "avgDurationSec": 43.63428571428572,
-          "setters": 7,
-          "clientCount": 1,
-          "topClient": "CCC",
-          "clients": [
-            {
-              "key": "CCC",
-              "dials": 221,
-              "connects": 71,
-              "bookings": 5,
-              "connectRate": 0.3213
-            }
-          ],
-          "lastUsed": "2026-08-17T19:30:28.730000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
           "number": "+12484539294",
           "state": "MI",
-          "dials": 220,
+          "dials": 221,
           "attempts": 61,
           "connects": 79,
-          "connectRate": 0.3591,
+          "connectRate": 0.3575,
           "bookings": 11,
           "bookRate": 0.1392,
-          "failed": 29,
-          "failRate": 0.1318,
+          "failed": 30,
+          "failRate": 0.1357,
           "inbound": 25,
           "talkTimeSec": 11118,
           "avgDurationSec": 97.11111111111111,
@@ -21900,10 +21957,10 @@
           "clients": [
             {
               "key": "THC",
-              "dials": 192,
+              "dials": 193,
               "connects": 71,
               "bookings": 11,
-              "connectRate": 0.3698
+              "connectRate": 0.3679
             },
             {
               "key": "AHS",
@@ -21941,6 +21998,38 @@
           }
         },
         {
+          "number": "+18303568380",
+          "state": "TX",
+          "dials": 221,
+          "attempts": 41,
+          "connects": 71,
+          "connectRate": 0.3213,
+          "bookings": 5,
+          "bookRate": 0.0704,
+          "failed": 10,
+          "failRate": 0.0452,
+          "inbound": 11,
+          "talkTimeSec": 6977,
+          "avgDurationSec": 43.63428571428572,
+          "setters": 7,
+          "clientCount": 1,
+          "topClient": "CCC",
+          "clients": [
+            {
+              "key": "CCC",
+              "dials": 221,
+              "connects": 71,
+              "bookings": 5,
+              "connectRate": 0.3213
+            }
+          ],
+          "lastUsed": "2026-08-17T19:30:28.730000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+12109879126",
           "state": "TX",
           "dials": 214,
@@ -21951,7 +22040,7 @@
           "bookRate": 0.1408,
           "failed": 16,
           "failRate": 0.0748,
-          "inbound": 21,
+          "inbound": 22,
           "talkTimeSec": 8839,
           "avgDurationSec": 68.6,
           "setters": 8,
@@ -22135,7 +22224,7 @@
           "bookRate": 0.0972,
           "failed": 8,
           "failRate": 0.0452,
-          "inbound": 24,
+          "inbound": 25,
           "talkTimeSec": 6882,
           "avgDurationSec": 57.07086614173228,
           "setters": 7,
@@ -22205,27 +22294,27 @@
         {
           "number": "+16238870272",
           "state": "AZ",
-          "dials": 149,
+          "dials": 148,
           "attempts": 49,
           "connects": 50,
-          "connectRate": 0.3356,
+          "connectRate": 0.3378,
           "bookings": 4,
           "bookRate": 0.08,
           "failed": 3,
-          "failRate": 0.0201,
-          "inbound": 5,
+          "failRate": 0.0203,
+          "inbound": 4,
           "talkTimeSec": 6618,
-          "avgDurationSec": 64.46296296296296,
+          "avgDurationSec": 65.00934579439253,
           "setters": 6,
           "clientCount": 2,
           "topClient": "GEN",
           "clients": [
             {
               "key": "GEN",
-              "dials": 28,
+              "dials": 27,
               "connects": 13,
               "bookings": 3,
-              "connectRate": 0.4643
+              "connectRate": 0.4815
             },
             {
               "key": "HWZ",
@@ -22581,7 +22670,7 @@
           "bookRate": 0.0244,
           "failed": 4,
           "failRate": 0.0421,
-          "inbound": 9,
+          "inbound": 10,
           "talkTimeSec": 3151,
           "avgDurationSec": 46.95774647887324,
           "setters": 8,
@@ -22617,6 +22706,45 @@
           }
         },
         {
+          "number": "+19253911056",
+          "state": "CA",
+          "dials": 94,
+          "attempts": 29,
+          "connects": 28,
+          "connectRate": 0.2979,
+          "bookings": 0,
+          "bookRate": 0.0,
+          "failed": 6,
+          "failRate": 0.0638,
+          "inbound": 58,
+          "talkTimeSec": 1151,
+          "avgDurationSec": 23.16949152542373,
+          "setters": 5,
+          "clientCount": 2,
+          "topClient": "AHS",
+          "clients": [
+            {
+              "key": "AHS",
+              "dials": 6,
+              "connects": 3,
+              "bookings": 0,
+              "connectRate": 0.5
+            },
+            {
+              "key": "SHS",
+              "dials": 2,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-17T21:09:50.494000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+17472394634",
           "state": "CA",
           "dials": 93,
@@ -22643,45 +22771,6 @@
             }
           ],
           "lastUsed": "2026-08-17T22:17:59.545000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
-          "number": "+19253911056",
-          "state": "CA",
-          "dials": 93,
-          "attempts": 29,
-          "connects": 28,
-          "connectRate": 0.3011,
-          "bookings": 0,
-          "bookRate": 0.0,
-          "failed": 5,
-          "failRate": 0.0538,
-          "inbound": 58,
-          "talkTimeSec": 1151,
-          "avgDurationSec": 23.16949152542373,
-          "setters": 5,
-          "clientCount": 2,
-          "topClient": "AHS",
-          "clients": [
-            {
-              "key": "AHS",
-              "dials": 6,
-              "connects": 3,
-              "bookings": 0,
-              "connectRate": 0.5
-            },
-            {
-              "key": "SHS",
-              "dials": 2,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-17T21:09:50.494000+00:00",
           "health": {
             "band": "good",
             "label": "Healthy"
@@ -22910,7 +22999,7 @@
           "bookRate": 0.0833,
           "failed": 13,
           "failRate": 0.1461,
-          "inbound": 9,
+          "inbound": 8,
           "talkTimeSec": 2961,
           "avgDurationSec": 54.50877192982456,
           "setters": 6,
@@ -22987,14 +23076,14 @@
         {
           "number": "+14752711843",
           "state": "CT",
-          "dials": 86,
-          "attempts": 59,
+          "dials": 85,
+          "attempts": 58,
           "connects": 21,
-          "connectRate": 0.2442,
+          "connectRate": 0.2471,
           "bookings": 4,
           "bookRate": 0.1905,
           "failed": 9,
-          "failRate": 0.1047,
+          "failRate": 0.1059,
           "inbound": 32,
           "talkTimeSec": 2108,
           "avgDurationSec": 53.666666666666664,
@@ -23230,27 +23319,27 @@
         {
           "number": "+17372014257",
           "state": "TX",
-          "dials": 73,
-          "attempts": 21,
+          "dials": 75,
+          "attempts": 22,
           "connects": 26,
-          "connectRate": 0.3562,
+          "connectRate": 0.3467,
           "bookings": 2,
           "bookRate": 0.0769,
           "failed": 6,
-          "failRate": 0.0822,
-          "inbound": 21,
+          "failRate": 0.08,
+          "inbound": 22,
           "talkTimeSec": 2254,
           "avgDurationSec": 51.608695652173914,
-          "setters": 7,
+          "setters": 8,
           "clientCount": 2,
           "topClient": "SHE",
           "clients": [
             {
               "key": "SHE",
-              "dials": 62,
+              "dials": 63,
               "connects": 21,
               "bookings": 2,
-              "connectRate": 0.3387
+              "connectRate": 0.3333
             },
             {
               "key": "SHC",
@@ -23410,14 +23499,14 @@
         {
           "number": "+13466712189",
           "state": "TX",
-          "dials": 64,
-          "attempts": 16,
+          "dials": 65,
+          "attempts": 17,
           "connects": 25,
-          "connectRate": 0.3906,
+          "connectRate": 0.3846,
           "bookings": 1,
           "bookRate": 0.04,
           "failed": 13,
-          "failRate": 0.2031,
+          "failRate": 0.2,
           "inbound": 21,
           "talkTimeSec": 1816,
           "avgDurationSec": 45.92857142857143,
@@ -23441,10 +23530,10 @@
             },
             {
               "key": "LPC",
-              "dials": 10,
+              "dials": 11,
               "connects": 5,
               "bookings": 0,
-              "connectRate": 0.5
+              "connectRate": 0.4545
             }
           ],
           "lastUsed": "2026-08-11T07:42:46.829000+00:00",
@@ -24122,7 +24211,7 @@
           "bookRate": 0.0,
           "failed": 0,
           "failRate": 0.0,
-          "inbound": 5,
+          "inbound": 6,
           "talkTimeSec": 510,
           "avgDurationSec": 42.76923076923077,
           "setters": 3,
@@ -24702,10 +24791,10 @@
         {
           "number": "+17723482714",
           "state": "FL",
-          "dials": 6,
+          "dials": 7,
           "attempts": 3,
           "connects": 4,
-          "connectRate": 0.6667,
+          "connectRate": 0.5714,
           "bookings": 0,
           "bookRate": 0.0,
           "failed": 0,
@@ -25634,22 +25723,22 @@
         },
         {
           "severity": "alert",
-          "headline": "104 leads unworked past the SLA",
+          "headline": "109 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 104,
+          "leadsAtRisk": 109,
           "rank": 4
         }
       ],
       "prevDateRange": "01 Jan 2025 to 18 Aug 2025",
       "deltas": {
         "leadsToday": {
-          "cur": 0,
+          "cur": 3,
           "prev": 0,
           "pct": null
         },
         "leadsInRange": {
-          "cur": 992,
+          "cur": 997,
           "prev": 0,
           "pct": null
         },
@@ -25659,12 +25748,12 @@
           "pct": 0.0
         },
         "unworkedNow": {
-          "cur": 104,
+          "cur": 109,
           "prev": 0,
           "pct": null
         },
         "unworkedPastSla": {
-          "cur": 104,
+          "cur": 109,
           "prev": 0,
           "pct": null
         },
@@ -25674,7 +25763,7 @@
           "pct": null
         },
         "dayOneCoverage": {
-          "cur": 0.8579,
+          "cur": 0.8536,
           "prev": null,
           "pct": null
         },
@@ -25739,14 +25828,14 @@
       "dateRange": "01 Jan 2000 to 18 Aug 2026",
       "windowDays": 9726,
       "floor": {
-        "leadsToday": 0,
-        "leadsInRange": 992,
+        "leadsToday": 3,
+        "leadsInRange": 997,
         "introsBookedToday": 3,
         "introsBookedInRange": 410,
-        "unworkedNow": 104,
-        "unworkedPastSla": 104,
+        "unworkedNow": 109,
+        "unworkedPastSla": 109,
         "speedToLeadMedianMin": 433.0,
-        "dayOneCoverage": 0.8579,
+        "dayOneCoverage": 0.8536,
         "formCompliance": 0.0,
         "dialsLogged": 10998,
         "attemptsDialed": 2200,
@@ -25762,9 +25851,9 @@
         "attemptIntegrity": null,
         "queue": {
           "p1": 8,
-          "p2": 17,
-          "p3": 71,
-          "p4": 148
+          "p2": 22,
+          "p3": 70,
+          "p4": 149
         },
         "onFloorNow": null
       },
@@ -25858,6 +25947,28 @@
           }
         },
         {
+          "key": "HPI",
+          "label": "HPI",
+          "market": null,
+          "active": true,
+          "leads": 37,
+          "worked": 37,
+          "contacted": 36,
+          "booked": 11,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 0.973,
+          "bookRate": 0.3056,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 601.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "RHC",
           "label": "RHC",
           "market": null,
@@ -25876,28 +25987,6 @@
             "leadToFirstAttempt": 12.0,
             "leadToConnect": 24.0,
             "connectToBooked": 27.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "HPI",
-          "label": "HPI",
-          "market": null,
-          "active": true,
-          "leads": 36,
-          "worked": 36,
-          "contacted": 36,
-          "booked": 11,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.3056,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 601.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -25946,6 +26035,28 @@
           }
         },
         {
+          "key": "ROC",
+          "label": "ROC",
+          "market": null,
+          "active": true,
+          "leads": 32,
+          "worked": 32,
+          "contacted": 32,
+          "booked": 10,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.3125,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 704.5,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 24.0,
+            "connectToBooked": 24.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "JOY",
           "label": "JOY",
           "market": null,
@@ -25964,28 +26075,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 46.9,
             "connectToBooked": 51.4,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ROC",
-          "label": "ROC",
-          "market": null,
-          "active": true,
-          "leads": 31,
-          "worked": 31,
-          "contacted": 31,
-          "booked": 10,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.3226,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 704.5,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 24.0,
-            "connectToBooked": 24.0,
             "bookedToHeld": null
           }
         },
@@ -26232,6 +26321,28 @@
           }
         },
         {
+          "key": "ACS",
+          "label": "ACS",
+          "market": null,
+          "active": true,
+          "leads": 14,
+          "worked": 14,
+          "contacted": 14,
+          "booked": 7,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.5,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 460.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 72.0,
+            "connectToBooked": 0.0,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "APA",
           "label": "APA",
           "market": null,
@@ -26294,28 +26405,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 90.7,
             "connectToBooked": 117.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ACS",
-          "label": "ACS",
-          "market": null,
-          "active": true,
-          "leads": 13,
-          "worked": 13,
-          "contacted": 13,
-          "booked": 7,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.5385,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 460.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 72.0,
-            "connectToBooked": 0.0,
             "bookedToHeld": null
           }
         },
@@ -26386,6 +26475,28 @@
           }
         },
         {
+          "key": "ALM",
+          "label": "ALM",
+          "market": null,
+          "active": true,
+          "leads": 10,
+          "worked": 10,
+          "contacted": 10,
+          "booked": 2,
+          "shows": 0,
+          "workedPct": 1.0,
+          "connectRate": 1.0,
+          "bookRate": 0.2,
+          "showRate": 0.0,
+          "speedToLeadMedianMin": 690.0,
+          "lags": {
+            "leadToFirstAttempt": 0.0,
+            "leadToConnect": 60.0,
+            "connectToBooked": null,
+            "bookedToHeld": null
+          }
+        },
+        {
           "key": "AVA",
           "label": "AVA",
           "market": null,
@@ -26426,28 +26537,6 @@
             "leadToFirstAttempt": 0.0,
             "leadToConnect": 24.0,
             "connectToBooked": 24.0,
-            "bookedToHeld": null
-          }
-        },
-        {
-          "key": "ALM",
-          "label": "ALM",
-          "market": null,
-          "active": true,
-          "leads": 9,
-          "worked": 9,
-          "contacted": 9,
-          "booked": 2,
-          "shows": 0,
-          "workedPct": 1.0,
-          "connectRate": 1.0,
-          "bookRate": 0.2222,
-          "showRate": 0.0,
-          "speedToLeadMedianMin": 690.0,
-          "lags": {
-            "leadToFirstAttempt": 0.0,
-            "leadToConnect": 60.0,
-            "connectToBooked": null,
             "bookedToHeld": null
           }
         },
@@ -26819,8 +26908,8 @@
           33,
           36,
           30,
-          24,
-          0
+          26,
+          3
         ],
         "worked": [
           64,
@@ -27066,14 +27155,14 @@
         {
           "number": "+14408272537",
           "state": "OH",
-          "dials": 874,
+          "dials": 872,
           "attempts": 165,
           "connects": 340,
-          "connectRate": 0.389,
+          "connectRate": 0.3899,
           "bookings": 35,
           "bookRate": 0.1029,
-          "failed": 37,
-          "failRate": 0.0423,
+          "failed": 35,
+          "failRate": 0.0401,
           "inbound": 72,
           "talkTimeSec": 27685,
           "avgDurationSec": 48.37520661157025,
@@ -27083,10 +27172,10 @@
           "clients": [
             {
               "key": "ENC",
-              "dials": 830,
+              "dials": 828,
               "connects": 327,
               "bookings": 35,
-              "connectRate": 0.394
+              "connectRate": 0.3949
             },
             {
               "key": "AHC",
@@ -27113,7 +27202,7 @@
           "bookRate": 0.0741,
           "failed": 38,
           "failRate": 0.0676,
-          "inbound": 30,
+          "inbound": 27,
           "talkTimeSec": 18455,
           "avgDurationSec": 49.630102040816325,
           "setters": 8,
@@ -27189,7 +27278,7 @@
           "failRate": 0.0955,
           "inbound": 68,
           "talkTimeSec": 18555,
-          "avgDurationSec": 57.77810650887574,
+          "avgDurationSec": 57.63716814159292,
           "setters": 10,
           "clientCount": 3,
           "topClient": "BCF",
@@ -27225,15 +27314,15 @@
         {
           "number": "+13053767715",
           "state": "FL",
-          "dials": 445,
+          "dials": 446,
           "attempts": 113,
           "connects": 151,
-          "connectRate": 0.3393,
+          "connectRate": 0.3386,
           "bookings": 10,
           "bookRate": 0.0662,
-          "failed": 42,
-          "failRate": 0.0944,
-          "inbound": 150,
+          "failed": 43,
+          "failRate": 0.0964,
+          "inbound": 149,
           "talkTimeSec": 14796,
           "avgDurationSec": 54.1764705882353,
           "setters": 9,
@@ -27338,14 +27427,14 @@
         {
           "number": "+18135440703",
           "state": "FL",
-          "dials": 369,
-          "attempts": 92,
+          "dials": 370,
+          "attempts": 93,
           "connects": 142,
-          "connectRate": 0.3848,
+          "connectRate": 0.3838,
           "bookings": 3,
           "bookRate": 0.0211,
-          "failed": 18,
-          "failRate": 0.0488,
+          "failed": 19,
+          "failRate": 0.0514,
           "inbound": 79,
           "talkTimeSec": 13546,
           "avgDurationSec": 55.77734375,
@@ -27601,16 +27690,76 @@
           }
         },
         {
+          "number": "+17137142703",
+          "state": "TX",
+          "dials": 260,
+          "attempts": 64,
+          "connects": 76,
+          "connectRate": 0.2923,
+          "bookings": 9,
+          "bookRate": 0.1184,
+          "failed": 28,
+          "failRate": 0.1077,
+          "inbound": 46,
+          "talkTimeSec": 11508,
+          "avgDurationSec": 79.64,
+          "setters": 10,
+          "clientCount": 5,
+          "topClient": "JOY",
+          "clients": [
+            {
+              "key": "JOY",
+              "dials": 184,
+              "connects": 62,
+              "bookings": 8,
+              "connectRate": 0.337
+            },
+            {
+              "key": "LPC",
+              "dials": 4,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            },
+            {
+              "key": "KTY",
+              "dials": 4,
+              "connects": 2,
+              "bookings": 1,
+              "connectRate": 0.5
+            },
+            {
+              "key": "OYV",
+              "dials": 1,
+              "connects": 1,
+              "bookings": 0,
+              "connectRate": 1.0
+            },
+            {
+              "key": "ALP",
+              "dials": 1,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-18T00:25:33.859000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+19515015234",
           "state": "CA",
-          "dials": 260,
+          "dials": 259,
           "attempts": 61,
           "connects": 93,
-          "connectRate": 0.3577,
+          "connectRate": 0.3591,
           "bookings": 8,
           "bookRate": 0.086,
-          "failed": 62,
-          "failRate": 0.2385,
+          "failed": 61,
+          "failRate": 0.2355,
           "inbound": 49,
           "talkTimeSec": 9541,
           "avgDurationSec": 71.30935251798562,
@@ -27620,10 +27769,10 @@
           "clients": [
             {
               "key": "RHC",
-              "dials": 220,
+              "dials": 219,
               "connects": 81,
               "bookings": 8,
-              "connectRate": 0.3682
+              "connectRate": 0.3699
             },
             {
               "key": "HHA",
@@ -27676,66 +27825,6 @@
             }
           ],
           "lastUsed": "2026-08-17T23:13:44.499000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
-          "number": "+17137142703",
-          "state": "TX",
-          "dials": 259,
-          "attempts": 64,
-          "connects": 76,
-          "connectRate": 0.2934,
-          "bookings": 9,
-          "bookRate": 0.1184,
-          "failed": 27,
-          "failRate": 0.1042,
-          "inbound": 46,
-          "talkTimeSec": 11508,
-          "avgDurationSec": 79.64,
-          "setters": 10,
-          "clientCount": 5,
-          "topClient": "JOY",
-          "clients": [
-            {
-              "key": "JOY",
-              "dials": 184,
-              "connects": 62,
-              "bookings": 8,
-              "connectRate": 0.337
-            },
-            {
-              "key": "KTY",
-              "dials": 4,
-              "connects": 2,
-              "bookings": 1,
-              "connectRate": 0.5
-            },
-            {
-              "key": "LPC",
-              "dials": 3,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            },
-            {
-              "key": "OYV",
-              "dials": 1,
-              "connects": 1,
-              "bookings": 0,
-              "connectRate": 1.0
-            },
-            {
-              "key": "ALP",
-              "dials": 1,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-18T00:25:33.859000+00:00",
           "health": {
             "band": "good",
             "label": "Healthy"
@@ -27953,7 +28042,7 @@
           "bookRate": 0.0833,
           "failed": 12,
           "failRate": 0.0519,
-          "inbound": 36,
+          "inbound": 37,
           "talkTimeSec": 10295,
           "avgDurationSec": 64.1437125748503,
           "setters": 9,
@@ -27996,48 +28085,16 @@
           }
         },
         {
-          "number": "+18303568380",
-          "state": "TX",
-          "dials": 221,
-          "attempts": 41,
-          "connects": 71,
-          "connectRate": 0.3213,
-          "bookings": 5,
-          "bookRate": 0.0704,
-          "failed": 10,
-          "failRate": 0.0452,
-          "inbound": 10,
-          "talkTimeSec": 6977,
-          "avgDurationSec": 43.63428571428572,
-          "setters": 7,
-          "clientCount": 1,
-          "topClient": "CCC",
-          "clients": [
-            {
-              "key": "CCC",
-              "dials": 221,
-              "connects": 71,
-              "bookings": 5,
-              "connectRate": 0.3213
-            }
-          ],
-          "lastUsed": "2026-08-17T19:30:28.730000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
           "number": "+12484539294",
           "state": "MI",
-          "dials": 220,
+          "dials": 221,
           "attempts": 61,
           "connects": 79,
-          "connectRate": 0.3591,
+          "connectRate": 0.3575,
           "bookings": 11,
           "bookRate": 0.1392,
-          "failed": 29,
-          "failRate": 0.1318,
+          "failed": 30,
+          "failRate": 0.1357,
           "inbound": 25,
           "talkTimeSec": 11118,
           "avgDurationSec": 97.11111111111111,
@@ -28047,10 +28104,10 @@
           "clients": [
             {
               "key": "THC",
-              "dials": 192,
+              "dials": 193,
               "connects": 71,
               "bookings": 11,
-              "connectRate": 0.3698
+              "connectRate": 0.3679
             },
             {
               "key": "AHS",
@@ -28088,6 +28145,38 @@
           }
         },
         {
+          "number": "+18303568380",
+          "state": "TX",
+          "dials": 221,
+          "attempts": 41,
+          "connects": 71,
+          "connectRate": 0.3213,
+          "bookings": 5,
+          "bookRate": 0.0704,
+          "failed": 10,
+          "failRate": 0.0452,
+          "inbound": 11,
+          "talkTimeSec": 6977,
+          "avgDurationSec": 43.63428571428572,
+          "setters": 7,
+          "clientCount": 1,
+          "topClient": "CCC",
+          "clients": [
+            {
+              "key": "CCC",
+              "dials": 221,
+              "connects": 71,
+              "bookings": 5,
+              "connectRate": 0.3213
+            }
+          ],
+          "lastUsed": "2026-08-17T19:30:28.730000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+12109879126",
           "state": "TX",
           "dials": 214,
@@ -28098,7 +28187,7 @@
           "bookRate": 0.1408,
           "failed": 16,
           "failRate": 0.0748,
-          "inbound": 21,
+          "inbound": 22,
           "talkTimeSec": 8839,
           "avgDurationSec": 68.6,
           "setters": 8,
@@ -28282,7 +28371,7 @@
           "bookRate": 0.0972,
           "failed": 8,
           "failRate": 0.0452,
-          "inbound": 24,
+          "inbound": 25,
           "talkTimeSec": 6882,
           "avgDurationSec": 57.07086614173228,
           "setters": 7,
@@ -28352,27 +28441,27 @@
         {
           "number": "+16238870272",
           "state": "AZ",
-          "dials": 149,
+          "dials": 148,
           "attempts": 49,
           "connects": 50,
-          "connectRate": 0.3356,
+          "connectRate": 0.3378,
           "bookings": 4,
           "bookRate": 0.08,
           "failed": 3,
-          "failRate": 0.0201,
-          "inbound": 5,
+          "failRate": 0.0203,
+          "inbound": 4,
           "talkTimeSec": 6618,
-          "avgDurationSec": 64.46296296296296,
+          "avgDurationSec": 65.00934579439253,
           "setters": 6,
           "clientCount": 2,
           "topClient": "GEN",
           "clients": [
             {
               "key": "GEN",
-              "dials": 28,
+              "dials": 27,
               "connects": 13,
               "bookings": 3,
-              "connectRate": 0.4643
+              "connectRate": 0.4815
             },
             {
               "key": "HWZ",
@@ -28728,7 +28817,7 @@
           "bookRate": 0.0244,
           "failed": 4,
           "failRate": 0.0421,
-          "inbound": 9,
+          "inbound": 10,
           "talkTimeSec": 3151,
           "avgDurationSec": 46.95774647887324,
           "setters": 8,
@@ -28764,6 +28853,45 @@
           }
         },
         {
+          "number": "+19253911056",
+          "state": "CA",
+          "dials": 94,
+          "attempts": 29,
+          "connects": 28,
+          "connectRate": 0.2979,
+          "bookings": 0,
+          "bookRate": 0.0,
+          "failed": 6,
+          "failRate": 0.0638,
+          "inbound": 58,
+          "talkTimeSec": 1151,
+          "avgDurationSec": 23.16949152542373,
+          "setters": 5,
+          "clientCount": 2,
+          "topClient": "AHS",
+          "clients": [
+            {
+              "key": "AHS",
+              "dials": 6,
+              "connects": 3,
+              "bookings": 0,
+              "connectRate": 0.5
+            },
+            {
+              "key": "SHS",
+              "dials": 2,
+              "connects": 0,
+              "bookings": 0,
+              "connectRate": 0.0
+            }
+          ],
+          "lastUsed": "2026-08-17T21:09:50.494000+00:00",
+          "health": {
+            "band": "good",
+            "label": "Healthy"
+          }
+        },
+        {
           "number": "+17472394634",
           "state": "CA",
           "dials": 93,
@@ -28790,45 +28918,6 @@
             }
           ],
           "lastUsed": "2026-08-17T22:17:59.545000+00:00",
-          "health": {
-            "band": "good",
-            "label": "Healthy"
-          }
-        },
-        {
-          "number": "+19253911056",
-          "state": "CA",
-          "dials": 93,
-          "attempts": 29,
-          "connects": 28,
-          "connectRate": 0.3011,
-          "bookings": 0,
-          "bookRate": 0.0,
-          "failed": 5,
-          "failRate": 0.0538,
-          "inbound": 58,
-          "talkTimeSec": 1151,
-          "avgDurationSec": 23.16949152542373,
-          "setters": 5,
-          "clientCount": 2,
-          "topClient": "AHS",
-          "clients": [
-            {
-              "key": "AHS",
-              "dials": 6,
-              "connects": 3,
-              "bookings": 0,
-              "connectRate": 0.5
-            },
-            {
-              "key": "SHS",
-              "dials": 2,
-              "connects": 0,
-              "bookings": 0,
-              "connectRate": 0.0
-            }
-          ],
-          "lastUsed": "2026-08-17T21:09:50.494000+00:00",
           "health": {
             "band": "good",
             "label": "Healthy"
@@ -29057,7 +29146,7 @@
           "bookRate": 0.0833,
           "failed": 13,
           "failRate": 0.1461,
-          "inbound": 9,
+          "inbound": 8,
           "talkTimeSec": 2961,
           "avgDurationSec": 54.50877192982456,
           "setters": 6,
@@ -29134,14 +29223,14 @@
         {
           "number": "+14752711843",
           "state": "CT",
-          "dials": 86,
-          "attempts": 59,
+          "dials": 85,
+          "attempts": 58,
           "connects": 21,
-          "connectRate": 0.2442,
+          "connectRate": 0.2471,
           "bookings": 4,
           "bookRate": 0.1905,
           "failed": 9,
-          "failRate": 0.1047,
+          "failRate": 0.1059,
           "inbound": 32,
           "talkTimeSec": 2108,
           "avgDurationSec": 53.666666666666664,
@@ -29377,27 +29466,27 @@
         {
           "number": "+17372014257",
           "state": "TX",
-          "dials": 73,
-          "attempts": 21,
+          "dials": 75,
+          "attempts": 22,
           "connects": 26,
-          "connectRate": 0.3562,
+          "connectRate": 0.3467,
           "bookings": 2,
           "bookRate": 0.0769,
           "failed": 6,
-          "failRate": 0.0822,
-          "inbound": 21,
+          "failRate": 0.08,
+          "inbound": 22,
           "talkTimeSec": 2254,
           "avgDurationSec": 51.608695652173914,
-          "setters": 7,
+          "setters": 8,
           "clientCount": 2,
           "topClient": "SHE",
           "clients": [
             {
               "key": "SHE",
-              "dials": 62,
+              "dials": 63,
               "connects": 21,
               "bookings": 2,
-              "connectRate": 0.3387
+              "connectRate": 0.3333
             },
             {
               "key": "SHC",
@@ -29557,14 +29646,14 @@
         {
           "number": "+13466712189",
           "state": "TX",
-          "dials": 64,
-          "attempts": 16,
+          "dials": 65,
+          "attempts": 17,
           "connects": 25,
-          "connectRate": 0.3906,
+          "connectRate": 0.3846,
           "bookings": 1,
           "bookRate": 0.04,
           "failed": 13,
-          "failRate": 0.2031,
+          "failRate": 0.2,
           "inbound": 21,
           "talkTimeSec": 1816,
           "avgDurationSec": 45.92857142857143,
@@ -29588,10 +29677,10 @@
             },
             {
               "key": "LPC",
-              "dials": 10,
+              "dials": 11,
               "connects": 5,
               "bookings": 0,
-              "connectRate": 0.5
+              "connectRate": 0.4545
             }
           ],
           "lastUsed": "2026-08-11T07:42:46.829000+00:00",
@@ -30269,7 +30358,7 @@
           "bookRate": 0.0,
           "failed": 0,
           "failRate": 0.0,
-          "inbound": 5,
+          "inbound": 6,
           "talkTimeSec": 510,
           "avgDurationSec": 42.76923076923077,
           "setters": 3,
@@ -30849,10 +30938,10 @@
         {
           "number": "+17723482714",
           "state": "FL",
-          "dials": 6,
+          "dials": 7,
           "attempts": 3,
           "connects": 4,
-          "connectRate": 0.6667,
+          "connectRate": 0.5714,
           "bookings": 0,
           "bookRate": 0.0,
           "failed": 0,
@@ -31805,10 +31894,10 @@
         },
         {
           "severity": "alert",
-          "headline": "104 leads unworked past the SLA",
+          "headline": "109 leads unworked past the SLA",
           "detail": "Inside floor hours, past 30 minutes with zero attempts.",
           "metric": "unworkedPastSla",
-          "leadsAtRisk": 104,
+          "leadsAtRisk": 109,
           "rank": 4
         }
       ],
@@ -31830,7 +31919,7 @@
       "dials": 387
     },
     "ACS": {
-      "contacts": 33,
+      "contacts": 34,
       "dials": 161
     },
     "AHA": {
@@ -31850,7 +31939,7 @@
       "dials": 344
     },
     "ALM": {
-      "contacts": 63,
+      "contacts": 64,
       "dials": 125
     },
     "ALP": {
@@ -31986,7 +32075,7 @@
       "dials": 254
     },
     "HPI": {
-      "contacts": 66,
+      "contacts": 67,
       "dials": 286
     },
     "HSE": {
@@ -32078,7 +32167,7 @@
       "dials": 86
     },
     "ROC": {
-      "contacts": 54,
+      "contacts": 55,
       "dials": 290
     },
     "SCS": {
@@ -32090,7 +32179,7 @@
       "dials": 291
     },
     "SHC": {
-      "contacts": 5,
+      "contacts": 6,
       "dials": 18
     },
     "SHE": {
