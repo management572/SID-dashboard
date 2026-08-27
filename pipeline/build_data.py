@@ -293,6 +293,29 @@ def build_data_quality(bundle, contacts, ghl, goals, calls=None, meta=None):
                         "call attribution." % (" and ".join(form_only))),
             "affects": ["setters.dials", "setters.connects", "setters.talkTimeSec"],
         })
+
+    # How much of the floor's dialling never reaches a roster row. This is the flag that would have
+    # caught the stale user map: the dials were arriving all along, they were just filed under GHL
+    # user ids the board could not name, so the Setters tab looked empty while volume piled up in
+    # otherDialers. A bare 20-character id here means a user exists in SID that /users/ did not name.
+    other = bundle.get("otherDialers") or []
+    roster_dials = sum((s.get("dials") or 0) for s in setters)
+    other_dials = sum((o.get("dials") or 0) for o in other)
+    total_dials = roster_dials + other_dials
+    if total_dials and other_dials / total_dials > 0.2:
+        unnamed = [o["name"] for o in other if len(str(o["name"])) == 20 and " " not in str(o["name"])]
+        flags.append({
+            "code": "UNATTRIBUTED_DIALS", "severity": "warn",
+            "message": ("%d of %d dials (%.0f%%) are not attributed to anyone on the roster%s. "
+                        "Per-setter dials, connects and talk time understate the floor by that much. "
+                        "Add the dialer to activeSetters in config, or give the person a GHL user "
+                        "account, so their calls land on their row."
+                        % (other_dials, total_dials, 100.0 * other_dials / total_dials,
+                           (", including %d GHL user id%s the user list did not name (%s)"
+                            % (len(unnamed), "" if len(unnamed) == 1 else "s", ", ".join(unnamed[:3])))
+                           if unnamed else "")),
+            "affects": ["setters.dials", "setters.connects", "setters.talkTimeSec"],
+        })
     return flags
 
 
@@ -314,6 +337,44 @@ def resolve_field_key(cfields, want_name, fallback_key):
 SPEED_FIELD_KEY = None
 
 
+def live_users(raw_users):
+    """uid -> display name, from the /users/ pull this run actually made."""
+    out = {}
+    for u in raw_users or []:
+        uid = u.get("id") or u.get("_id") or u.get("userId")
+        name = (u.get("name")
+                or " ".join(x for x in [u.get("firstName"), u.get("lastName")] if x).strip()
+                or u.get("email"))
+        if uid and name:
+            out[str(uid)] = str(name).strip()
+    return out
+
+
+def resolve_roster(active_setters, users):
+    """Fill in a setter's ghlUserId by matching their first name against the live user list.
+
+    The roster in config carries ghlUserId: null for anyone who had no GHL account when it was
+    written. Once they are given one, their calls start flowing under an id the board does not
+    recognise, so they keep showing a dash while their dials pile up in otherDialers. Matching on
+    first name closes that automatically instead of waiting for someone to hand-edit the config.
+    """
+    out, claimed = [], {s.get("ghlUserId") for s in active_setters if s.get("ghlUserId")}
+    for s in active_setters:
+        s = dict(s)
+        if not s.get("ghlUserId"):
+            want = first_name(s.get("formName") or s.get("name"))
+            for uid, name in users.items():
+                if uid in claimed:
+                    continue
+                if first_name(name) == want:
+                    s["ghlUserId"] = uid
+                    s["_resolvedFrom"] = name
+                    claimed.add(uid)
+                    break
+        out.append(s)
+    return out
+
+
 def build_from_raw(ghl, dash):
     meta = load_json(os.path.join(RAW_DIR, "_meta.json"), {})
     if not meta:
@@ -322,6 +383,22 @@ def build_from_raw(ghl, dash):
     submissions = load_json(os.path.join(RAW_DIR, "form_submissions.json"), []) or []
     cfields = load_json(os.path.join(RAW_DIR, "custom_fields.json"), []) or []
     calls = parse_calls(load_json(os.path.join(RAW_DIR, "calls.json"), []) or [])
+    raw_users = load_json(os.path.join(RAW_DIR, "users.json"), []) or []
+
+    # The pipeline pulls /users/ every run, but the board had been naming dialers from a static map
+    # captured at discovery. Anyone added to SID since then dialed under an id the board could not
+    # name, so their volume landed in otherDialers as a bare 20-character id. Live wins, config
+    # fills the gaps.
+    users = dict(ghl.get("users") or {})
+    live = live_users(raw_users)
+    users.update(live)
+    ghl = dict(ghl)
+    ghl["users"] = users
+    ghl["activeSetters"] = resolve_roster(ghl.get("activeSetters") or [], users)
+    newly = [(s["name"], s.get("_resolvedFrom")) for s in ghl["activeSetters"] if s.get("_resolvedFrom")]
+    print("build_data: %d users live (%d in config), roster resolved%s"
+          % (len(live), len(ghl.get("users") or {}) - len(live) if live else 0,
+             (": " + ", ".join("%s -> %s" % n for n in newly)) if newly else " (no new matches)"))
 
     global FIELD_KEY_TO_ID, SPEED_FIELD_KEY
     FIELD_KEY_TO_ID = {f.get("fieldKey"): f.get("id") for f in cfields if f.get("fieldKey") and f.get("id")}
