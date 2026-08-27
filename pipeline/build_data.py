@@ -303,7 +303,7 @@ def build_data_quality(bundle, contacts, ghl, goals, calls=None, meta=None):
     other_dials = sum((o.get("dials") or 0) for o in other)
     total_dials = roster_dials + other_dials
     if total_dials and other_dials / total_dials > 0.2:
-        unnamed = [o["name"] for o in other if len(str(o["name"])) == 20 and " " not in str(o["name"])]
+        unnamed = [str(o.get("userId") or o.get("name")) for o in other if o.get("named") is False]
         flags.append({
             "code": "UNATTRIBUTED_DIALS", "severity": "warn",
             "message": ("%d of %d dials (%.0f%%) are not attributed to anyone on the roster%s. "
@@ -989,7 +989,9 @@ def build_setters(facts, submissions, calls, ghl, goals, since, until, connect_m
     other = []
     for uid, m in per_user.items():
         if uid and uid not in matched_uids and m["dials"]:
-            other.append({"name": users.get(uid, uid), "dials": m["dials"], "connects": m["connects"]})
+            other.append({"name": dialer_label(uid, users), "userId": uid,
+                          "named": bool(users.get(uid)),
+                          "dials": m["dials"], "connects": m["connects"]})
     other.sort(key=lambda x: -x["dials"])
     # Keep the full active roster visible even at zero (ramp and quiet reps stay on the board).
     setters = sorted(setters, key=lambda s: (-(s.get("connects") or 0), -(s.get("formsSubmitted") or 0)))
@@ -1097,6 +1099,19 @@ def to_int(v):
         return int(float(v)) if v not in (None, "") else 0
     except (ValueError, TypeError):
         return 0
+
+
+def dialer_label(uid, users):
+    """A readable name for whoever placed a call.
+
+    Live user list first, then the config map. If GHL cannot name the id at all, say so in words
+    rather than printing a 20-character string at the floor lead: an unnamed dialer is a finding
+    (a deleted or agency-level account is still dialling), not a label.
+    """
+    name = users.get(uid)
+    if name:
+        return name
+    return "Unknown user (%s\u2026)" % str(uid)[:6]
 
 
 def uid_for(label, users):

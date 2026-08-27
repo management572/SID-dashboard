@@ -439,6 +439,33 @@ def main():
     calls = pull_calls(cfg, token, location_id, calls_since)
     dump("calls", calls)
 
+    # Backfill any dialer the location user list did not return. GET /users/?locationId= only lists
+    # users currently attached to the location, so a deactivated rep, or one who sits at the agency
+    # level, dials under an id that never resolves to a name and shows on the board as a bare 20
+    # character string. Fetch those one at a time: it is a handful of ids, not a page.
+    known = {str(u.get("id") or u.get("_id") or "") for u in users}
+    missing = sorted({str(c.get("userId")) for c in calls
+                      if c.get("userId") and str(c.get("userId")) not in known})
+    if missing:
+        print("fetch_sid: resolving %d dialer id(s) missing from the location user list" % len(missing))
+        for uid in missing[:60]:
+            try:
+                u = api_get(cfg, token, "/users/%s" % uid, {})
+            except SystemExit:
+                continue
+            u = u.get("user") if isinstance(u.get("user"), dict) else u
+            if isinstance(u, dict) and (u.get("id") or u.get("_id")):
+                u.setdefault("id", uid)
+                u["_backfilled"] = True
+                users.append(u)
+                print("fetch_sid:   %s -> %s"
+                      % (uid, u.get("name")
+                         or " ".join(x for x in [u.get("firstName"), u.get("lastName")] if x)
+                         or u.get("email") or "(unnamed)"))
+            else:
+                print("fetch_sid:   %s -> not resolvable" % uid)
+        dump("users", users)
+
     meta = {
         "locationId": location_id,
         "since": since.isoformat(),
